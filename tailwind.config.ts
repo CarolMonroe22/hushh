@@ -80,10 +80,37 @@ export default {
             height: "0",
           },
         },
+        "fade-in": {
+          from: {
+            opacity: "0",
+          },
+          to: {
+            opacity: "1",
+          },
+        },
+        "fade-out": {
+          from: {
+            opacity: "1",
+          },
+          to: {
+            opacity: "0",
+          },
+        },
+        "glow-pulse": {
+          "0%, 100%": {
+            filter: "drop-shadow(0 0 8px hsl(var(--primary) / 0.3))",
+          },
+          "50%": {
+            filter: "drop-shadow(0 0 16px hsl(var(--primary) / 0.5))",
+          },
+        },
       },
       animation: {
         "accordion-down": "accordion-down 0.2s ease-out",
         "accordion-up": "accordion-up 0.2s ease-out",
+        "fade-in": "fade-in 900ms ease-out",
+        "fade-out": "fade-out 1000ms ease-out",
+        "glow-pulse": "glow-pulse 3s ease-in-out infinite",
       },
     },
   },

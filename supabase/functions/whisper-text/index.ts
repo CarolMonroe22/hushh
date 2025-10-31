@@ -58,9 +58,23 @@ serve(async (req) => {
     });
 
     if (!response.ok) {
-      const error = await response.text();
-      console.error("ElevenLabs API error:", error);
-      throw new Error(`ElevenLabs API error: ${response.status}`);
+      const errorText = await response.text();
+      console.error("ElevenLabs API error:", errorText);
+      
+      // Parse error details
+      let errorMessage = `ElevenLabs API error: ${response.status}`;
+      try {
+        const errorData = JSON.parse(errorText);
+        if (errorData.detail?.status === 'quota_exceeded') {
+          errorMessage = `ElevenLabs quota exceeded. ${errorData.detail.message}`;
+        } else if (errorData.detail?.message) {
+          errorMessage = errorData.detail.message;
+        }
+      } catch (e) {
+        // Keep default error message if parsing fails
+      }
+      
+      throw new Error(errorMessage);
     }
 
     // Get audio as array buffer

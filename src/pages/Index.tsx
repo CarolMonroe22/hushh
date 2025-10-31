@@ -103,8 +103,18 @@ const Index = () => {
       setIsGenerating(false);
     } catch (error) {
       console.error("Whisper error:", error);
+      
+      let errorDescription = "whisper failed...";
+      if (error instanceof Error) {
+        if (error.message.includes("quota exceeded") || error.message.includes("ElevenLabs quota")) {
+          errorDescription = "elevenlabs quota exceeded. please add credits to your account.";
+        } else if (error.message.includes("ElevenLabs")) {
+          errorDescription = "elevenlabs error. check your api key.";
+        }
+      }
+      
       toast({
-        description: "whisper failed...",
+        description: errorDescription,
         variant: "destructive",
       });
       setIsPlaying(false);

@@ -341,9 +341,14 @@ const Index = () => {
               <p className="text-2xl text-white/90 font-light tracking-wide animate-fade-in">
                 {getCategoryWelcomeMessage(selectedCategory)}
               </p>
-              <div className="text-white/60 text-sm tracking-wide flex items-center justify-center gap-1">
-                <span>preparing your whisper</span>
-                <span className="inline-block w-8 text-left animate-pulse">...</span>
+              <div className="text-white/60 text-sm tracking-wide space-y-1">
+                <div className="flex items-center justify-center gap-1">
+                  <span>preparing your whisper</span>
+                  <span className="inline-block w-8 text-left animate-pulse">...</span>
+                </div>
+                <p className="text-white/40 text-xs animate-fade-in">
+                  (this may take a few seconds while we craft your unique session)
+                </p>
               </div>
             </div>
           </div>

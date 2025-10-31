@@ -41,6 +41,7 @@ const Index = () => {
   const [showCustomText, setShowCustomText] = useState(false);
   const [customText, setCustomText] = useState("");
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
+  const [sessionCompleted, setSessionCompleted] = useState(false);
   const [voteSubmitted, setVoteSubmitted] = useState(false);
   const [showEmailCapture, setShowEmailCapture] = useState(false);
   const [userEmail, setUserEmail] = useState("");
@@ -96,11 +97,8 @@ const Index = () => {
       audioRef.current = new Audio(audioUrl);
       
       audioRef.current.onended = () => {
-        setShowAttribution(true);
-        setTimeout(() => {
-          setShowAttribution(false);
-          setIsPlaying(false);
-        }, 5000);
+        setIsPlaying(false);
+        setSessionCompleted(true);
       };
 
       await audioRef.current.play();
@@ -318,6 +316,112 @@ const Index = () => {
           <p className="text-muted-foreground text-xs">
             one night she couldn't sleep at 3 : 23 am
           </p>
+        </div>
+      </div>
+    );
+  }
+
+  // Session Complete Screen
+  if (sessionCompleted) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center p-6 animate-fade-in">
+        <div className="max-w-md mx-auto space-y-8">
+          {/* Carol's Story */}
+          <div className="text-center space-y-4 animate-fade-in">
+            <p className="text-lg text-muted-foreground tracking-wide leading-relaxed">
+              Carol couldn't sleep one day at 3:23 AM and decided to create this...
+            </p>
+          </div>
+
+          {/* Vote Section */}
+          <div className="border border-border/50 rounded-lg p-6 space-y-4 bg-card/50 animate-fade-in">
+            <div className="text-center space-y-2">
+              <p className="text-sm text-muted-foreground tracking-wide">
+                would you use 1-hour versions with ambient music?
+              </p>
+              <p className="text-xs text-muted-foreground/60">
+                help us prioritize what to build next
+              </p>
+            </div>
+            
+            {!showEmailCapture && !voteSubmitted ? (
+              <div className="flex gap-3 justify-center">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => handleVote('yes')}
+                  className="lowercase tracking-wide hover:bg-green-500/10 hover:border-green-500/50 hover:text-green-400 transition-colors"
+                >
+                  yes, i'd use it
+                </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => handleVote('no')}
+                  className="lowercase tracking-wide hover:bg-red-500/10 hover:border-red-500/50 hover:text-red-400 transition-colors"
+                >
+                  no, 1 min is enough
+                </Button>
+              </div>
+            ) : null}
+            
+            {/* Email Capture Form */}
+            {showEmailCapture && !voteSubmitted ? (
+              <div className="space-y-3 animate-fade-in">
+                <div className="flex gap-2">
+                  <input
+                    type="email"
+                    placeholder="your@email.com"
+                    value={userEmail}
+                    onChange={(e) => setUserEmail(e.target.value)}
+                    onKeyDown={(e) => e.key === 'Enter' && handleEmailSubmit()}
+                    className="flex-1 px-3 py-2 text-sm bg-background border border-border rounded-md focus:outline-none focus:ring-2 focus:ring-primary lowercase"
+                  />
+                  <Button
+                    onClick={handleEmailSubmit}
+                    disabled={emailSubmitting}
+                    size="sm"
+                    className="lowercase tracking-wide"
+                  >
+                    {emailSubmitting ? "..." : "notify me"}
+                  </Button>
+                </div>
+                <button
+                  onClick={() => {
+                    setShowEmailCapture(false);
+                    setVoteSubmitted(true);
+                    setTimeout(() => setVoteSubmitted(false), 3000);
+                  }}
+                  className="text-xs text-muted-foreground/60 hover:text-muted-foreground underline w-full text-center"
+                >
+                  skip, just save my vote
+                </button>
+              </div>
+            ) : null}
+            
+            {/* Confirmation Message */}
+            {voteSubmitted && (
+              <p className="text-xs text-center text-green-400/80 animate-fade-in">
+                thanks for your feedback 🌙
+              </p>
+            )}
+          </div>
+
+          {/* Start Another Session Button */}
+          <div className="text-center animate-fade-in">
+            <Button
+              variant="ghost"
+              onClick={() => {
+                setSessionCompleted(false);
+                setVoteSubmitted(false);
+                setShowEmailCapture(false);
+                setUserEmail("");
+              }}
+              className="text-xs text-muted-foreground hover:text-foreground lowercase tracking-wide"
+            >
+              start another session
+            </Button>
+          </div>
         </div>
       </div>
     );

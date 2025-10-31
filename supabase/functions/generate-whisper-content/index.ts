@@ -11,13 +11,14 @@ const CATEGORY_PROMPTS = {
 Structure:
 - Opening (15 sec): Gentle breath invitation
 - Body (35 sec): Core affirmations about goals manifesting
-- Closing (10 sec): Powerful final affirmation
+- Closing (10 sec): Powerful final affirmation + soft mention of extended sessions
 
 Include:
 - [WHISPER] tag at the very start
 - [PAUSE 400ms] every 2 sentences for ASMR rhythm
 - Soft, intimate language (you form)
 - Present tense affirmations
+- End with: "one minute of peace... [PAUSE 400ms] if you'd like longer sessions, leave your vote and email at the end..."
 
 Generate a unique, concise script now.`,
 
@@ -26,13 +27,14 @@ Generate a unique, concise script now.`,
 Structure:
 - Opening (15 sec): Deep breath invitation
 - Body (35 sec): Quick body scan (head → shoulders → core → legs)
-- Closing (10 sec): Full body release
+- Closing (10 sec): Full body release + soft mention of extended sessions
 
 Include:
 - [WHISPER] tag at start
 - [PAUSE 400ms] between body areas
 - Specific body references
 - Release and softening language
+- End with: "one minute to unwind... [PAUSE 400ms] want more? leave your vote and email below..."
 
 Generate a unique, concise script now.`,
 
@@ -41,13 +43,14 @@ Generate a unique, concise script now.`,
 Structure:
 - Opening (15 sec): Gentle reflection invitation
 - Body (35 sec): 2-3 gratitude moments with sensory details
-- Closing (10 sec): Whispered thank you
+- Closing (10 sec): Whispered thank you + soft mention of extended sessions
 
 Include:
 - [WHISPER] tag at start
 - [PAUSE 400ms] between reflections
 - Sensory details (sounds, textures)
 - Intimate, warm tone
+- End with: "one minute of gratitude... [PAUSE 400ms] for longer journeys, share your vote and email..."
 
 Generate a unique, concise script now.`
 };

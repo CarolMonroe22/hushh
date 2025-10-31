@@ -12,33 +12,21 @@ serve(async (req) => {
   }
 
   try {
-    const body = await req.json();
-    const text = body.text;
+    const { prompt, duration } = await req.json();
     const ELEVENLABS_API_KEY = Deno.env.get('ELEVENLABS_API_KEY');
 
     if (!ELEVENLABS_API_KEY) {
       throw new Error('ELEVENLABS_API_KEY is not configured');
     }
 
-    if (!text) {
-      throw new Error('Text is required');
+    if (!prompt) {
+      throw new Error('Prompt is required');
     }
 
-    console.log("Generating whisper for text:", text.substring(0, 50));
+    console.log("Generating ambient music:", prompt, "duration:", duration);
 
-    // Get voice settings from request or use defaults
-    const voiceId = body.voiceId || '9BWtsMINqrJLrRacOk9x';
-    const stability = body.stability || 0.2;
-    const similarityBoost = body.similarity || 0.85;
-
-    // Convert custom pause tags to SSML
-    const processedText = text
-      .replace(/\[WHISPER\]/g, '')
-      .replace(/\[PAUSE (\d+)ms\]/g, '<break time="$1ms"/>')
-      .trim();
-
-    // Call ElevenLabs TTS API with custom voice settings
-    const response = await fetch(`https://api.elevenlabs.io/v1/text-to-speech/${voiceId}`, {
+    // Call ElevenLabs Music API
+    const response = await fetch('https://api.elevenlabs.io/v1/sound-generation', {
       method: 'POST',
       headers: {
         'Accept': 'audio/mpeg',
@@ -46,27 +34,22 @@ serve(async (req) => {
         'xi-api-key': ELEVENLABS_API_KEY,
       },
       body: JSON.stringify({
-        text: processedText,
-        model_id: 'eleven_multilingual_v2',
-        voice_settings: {
-          stability: stability,
-          similarity_boost: similarityBoost,
-          style: 0.15,
-          use_speaker_boost: false,
-        },
+        text: prompt,
+        duration_seconds: duration || 300, // Default 5 minutes
+        prompt_influence: 0.3,
       }),
     });
 
     if (!response.ok) {
       const error = await response.text();
-      console.error("ElevenLabs API error:", error);
-      throw new Error(`ElevenLabs API error: ${response.status}`);
+      console.error("ElevenLabs Music API error:", error);
+      throw new Error(`ElevenLabs Music API error: ${response.status}`);
     }
 
     // Get audio as array buffer
     const audioBuffer = await response.arrayBuffer();
     
-    // Convert to base64 in chunks to avoid call stack issues
+    // Convert to base64 in chunks
     const uint8Array = new Uint8Array(audioBuffer);
     const chunkSize = 8192;
     let binaryString = '';
@@ -85,7 +68,7 @@ serve(async (req) => {
       },
     );
   } catch (error) {
-    console.error("Error in whisper-text function:", error);
+    console.error("Error in generate-ambient function:", error);
     const errorMessage = error instanceof Error ? error.message : "Unknown error";
     return new Response(
       JSON.stringify({ error: errorMessage }),

@@ -1,8 +1,17 @@
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Slider } from "@/components/ui/slider";
+import { Label } from "@/components/ui/label";
 
 const PRESETS = {
   manifest: `[WHISPER] Close your eyes. Picture tomorrow unfolding softly.
@@ -44,13 +53,54 @@ You are enough tonight.
 Rest is progress, too.`,
 };
 
+const VOICES = {
+  aimee: { id: "zA6D7RyKdc2EClouEMkP", name: "AImee - Soft Whisper" },
+  natasha_gentle: { id: "Atp5cNFg1Wj5gyKD7HWV", name: "Natasha - Gentle" },
+  natasha_sensual: { id: "PB6BdkFkZLbI39GHdnbQ", name: "Natasha - Sensual" },
+  aria: { id: "9BWtsMINqrJLrRacOk9x", name: "Aria - Classic" },
+};
+
+const AMBIENT_TRACKS = {
+  rain: "Soft rain sounds with distant thunder, peaceful and calming",
+  ocean: "Gentle ocean waves lapping on shore, meditative atmosphere",
+  forest: "Night forest ambience with crickets and wind through leaves",
+  white_noise: "Pure white noise for deep relaxation and sleep",
+  cosmic: "Cosmic ambient soundscape with ethereal drones",
+};
+
+const DURATIONS = [
+  { value: "3", label: "3 min" },
+  { value: "5", label: "5 min" },
+  { value: "10", label: "10 min" },
+];
+
 const Index = () => {
   const [thought, setThought] = useState("");
   const [isPlaying, setIsPlaying] = useState(false);
   const [showAttribution, setShowAttribution] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [selectedVoice, setSelectedVoice] = useState("aimee");
+  const [selectedAmbient, setSelectedAmbient] = useState<string | null>(null);
+  const [duration, setDuration] = useState("5");
+  const [stability, setStability] = useState([0.2]);
+  const [similarity, setSimilarity] = useState([0.85]);
   const { toast } = useToast();
   const audioRef = useRef<HTMLAudioElement | null>(null);
+  const ambientRef = useRef<HTMLAudioElement | null>(null);
+
+  // Cleanup audio on unmount
+  useEffect(() => {
+    return () => {
+      if (audioRef.current) {
+        audioRef.current.pause();
+        audioRef.current = null;
+      }
+      if (ambientRef.current) {
+        ambientRef.current.pause();
+        ambientRef.current = null;
+      }
+    };
+  }, []);
 
   const handlePreset = (key: keyof typeof PRESETS) => {
     setThought(PRESETS[key]);
@@ -77,9 +127,36 @@ const Index = () => {
     setIsPlaying(true);
 
     try {
+      // Start ambient music if selected
+      if (selectedAmbient) {
+        const { data: ambientData, error: ambientError } = await supabase.functions.invoke('generate-ambient', {
+          body: { 
+            prompt: AMBIENT_TRACKS[selectedAmbient as keyof typeof AMBIENT_TRACKS],
+            duration: parseInt(duration) * 60 // Convert to seconds
+          }
+        });
+
+        if (!ambientError && ambientData?.audioContent) {
+          const ambientBlob = new Blob(
+            [Uint8Array.from(atob(ambientData.audioContent), c => c.charCodeAt(0))],
+            { type: 'audio/mpeg' }
+          );
+          const ambientUrl = URL.createObjectURL(ambientBlob);
+          ambientRef.current = new Audio(ambientUrl);
+          ambientRef.current.loop = true;
+          ambientRef.current.volume = 0.3;
+          await ambientRef.current.play();
+        }
+      }
+
       // Call edge function to generate whisper
       const { data, error } = await supabase.functions.invoke('whisper-text', {
-        body: { text: thought }
+        body: { 
+          text: thought,
+          voiceId: VOICES[selectedVoice as keyof typeof VOICES].id,
+          stability: stability[0],
+          similarity: similarity[0]
+        }
       });
 
       if (error) throw error;
@@ -98,6 +175,21 @@ const Index = () => {
       audioRef.current = new Audio(audioUrl);
       
       audioRef.current.onended = () => {
+        // Fade out ambient
+        if (ambientRef.current) {
+          const fadeOut = setInterval(() => {
+            if (ambientRef.current && ambientRef.current.volume > 0.05) {
+              ambientRef.current.volume -= 0.05;
+            } else {
+              if (ambientRef.current) {
+                ambientRef.current.pause();
+                ambientRef.current = null;
+              }
+              clearInterval(fadeOut);
+            }
+          }, 100);
+        }
+
         setShowAttribution(true);
         setTimeout(() => {
           setShowAttribution(false);
@@ -116,6 +208,12 @@ const Index = () => {
       });
       setIsPlaying(false);
       setIsLoading(false);
+      
+      // Stop ambient on error
+      if (ambientRef.current) {
+        ambientRef.current.pause();
+        ambientRef.current = null;
+      }
     }
   };
 
@@ -154,7 +252,7 @@ const Index = () => {
 
   return (
     <main className="min-h-screen bg-background flex items-center justify-center p-6">
-      <div className="w-full max-w-xl space-y-8 animate-fade-in">
+      <div className="w-full max-w-2xl space-y-6 animate-fade-in">
         {/* Title */}
         <div className="text-center space-y-2">
           <h1 className="text-4xl md:text-5xl font-light tracking-[0.2em] text-foreground uppercase animate-glow-pulse">
@@ -163,6 +261,105 @@ const Index = () => {
           <p className="text-sm text-muted-foreground tracking-wide">
             before sleep, a whisper.
           </p>
+        </div>
+
+        {/* Voice & Ambient Settings */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="space-y-2">
+            <Label className="text-xs text-muted-foreground uppercase tracking-wide">
+              voice
+            </Label>
+            <Select value={selectedVoice} onValueChange={setSelectedVoice}>
+              <SelectTrigger className="bg-card border-border">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                {Object.entries(VOICES).map(([key, voice]) => (
+                  <SelectItem key={key} value={key}>
+                    {voice.name}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+
+          <div className="space-y-2">
+            <Label className="text-xs text-muted-foreground uppercase tracking-wide">
+              ambient sound
+            </Label>
+            <Select value={selectedAmbient || "none"} onValueChange={(v) => setSelectedAmbient(v === "none" ? null : v)}>
+              <SelectTrigger className="bg-card border-border">
+                <SelectValue placeholder="none" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="none">none</SelectItem>
+                <SelectItem value="rain">rain</SelectItem>
+                <SelectItem value="ocean">ocean waves</SelectItem>
+                <SelectItem value="forest">night forest</SelectItem>
+                <SelectItem value="white_noise">white noise</SelectItem>
+                <SelectItem value="cosmic">cosmic</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+        </div>
+
+        {/* Duration Selector (only shown if ambient selected) */}
+        {selectedAmbient && (
+          <div className="space-y-2">
+            <Label className="text-xs text-muted-foreground uppercase tracking-wide">
+              ambient duration
+            </Label>
+            <div className="flex gap-2">
+              {DURATIONS.map((d) => (
+                <Button
+                  key={d.value}
+                  variant={duration === d.value ? "default" : "secondary"}
+                  size="sm"
+                  onClick={() => setDuration(d.value)}
+                  className="flex-1"
+                >
+                  {d.label}
+                </Button>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* Advanced Voice Settings */}
+        <div className="space-y-4 p-4 bg-card rounded-lg border border-border">
+          <div className="space-y-2">
+            <div className="flex justify-between">
+              <Label className="text-xs text-muted-foreground uppercase tracking-wide">
+                stability
+              </Label>
+              <span className="text-xs text-foreground">{stability[0].toFixed(2)}</span>
+            </div>
+            <Slider
+              value={stability}
+              onValueChange={setStability}
+              min={0}
+              max={1}
+              step={0.05}
+              className="w-full"
+            />
+          </div>
+
+          <div className="space-y-2">
+            <div className="flex justify-between">
+              <Label className="text-xs text-muted-foreground uppercase tracking-wide">
+                clarity
+              </Label>
+              <span className="text-xs text-foreground">{similarity[0].toFixed(2)}</span>
+            </div>
+            <Slider
+              value={similarity}
+              onValueChange={setSimilarity}
+              min={0}
+              max={1}
+              step={0.05}
+              className="w-full"
+            />
+          </div>
         </div>
 
         {/* Text Area */}

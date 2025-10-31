@@ -14,7 +14,71 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      early_access_emails: {
+        Row: {
+          created_at: string | null
+          email: string
+          feature: string
+          id: string
+          notified: boolean | null
+          vote_id: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          email: string
+          feature?: string
+          id?: string
+          notified?: boolean | null
+          vote_id?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          email?: string
+          feature?: string
+          id?: string
+          notified?: boolean | null
+          vote_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "early_access_emails_vote_id_fkey"
+            columns: ["vote_id"]
+            isOneToOne: false
+            referencedRelation: "votes"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      votes: {
+        Row: {
+          created_at: string | null
+          feature: string
+          id: string
+          ip_address: unknown
+          session_id: string | null
+          user_agent: string | null
+          vote: string
+        }
+        Insert: {
+          created_at?: string | null
+          feature?: string
+          id?: string
+          ip_address?: unknown
+          session_id?: string | null
+          user_agent?: string | null
+          vote: string
+        }
+        Update: {
+          created_at?: string | null
+          feature?: string
+          id?: string
+          ip_address?: unknown
+          session_id?: string | null
+          user_agent?: string | null
+          vote?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never

@@ -42,6 +42,9 @@ const Index = () => {
   const [customText, setCustomText] = useState("");
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const [voteSubmitted, setVoteSubmitted] = useState(false);
+  const [showEmailCapture, setShowEmailCapture] = useState(false);
+  const [userEmail, setUserEmail] = useState("");
+  const [emailSubmitting, setEmailSubmitting] = useState(false);
   const { toast } = useToast();
   const audioRef = useRef<HTMLAudioElement | null>(null);
 
@@ -193,19 +196,98 @@ const Index = () => {
 
   const handleVote = async (vote: 'yes' | 'no') => {
     try {
-      console.log(`User voted: ${vote} for 1-hour versions`);
+      // Generate or retrieve session_id
+      const sessionId = localStorage.getItem('session_id') || crypto.randomUUID();
+      localStorage.setItem('session_id', sessionId);
       
-      setVoteSubmitted(true);
-      
-      toast({
-        description: vote === 'yes' 
-          ? "thanks! we'll prioritize this feature 🎵" 
-          : "noted! we'll focus on other improvements 🌙",
-      });
-      
-      setTimeout(() => setVoteSubmitted(false), 3000);
+      // Save vote to database
+      const { data: voteData, error: voteError } = await supabase
+        .from('votes')
+        .insert({
+          vote,
+          feature: '1hour_ambient',
+          session_id: sessionId,
+          user_agent: navigator.userAgent
+        })
+        .select()
+        .single();
+
+      if (voteError) throw voteError;
+
+      console.log('Vote saved:', voteData);
+
+      // If voted "yes", show email capture
+      if (vote === 'yes') {
+        setShowEmailCapture(true);
+        toast({
+          description: "thanks! want early access? leave your email below 🎵",
+        });
+      } else {
+        // If voted "no", just thank them
+        setVoteSubmitted(true);
+        toast({
+          description: "noted! we'll focus on other improvements 🌙",
+        });
+        setTimeout(() => setVoteSubmitted(false), 3000);
+      }
+
     } catch (error) {
       console.error("Vote error:", error);
+      toast({
+        description: "couldn't save vote, please try again",
+        variant: "destructive"
+      });
+    }
+  };
+
+  const handleEmailSubmit = async () => {
+    if (!userEmail || !userEmail.includes('@')) {
+      toast({
+        description: "please enter a valid email",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    setEmailSubmitting(true);
+    
+    try {
+      const { error } = await supabase
+        .from('early_access_emails')
+        .insert({
+          email: userEmail.toLowerCase().trim(),
+          feature: '1hour_ambient'
+        });
+
+      if (error) {
+        // If email already exists, that's ok
+        if (error.code === '23505') {
+          toast({
+            description: "you're already on the list! we'll notify you 🌙",
+          });
+        } else {
+          throw error;
+        }
+      } else {
+        toast({
+          description: "perfect! we'll email you when it's ready 🎵",
+        });
+      }
+
+      // Reset and show confirmation
+      setUserEmail("");
+      setShowEmailCapture(false);
+      setVoteSubmitted(true);
+      setTimeout(() => setVoteSubmitted(false), 3000);
+
+    } catch (error) {
+      console.error("Email submit error:", error);
+      toast({
+        description: "couldn't save email, please try again",
+        variant: "destructive"
+      });
+    } finally {
+      setEmailSubmitting(false);
     }
   };
 
@@ -326,25 +408,62 @@ const Index = () => {
             </p>
           </div>
           
-          <div className="flex gap-3 justify-center">
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => handleVote('yes')}
-              className="lowercase tracking-wide hover:bg-green-500/10 hover:border-green-500/50 hover:text-green-400 transition-colors"
-            >
-              yes, i'd use it
-            </Button>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => handleVote('no')}
-              className="lowercase tracking-wide hover:bg-red-500/10 hover:border-red-500/50 hover:text-red-400 transition-colors"
-            >
-              no, 1 min is enough
-            </Button>
-          </div>
+          {!showEmailCapture && !voteSubmitted ? (
+            <div className="flex gap-3 justify-center">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => handleVote('yes')}
+                className="lowercase tracking-wide hover:bg-green-500/10 hover:border-green-500/50 hover:text-green-400 transition-colors"
+              >
+                yes, i'd use it
+              </Button>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => handleVote('no')}
+                className="lowercase tracking-wide hover:bg-red-500/10 hover:border-red-500/50 hover:text-red-400 transition-colors"
+              >
+                no, 1 min is enough
+              </Button>
+            </div>
+          ) : null}
           
+          {/* Email Capture Form (solo para "YES" votes) */}
+          {showEmailCapture && !voteSubmitted ? (
+            <div className="space-y-3 animate-fade-in">
+              <div className="flex gap-2">
+                <input
+                  type="email"
+                  placeholder="your@email.com"
+                  value={userEmail}
+                  onChange={(e) => setUserEmail(e.target.value)}
+                  onKeyDown={(e) => e.key === 'Enter' && handleEmailSubmit()}
+                  className="flex-1 px-3 py-2 text-sm bg-background border border-border rounded-md focus:outline-none focus:ring-2 focus:ring-primary lowercase"
+                />
+                <Button
+                  onClick={handleEmailSubmit}
+                  disabled={emailSubmitting}
+                  size="sm"
+                  className="lowercase tracking-wide"
+                >
+                  {emailSubmitting ? "..." : "notify me"}
+                </Button>
+              </div>
+              <button
+                onClick={() => {
+                  setShowEmailCapture(false);
+                  setVoteSubmitted(true);
+                  setTimeout(() => setVoteSubmitted(false), 3000);
+                }}
+                className="text-xs text-muted-foreground/60 hover:text-muted-foreground underline w-full text-center"
+              >
+                skip, just save my vote
+              </button>
+            </div>
+          ) : null}
+          
+          {/* Confirmation Message */}
           {voteSubmitted && (
             <p className="text-xs text-center text-green-400/80 animate-fade-in">
               thanks for your feedback 🌙

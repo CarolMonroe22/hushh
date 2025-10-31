@@ -200,21 +200,20 @@ const Index = () => {
       const sessionId = localStorage.getItem('session_id') || crypto.randomUUID();
       localStorage.setItem('session_id', sessionId);
       
-      // Save vote to database
-      const { data: voteData, error: voteError } = await supabase
+      // Save vote to database (no select to avoid RLS read policy)
+      const { error: voteError } = await supabase
         .from('votes')
         .insert({
           vote,
           feature: '1hour_ambient',
           session_id: sessionId,
           user_agent: navigator.userAgent
-        })
-        .select()
-        .single();
+        });
 
-      if (voteError) throw voteError;
-
-      console.log('Vote saved:', voteData);
+      if (voteError) {
+        console.error('Vote error details:', voteError);
+        throw voteError;
+      }
 
       // If voted "yes", show email capture
       if (vote === 'yes') {

@@ -328,11 +328,38 @@ const Index = () => {
       {/* Generating Overlay */}
       {isGenerating && selectedCategory && (
         <div className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center z-50 animate-in fade-in">
-          <div className="text-center space-y-4 px-4">
-            <p className="text-2xl text-white/90 font-light tracking-wide">
-              {getCategoryWelcomeMessage(selectedCategory)}
-            </p>
-            <div className="animate-pulse text-white/60 text-sm tracking-wide">generating your whisper...</div>
+          <div className="text-center space-y-6 px-4">
+            {/* Animated circle indicator */}
+            <div className="flex justify-center">
+              <div className="w-16 h-16 rounded-full border-2 border-primary/30 flex items-center justify-center animate-breathe">
+                <div className="w-8 h-8 rounded-full bg-primary/50 animate-float" />
+              </div>
+            </div>
+            
+            {/* Messages */}
+            <div className="space-y-2">
+              <p className="text-2xl text-white/90 font-light tracking-wide animate-fade-in">
+                {getCategoryWelcomeMessage(selectedCategory)}
+              </p>
+              <div className="text-white/60 text-sm tracking-wide flex items-center justify-center gap-1">
+                <span>preparing your whisper</span>
+                <span className="inline-block w-8 text-left animate-pulse">...</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Listening Indicator - shown when audio is playing */}
+      {isPlaying && !isGenerating && (
+        <div className="fixed top-8 left-1/2 -translate-x-1/2 z-50 animate-in slide-in-from-top">
+          <div className="bg-card/90 backdrop-blur-sm border border-border rounded-full px-6 py-3 flex items-center gap-3">
+            <div className="flex gap-1">
+              <div className="w-1 h-4 bg-primary rounded-full animate-breathe" style={{ animationDelay: '0s' }} />
+              <div className="w-1 h-4 bg-primary rounded-full animate-breathe" style={{ animationDelay: '0.2s' }} />
+              <div className="w-1 h-4 bg-primary rounded-full animate-breathe" style={{ animationDelay: '0.4s' }} />
+            </div>
+            <span className="text-sm text-foreground/80 tracking-wide">listening...</span>
           </div>
         </div>
       )}

@@ -104,6 +104,24 @@ export default {
             filter: "drop-shadow(0 0 16px hsl(var(--primary) / 0.5))",
           },
         },
+        "breathe": {
+          "0%, 100%": {
+            transform: "scale(1)",
+            opacity: "0.6",
+          },
+          "50%": {
+            transform: "scale(1.1)",
+            opacity: "1",
+          },
+        },
+        "float": {
+          "0%, 100%": {
+            transform: "translateY(0px)",
+          },
+          "50%": {
+            transform: "translateY(-10px)",
+          },
+        },
       },
       animation: {
         "accordion-down": "accordion-down 0.2s ease-out",
@@ -111,6 +129,8 @@ export default {
         "fade-in": "fade-in 900ms ease-out",
         "fade-out": "fade-out 1000ms ease-out",
         "glow-pulse": "glow-pulse 3s ease-in-out infinite",
+        "breathe": "breathe 2s ease-in-out infinite",
+        "float": "float 3s ease-in-out infinite",
       },
     },
   },

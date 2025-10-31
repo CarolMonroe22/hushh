@@ -6,51 +6,50 @@ const corsHeaders = {
 };
 
 const CATEGORY_PROMPTS = {
-  manifest: `You are an ASMR manifestation guide. Generate a 5-minute whisper script in English (2,500-3,500 characters) that helps visualize desired future.
+  manifest: `You are an ASMR manifestation guide. Generate a 1-minute whisper script in English (500-700 characters) that helps visualize desired future.
 
 Structure:
-- Opening (30 sec): Gentle invitation to close eyes and breathe
-- Body (4 min): Detailed affirmations about goals manifesting naturally
-- Closing (30 sec): Powerful final affirmations
+- Opening (15 sec): Gentle breath invitation
+- Body (35 sec): Core affirmations about goals manifesting
+- Closing (10 sec): Powerful final affirmation
 
 Include:
 - [WHISPER] tag at the very start
-- [PAUSE 300-500ms] every 2-3 sentences for ASMR rhythm
+- [PAUSE 400ms] every 2 sentences for ASMR rhythm
 - Soft, intimate language (you form)
-- Visualization cues
 - Present tense affirmations
 
-Generate a unique script now.`,
+Generate a unique, concise script now.`,
 
-  relax: `You are an ASMR relaxation therapist. Generate a 5-minute body scan whisper script in English (2,500-3,500 characters).
+  relax: `You are an ASMR relaxation therapist. Generate a 1-minute body scan whisper script in English (500-700 characters).
 
 Structure:
-- Opening (30 sec): Deep breath invitation
-- Body (4 min): Systematic body relaxation from head to toes
-- Closing (30 sec): Full body awareness
+- Opening (15 sec): Deep breath invitation
+- Body (35 sec): Quick body scan (head → shoulders → core → legs)
+- Closing (10 sec): Full body release
 
 Include:
 - [WHISPER] tag at start
-- [PAUSE 400-500ms] between body parts
-- Specific body references (jaw, shoulders, hands, feet)
+- [PAUSE 400ms] between body areas
+- Specific body references
 - Release and softening language
 
-Generate a unique script now.`,
+Generate a unique, concise script now.`,
 
-  gratitude: `You are an ASMR gratitude guide. Generate a 5-minute contemplative whisper script in English (2,500-3,500 characters).
+  gratitude: `You are an ASMR gratitude guide. Generate a 1-minute contemplative whisper script in English (500-700 characters).
 
 Structure:
-- Opening (30 sec): Gentle reflection invitation
-- Body (4 min): Guided journey through small daily moments
-- Closing (30 sec): Whispered thank you
+- Opening (15 sec): Gentle reflection invitation
+- Body (35 sec): 2-3 gratitude moments with sensory details
+- Closing (10 sec): Whispered thank you
 
 Include:
 - [WHISPER] tag at start
-- [PAUSE 300-400ms] between reflections
-- Sensory details (sounds, smells, textures)
+- [PAUSE 400ms] between reflections
+- Sensory details (sounds, textures)
 - Intimate, warm tone
 
-Generate a unique script now.`
+Generate a unique, concise script now.`
 };
 
 serve(async (req) => {
@@ -92,7 +91,7 @@ serve(async (req) => {
           { role: 'system', content: systemPrompt },
           { role: 'user', content: 'Generate a unique whisper script for this category.' }
         ],
-        max_tokens: 4000,
+        max_tokens: 1000,
       }),
     });
 

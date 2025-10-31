@@ -26,7 +26,10 @@ serve(async (req) => {
     console.log("Generating ambient music:", prompt, "duration:", duration);
 
     // Call ElevenLabs Music API
-    const response = await fetch('https://api.elevenlabs.io/v1/sound-generation', {
+    // Convert duration to milliseconds (max 300 seconds = 300,000ms)
+    const durationMs = Math.min(duration * 1000, 300000);
+    
+    const response = await fetch('https://api.elevenlabs.io/v1/music-generation', {
       method: 'POST',
       headers: {
         'Accept': 'audio/mpeg',
@@ -34,9 +37,9 @@ serve(async (req) => {
         'xi-api-key': ELEVENLABS_API_KEY,
       },
       body: JSON.stringify({
-        text: prompt,
-        duration_seconds: duration || 300, // Default 5 minutes
-        prompt_influence: 0.3,
+        prompt: prompt,
+        music_length_ms: durationMs,
+        model_id: 'music_v1',
       }),
     });
 

@@ -20,9 +20,9 @@ import {
 } from "@/components/ui/dialog";
 
 const CATEGORIES = [
-  { id: "manifest", label: "manifest", emoji: "🌟" },
-  { id: "relax", label: "relax", emoji: "🌊" },
-  { id: "gratitude", label: "gratitude", emoji: "🙏" },
+  { id: "manifest", label: "manifest" },
+  { id: "relax", label: "relax" },
+  { id: "gratitude", label: "gratitude" },
 ];
 
 const VOICES = {
@@ -32,26 +32,17 @@ const VOICES = {
   aria: { id: "9BWtsMINqrJLrRacOk9x", name: "Aria - Classic" },
 };
 
-const AMBIENT_FILES: Record<string, string> = {
-  rain: '/ambient/rain.mp3',
-  ocean: '/ambient/ocean.mp3',
-  forest: '/ambient/forest.mp3',
-  white_noise: '/ambient/white-noise.mp3',
-  cosmic: '/ambient/cosmic.mp3',
-};
 
 const Index = () => {
   const [isPlaying, setIsPlaying] = useState(false);
   const [showAttribution, setShowAttribution] = useState(false);
   const [isGenerating, setIsGenerating] = useState(false);
   const [selectedVoice, setSelectedVoice] = useState("aimee");
-  const [selectedAmbient, setSelectedAmbient] = useState<string | null>(null);
   const [showCustomText, setShowCustomText] = useState(false);
   const [customText, setCustomText] = useState("");
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const { toast } = useToast();
   const audioRef = useRef<HTMLAudioElement | null>(null);
-  const ambientRef = useRef<HTMLAudioElement | null>(null);
 
   // Cleanup audio on unmount
   useEffect(() => {
@@ -59,10 +50,6 @@ const Index = () => {
       if (audioRef.current) {
         audioRef.current.pause();
         audioRef.current = null;
-      }
-      if (ambientRef.current) {
-        ambientRef.current.pause();
-        ambientRef.current = null;
       }
     };
   }, []);
@@ -80,26 +67,6 @@ const Index = () => {
     setIsPlaying(true);
 
     try {
-      // Start ambient music if selected
-      if (selectedAmbient) {
-        const ambientPath = AMBIENT_FILES[selectedAmbient as keyof typeof AMBIENT_FILES];
-        if (ambientPath) {
-          ambientRef.current = new Audio(ambientPath);
-          ambientRef.current.loop = true;
-          ambientRef.current.volume = 0.3;
-          
-          try {
-            await ambientRef.current.play();
-          } catch (err) {
-            console.warn("Ambient playback failed:", err);
-            toast({
-              description: "ambient music unavailable...",
-              variant: "default",
-            });
-          }
-        }
-      }
-
       // Generate whisper audio
       const { data, error } = await supabase.functions.invoke('whisper-text', {
         body: { 
@@ -125,20 +92,6 @@ const Index = () => {
       audioRef.current = new Audio(audioUrl);
       
       audioRef.current.onended = () => {
-        if (ambientRef.current) {
-          const fadeOut = setInterval(() => {
-            if (ambientRef.current && ambientRef.current.volume > 0.05) {
-              ambientRef.current.volume -= 0.05;
-            } else {
-              if (ambientRef.current) {
-                ambientRef.current.pause();
-                ambientRef.current = null;
-              }
-              clearInterval(fadeOut);
-            }
-          }, 100);
-        }
-
         setShowAttribution(true);
         setTimeout(() => {
           setShowAttribution(false);
@@ -156,11 +109,6 @@ const Index = () => {
       });
       setIsPlaying(false);
       setIsGenerating(false);
-      
-      if (ambientRef.current) {
-        ambientRef.current.pause();
-        ambientRef.current = null;
-      }
     }
   };
 
@@ -283,7 +231,7 @@ const Index = () => {
         {/* Title */}
         <div className="text-center space-y-2">
           <h1 className="text-4xl md:text-5xl font-light tracking-[0.2em] text-foreground uppercase animate-glow-pulse">
-            murmur
+            shh
           </h1>
           <p className="text-sm text-muted-foreground tracking-wide">
             before sleep, a whisper.
@@ -291,7 +239,7 @@ const Index = () => {
         </div>
 
         {/* Voice & Ambient Settings */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 gap-4">
           <div className="space-y-2">
             <Label className="text-xs text-muted-foreground uppercase tracking-wide">
               voice
@@ -314,18 +262,10 @@ const Index = () => {
             <Label className="text-xs text-muted-foreground uppercase tracking-wide">
               ambient sound
             </Label>
-            <Select value={selectedAmbient || "none"} onValueChange={(v) => setSelectedAmbient(v === "none" ? null : v)}>
-              <SelectTrigger className="bg-card border-border">
-                <SelectValue placeholder="none" />
+            <Select disabled value="coming-soon">
+              <SelectTrigger className="bg-card border-border opacity-60">
+                <SelectValue placeholder="coming soon..." />
               </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="none">none</SelectItem>
-                <SelectItem value="rain">🌧️ rain (10 min loop)</SelectItem>
-                <SelectItem value="ocean">🌊 ocean waves (10 min loop)</SelectItem>
-                <SelectItem value="forest">🌲 night forest (10 min loop)</SelectItem>
-                <SelectItem value="white_noise">⚪ white noise (10 min loop)</SelectItem>
-                <SelectItem value="cosmic">✨ cosmic (10 min loop)</SelectItem>
-              </SelectContent>
             </Select>
           </div>
         </div>
@@ -340,7 +280,7 @@ const Index = () => {
               size="lg"
               className="w-full py-8 text-lg lowercase tracking-wide bg-primary hover:bg-primary/90 text-primary-foreground disabled:opacity-50"
             >
-              {category.emoji} {category.label}
+              {category.label}
               <span className="text-xs ml-2 opacity-70">(5 min)</span>
             </Button>
           ))}
@@ -392,6 +332,13 @@ const Index = () => {
           </DialogContent>
         </Dialog>
       </div>
+
+      {/* Footer */}
+      <footer className="fixed bottom-4 left-0 right-0 text-center">
+        <p className="text-xs text-muted-foreground tracking-wide">
+          made at 3:23 am because i couldn't sleep
+        </p>
+      </footer>
     </main>
   );
 };

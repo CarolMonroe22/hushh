@@ -41,6 +41,7 @@ const Index = () => {
   const [showCustomText, setShowCustomText] = useState(false);
   const [customText, setCustomText] = useState("");
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
+  const [voteSubmitted, setVoteSubmitted] = useState(false);
   const { toast } = useToast();
   const audioRef = useRef<HTMLAudioElement | null>(null);
 
@@ -190,6 +191,24 @@ const Index = () => {
     setCustomText("");
   };
 
+  const handleVote = async (vote: 'yes' | 'no') => {
+    try {
+      console.log(`User voted: ${vote} for 1-hour versions`);
+      
+      setVoteSubmitted(true);
+      
+      toast({
+        description: vote === 'yes' 
+          ? "thanks! we'll prioritize this feature 🎵" 
+          : "noted! we'll focus on other improvements 🌙",
+      });
+      
+      setTimeout(() => setVoteSubmitted(false), 3000);
+    } catch (error) {
+      console.error("Vote error:", error);
+    }
+  };
+
   if (isPlaying && !showAttribution) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center animate-fade-in">
@@ -270,11 +289,11 @@ const Index = () => {
 
           <div className="space-y-2">
             <Label className="text-xs text-muted-foreground uppercase tracking-wide">
-              ambient sound
+              ambient sound <span className="normal-case text-muted-foreground/60">(very soon)</span>
             </Label>
             <Select disabled value="coming-soon">
               <SelectTrigger className="bg-card border-border opacity-60">
-                <SelectValue placeholder="coming soon..." />
+                <SelectValue placeholder="rain, ocean, fire..." />
               </SelectTrigger>
             </Select>
           </div>
@@ -291,9 +310,46 @@ const Index = () => {
               className="w-full py-8 text-lg lowercase tracking-wide bg-primary hover:bg-primary/90 text-primary-foreground disabled:opacity-50"
             >
               {category.label}
-              <span className="text-xs ml-2 opacity-70">(5 min)</span>
+              <span className="text-xs ml-2 opacity-70">(1 min)</span>
             </Button>
           ))}
+        </div>
+
+        {/* Vote Section */}
+        <div className="border border-border/50 rounded-lg p-6 space-y-4 bg-card/50">
+          <div className="text-center space-y-2">
+            <p className="text-sm text-muted-foreground tracking-wide">
+              would you use 1-hour versions with ambient music?
+            </p>
+            <p className="text-xs text-muted-foreground/60">
+              help us prioritize what to build next
+            </p>
+          </div>
+          
+          <div className="flex gap-3 justify-center">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => handleVote('yes')}
+              className="lowercase tracking-wide hover:bg-green-500/10 hover:border-green-500/50 hover:text-green-400 transition-colors"
+            >
+              yes, i'd use it
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => handleVote('no')}
+              className="lowercase tracking-wide hover:bg-red-500/10 hover:border-red-500/50 hover:text-red-400 transition-colors"
+            >
+              no, 1 min is enough
+            </Button>
+          </div>
+          
+          {voteSubmitted && (
+            <p className="text-xs text-center text-green-400/80 animate-fade-in">
+              thanks for your feedback 🌙
+            </p>
+          )}
         </div>
 
         {/* Custom Text Option */}
@@ -315,7 +371,7 @@ const Index = () => {
             <DialogHeader>
               <DialogTitle className="lowercase tracking-wide">custom whisper</DialogTitle>
               <DialogDescription className="text-xs">
-                paste your text (max 5,000 characters for ~7 minutes)
+                paste your text (max 5,000 characters)
               </DialogDescription>
             </DialogHeader>
             <div className="space-y-4">

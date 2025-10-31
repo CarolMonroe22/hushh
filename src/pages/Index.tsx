@@ -230,8 +230,8 @@ const Index = () => {
       <div className="w-full max-w-2xl space-y-6 animate-fade-in">
         {/* Title */}
         <div className="text-center space-y-2">
-          <h1 className="text-4xl md:text-5xl font-light tracking-[0.2em] text-foreground uppercase animate-glow-pulse">
-            shh
+          <h1 className="text-4xl md:text-5xl font-light tracking-[0.2em] text-foreground animate-glow-pulse">
+            3:23
           </h1>
           <p className="text-sm text-muted-foreground tracking-wide">
             before sleep, a whisper.

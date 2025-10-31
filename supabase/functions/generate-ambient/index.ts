@@ -29,7 +29,7 @@ serve(async (req) => {
     // Convert duration to milliseconds (max 300 seconds = 300,000ms)
     const durationMs = Math.min(duration * 1000, 300000);
     
-    const response = await fetch('https://api.elevenlabs.io/v1/music-generation', {
+    const response = await fetch('https://api.elevenlabs.io/v1/music/compose-detailed', {
       method: 'POST',
       headers: {
         'Accept': 'audio/mpeg',
@@ -40,6 +40,7 @@ serve(async (req) => {
         prompt: prompt,
         music_length_ms: durationMs,
         model_id: 'music_v1',
+        force_instrumental: true,
       }),
     });
 

@@ -28,7 +28,7 @@ serve(async (req) => {
     // Convert custom pause tags to SSML
     const processedText = text
       .replace(/\[WHISPER\]/g, '')
-      .replace(/\[PAUSE (\d+)ms\]/g, '<break time="${1}ms"/>')
+      .replace(/\[PAUSE (\d+)ms\]/g, '<break time="$1ms"/>')
       .trim();
 
     // Call ElevenLabs TTS API
@@ -61,10 +61,17 @@ serve(async (req) => {
     // Get audio as array buffer
     const audioBuffer = await response.arrayBuffer();
     
-    // Convert to base64 for easier handling on client
-    const base64Audio = btoa(
-      String.fromCharCode(...new Uint8Array(audioBuffer))
-    );
+    // Convert to base64 in chunks to avoid call stack issues
+    const uint8Array = new Uint8Array(audioBuffer);
+    const chunkSize = 8192;
+    let binaryString = '';
+    
+    for (let i = 0; i < uint8Array.length; i += chunkSize) {
+      const chunk = uint8Array.subarray(i, Math.min(i + chunkSize, uint8Array.length));
+      binaryString += String.fromCharCode.apply(null, Array.from(chunk));
+    }
+    
+    const base64Audio = btoa(binaryString);
 
     return new Response(
       JSON.stringify({ audioContent: base64Audio }),

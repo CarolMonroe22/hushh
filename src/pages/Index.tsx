@@ -10,48 +10,20 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Slider } from "@/components/ui/slider";
 import { Label } from "@/components/ui/label";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 
-const PRESETS = {
-  manifest: `[WHISPER] Close your eyes. Picture tomorrow unfolding softly.
-[PAUSE 300ms]
-You are not rushing. You are arriving.
-[PAUSE 300ms]
-Everything you've been asking for is already finding you.`,
-  relax: `[WHISPER] Let your breath fall.
-[PAUSE 400ms]
-Unclench your hands.
-Drop the shoulders.
-[PAUSE 300ms]
-There's nothing left to fix tonight.
-Just breathe.`,
-  gratitude: `[WHISPER] Think of one small thing that made today gentler.
-[PAUSE 300ms]
-A voice. A smell. A second of quiet.
-[PAUSE 300ms]
-Whisper a thank you.`,
-  sleep: `[WHISPER] Counting down.
-Five. Loosen the feet.
-[PAUSE 200ms]
-Four. The hands.
-Three. The jaw.
-[PAUSE 300ms]
-Two. The thoughts.
-[PAUSE 300ms]
-One. Only silence now.`,
-  facts: `[WHISPER] Did you know?
-Whales can talk across oceans.
-[PAUSE 300ms]
-So can your thoughts, if you send them kindly.
-[PAUSE 400ms]
-Sound is just connection in slow motion.`,
-  positive: `[WHISPER] You did enough today.
-[PAUSE 300ms]
-You are enough tonight.
-[PAUSE 300ms]
-Rest is progress, too.`,
-};
+const CATEGORIES = [
+  { id: "manifest", label: "manifest", emoji: "🌟" },
+  { id: "relax", label: "relax", emoji: "🌊" },
+  { id: "gratitude", label: "gratitude", emoji: "🙏" },
+];
 
 const VOICES = {
   aimee: { id: "zA6D7RyKdc2EClouEMkP", name: "AImee - Soft Whisper" },
@@ -75,15 +47,14 @@ const DURATIONS = [
 ];
 
 const Index = () => {
-  const [thought, setThought] = useState("");
   const [isPlaying, setIsPlaying] = useState(false);
   const [showAttribution, setShowAttribution] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
+  const [isGenerating, setIsGenerating] = useState(false);
   const [selectedVoice, setSelectedVoice] = useState("aimee");
   const [selectedAmbient, setSelectedAmbient] = useState<string | null>(null);
   const [duration, setDuration] = useState("5");
-  const [stability, setStability] = useState([0.2]);
-  const [similarity, setSimilarity] = useState([0.85]);
+  const [showCustomText, setShowCustomText] = useState(false);
+  const [customText, setCustomText] = useState("");
   const { toast } = useToast();
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const ambientRef = useRef<HTMLAudioElement | null>(null);
@@ -102,28 +73,7 @@ const Index = () => {
     };
   }, []);
 
-  const handlePreset = (key: keyof typeof PRESETS) => {
-    setThought(PRESETS[key]);
-  };
-
-  const handleWhisper = async () => {
-    if (!thought.trim()) {
-      toast({
-        description: "write something first...",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    if (thought.length > 280) {
-      toast({
-        description: "keep it short, under 280 characters...",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    setIsLoading(true);
+  const playWhisper = async (text: string) => {
     setIsPlaying(true);
 
     try {
@@ -132,7 +82,7 @@ const Index = () => {
         const { data: ambientData, error: ambientError } = await supabase.functions.invoke('generate-ambient', {
           body: { 
             prompt: AMBIENT_TRACKS[selectedAmbient as keyof typeof AMBIENT_TRACKS],
-            duration: parseInt(duration) * 60 // Convert to seconds
+            duration: parseInt(duration) * 60
           }
         });
 
@@ -149,13 +99,13 @@ const Index = () => {
         }
       }
 
-      // Call edge function to generate whisper
+      // Generate whisper audio
       const { data, error } = await supabase.functions.invoke('whisper-text', {
         body: { 
-          text: thought,
+          text,
           voiceId: VOICES[selectedVoice as keyof typeof VOICES].id,
-          stability: stability[0],
-          similarity: similarity[0]
+          stability: 0.2,
+          similarity: 0.85
         }
       });
 
@@ -165,7 +115,6 @@ const Index = () => {
         throw new Error("No audio returned");
       }
 
-      // Convert base64 to blob and play
       const audioBlob = new Blob(
         [Uint8Array.from(atob(data.audioContent), c => c.charCodeAt(0))],
         { type: 'audio/mpeg' }
@@ -175,7 +124,6 @@ const Index = () => {
       audioRef.current = new Audio(audioUrl);
       
       audioRef.current.onended = () => {
-        // Fade out ambient
         if (ambientRef.current) {
           const fadeOut = setInterval(() => {
             if (ambientRef.current && ambientRef.current.volume > 0.05) {
@@ -194,12 +142,11 @@ const Index = () => {
         setTimeout(() => {
           setShowAttribution(false);
           setIsPlaying(false);
-          setThought("");
         }, 5000);
       };
 
       await audioRef.current.play();
-      setIsLoading(false);
+      setIsGenerating(false);
     } catch (error) {
       console.error("Whisper error:", error);
       toast({
@@ -207,9 +154,8 @@ const Index = () => {
         variant: "destructive",
       });
       setIsPlaying(false);
-      setIsLoading(false);
+      setIsGenerating(false);
       
-      // Stop ambient on error
       if (ambientRef.current) {
         ambientRef.current.pause();
         ambientRef.current = null;
@@ -217,11 +163,78 @@ const Index = () => {
     }
   };
 
+  const handleCategorySelect = async (category: string) => {
+    setIsGenerating(true);
+
+    try {
+      const { data: contentData, error: contentError } = 
+        await supabase.functions.invoke('generate-whisper-content', {
+          body: { category }
+        });
+      
+      if (contentError) {
+        if (contentError.message?.includes('429')) {
+          toast({
+            description: "rate limit exceeded, please try again later...",
+            variant: "destructive",
+          });
+        } else if (contentError.message?.includes('402')) {
+          toast({
+            description: "please add credits to continue...",
+            variant: "destructive",
+          });
+        } else {
+          throw contentError;
+        }
+        setIsGenerating(false);
+        return;
+      }
+
+      const generatedText = contentData.text;
+      
+      if (!generatedText) {
+        throw new Error("No content generated");
+      }
+
+      await playWhisper(generatedText);
+    } catch (error) {
+      console.error("Generation error:", error);
+      toast({
+        description: "failed to generate whisper...",
+        variant: "destructive",
+      });
+      setIsGenerating(false);
+    }
+  };
+
+  const handleCustomText = async () => {
+    if (!customText.trim()) {
+      toast({
+        description: "write something first...",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    if (customText.length > 5000) {
+      toast({
+        description: "text too long, max 5000 characters...",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setShowCustomText(false);
+    setIsGenerating(true);
+    await playWhisper(customText);
+    setCustomText("");
+  };
+
   if (isPlaying && !showAttribution) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center animate-fade-in">
         <p className="text-muted-foreground text-sm tracking-[0.3em] uppercase animate-fade-in">
-          {isLoading ? "preparing..." : "listening..."}
+          {isGenerating ? "preparing..." : "listening..."}
         </p>
       </div>
     );
@@ -325,82 +338,67 @@ const Index = () => {
           </div>
         )}
 
-        {/* Advanced Voice Settings */}
-        <div className="space-y-4 p-4 bg-card rounded-lg border border-border">
-          <div className="space-y-2">
-            <div className="flex justify-between">
-              <Label className="text-xs text-muted-foreground uppercase tracking-wide">
-                stability
-              </Label>
-              <span className="text-xs text-foreground">{stability[0].toFixed(2)}</span>
-            </div>
-            <Slider
-              value={stability}
-              onValueChange={setStability}
-              min={0}
-              max={1}
-              step={0.05}
-              className="w-full"
-            />
-          </div>
-
-          <div className="space-y-2">
-            <div className="flex justify-between">
-              <Label className="text-xs text-muted-foreground uppercase tracking-wide">
-                clarity
-              </Label>
-              <span className="text-xs text-foreground">{similarity[0].toFixed(2)}</span>
-            </div>
-            <Slider
-              value={similarity}
-              onValueChange={setSimilarity}
-              min={0}
-              max={1}
-              step={0.05}
-              className="w-full"
-            />
-          </div>
-        </div>
-
-        {/* Text Area */}
-        <Textarea
-          value={thought}
-          onChange={(e) => setThought(e.target.value)}
-          placeholder="write a thought to whisper..."
-          maxLength={280}
-          className="min-h-[120px] bg-card border-border text-foreground placeholder:text-muted-foreground resize-none focus-visible:ring-primary"
-        />
-
-        {/* Character Count */}
-        <p className="text-xs text-muted-foreground text-right">
-          {thought.length} / 280
-        </p>
-
-        {/* Preset Buttons */}
-        <div className="flex flex-wrap gap-2 justify-center">
-          {Object.keys(PRESETS).map((key) => (
+        {/* Category Buttons */}
+        <div className="space-y-3">
+          {CATEGORIES.map((category) => (
             <Button
-              key={key}
-              variant="secondary"
-              size="sm"
-              onClick={() => handlePreset(key as keyof typeof PRESETS)}
-              className="lowercase tracking-wide hover:text-primary hover:border-primary transition-all"
+              key={category.id}
+              onClick={() => handleCategorySelect(category.id)}
+              disabled={isPlaying || isGenerating}
+              size="lg"
+              className="w-full py-8 text-lg lowercase tracking-wide bg-primary hover:bg-primary/90 text-primary-foreground disabled:opacity-50"
             >
-              {key}
+              {category.emoji} {category.label}
+              <span className="text-xs ml-2 opacity-70">(5 min)</span>
             </Button>
           ))}
         </div>
 
-        {/* Main Action Button */}
-        <div className="flex justify-center">
+        {/* Custom Text Option */}
+        <div className="flex justify-center pt-2">
           <Button
-            onClick={handleWhisper}
-            disabled={isPlaying}
-            className="px-8 py-6 text-base tracking-wide lowercase bg-primary hover:bg-primary/90 text-primary-foreground animate-glow-pulse disabled:animate-none"
+            variant="ghost"
+            size="sm"
+            onClick={() => setShowCustomText(true)}
+            disabled={isPlaying || isGenerating}
+            className="text-muted-foreground hover:text-foreground lowercase tracking-wide text-xs"
           >
-            whisper it
+            or paste your own text
           </Button>
         </div>
+
+        {/* Custom Text Dialog */}
+        <Dialog open={showCustomText} onOpenChange={setShowCustomText}>
+          <DialogContent className="max-w-2xl">
+            <DialogHeader>
+              <DialogTitle className="lowercase tracking-wide">custom whisper</DialogTitle>
+              <DialogDescription className="text-xs">
+                paste your text (max 5,000 characters for ~7 minutes)
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4">
+              <Textarea
+                value={customText}
+                onChange={(e) => setCustomText(e.target.value)}
+                placeholder="paste your text here..."
+                maxLength={5000}
+                className="min-h-[300px] bg-card border-border text-foreground resize-none"
+              />
+              <div className="flex justify-between items-center">
+                <p className="text-xs text-muted-foreground">
+                  {customText.length} / 5,000
+                </p>
+                <Button
+                  onClick={handleCustomText}
+                  disabled={!customText.trim()}
+                  className="lowercase tracking-wide"
+                >
+                  generate whisper
+                </Button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
       </div>
     </main>
   );

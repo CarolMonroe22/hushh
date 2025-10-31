@@ -5,6 +5,27 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
+// Simple in-memory rate limiting (resets on function cold start)
+const rateLimitMap = new Map<string, { count: number; resetTime: number }>();
+
+function checkRateLimit(ip: string): boolean {
+  const now = Date.now();
+  const limit = rateLimitMap.get(ip);
+  
+  if (!limit || now > limit.resetTime) {
+    // Reset limit every minute
+    rateLimitMap.set(ip, { count: 1, resetTime: now + 60000 });
+    return true;
+  }
+  
+  if (limit.count >= 20) {
+    return false;
+  }
+  
+  limit.count++;
+  return true;
+}
+
 serve(async (req) => {
   // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
@@ -12,6 +33,16 @@ serve(async (req) => {
   }
 
   try {
+    // Rate limiting by IP
+    const ip = req.headers.get('x-forwarded-for')?.split(',')[0] || 'unknown';
+    if (!checkRateLimit(ip)) {
+      console.warn(`Rate limit exceeded for IP: ${ip}`);
+      return new Response(
+        JSON.stringify({ error: 'Too many requests. Please try again in a minute.' }),
+        { status: 429, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
     const body = await req.json();
     const text = body.text;
     const ELEVENLABS_API_KEY = Deno.env.get('ELEVENLABS_API_KEY');
@@ -20,16 +51,34 @@ serve(async (req) => {
       throw new Error('ELEVENLABS_API_KEY is not configured');
     }
 
-    if (!text) {
-      throw new Error('Text is required');
+    // Input validation
+    if (!text || typeof text !== 'string') {
+      return new Response(
+        JSON.stringify({ error: 'Invalid text input' }),
+        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
+    if (text.length > 5000) {
+      return new Response(
+        JSON.stringify({ error: 'Text too long. Maximum 5000 characters.' }),
+        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
+    if (text.trim().length === 0) {
+      return new Response(
+        JSON.stringify({ error: 'Text cannot be empty' }),
+        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
     }
 
     console.log("Generating whisper for text:", text.substring(0, 50));
 
     // Get voice settings from request or use defaults
     const voiceId = body.voiceId || '9BWtsMINqrJLrRacOk9x';
-    const stability = body.stability || 0.2;
-    const similarityBoost = body.similarity || 0.85;
+    const stability = Math.min(Math.max(body.stability || 0.2, 0), 1);
+    const similarityBoost = Math.min(Math.max(body.similarity || 0.85, 0), 1);
 
     // Convert custom pause tags to SSML
     const processedText = text
@@ -59,22 +108,24 @@ serve(async (req) => {
 
     if (!response.ok) {
       const errorText = await response.text();
-      console.error("ElevenLabs API error:", errorText);
+      console.error("ElevenLabs API error:", response.status, errorText);
       
-      // Parse error details
-      let errorMessage = `ElevenLabs API error: ${response.status}`;
+      // Return generic error to user, log details server-side
+      let userMessage = 'Audio generation temporarily unavailable. Please try again.';
+      
       try {
         const errorData = JSON.parse(errorText);
         if (errorData.detail?.status === 'quota_exceeded') {
-          errorMessage = `ElevenLabs quota exceeded. ${errorData.detail.message}`;
-        } else if (errorData.detail?.message) {
-          errorMessage = errorData.detail.message;
+          userMessage = 'Service is temporarily at capacity. Please try again later.';
         }
       } catch (e) {
-        // Keep default error message if parsing fails
+        // Keep default message
       }
       
-      throw new Error(errorMessage);
+      return new Response(
+        JSON.stringify({ error: userMessage }),
+        { status: 503, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
     }
 
     // Get audio as array buffer

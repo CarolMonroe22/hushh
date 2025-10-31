@@ -336,7 +336,10 @@ const Index = () => {
       {/* Footer */}
       <footer className="fixed bottom-4 left-0 right-0 text-center">
         <p className="text-xs text-muted-foreground tracking-wide">
-          made at 3:23 am because i couldn't sleep
+          made at 3:23 am because i couldn't sleep · by{" "}
+          <a href="https://x.com/carolmonroe" target="_blank" rel="noopener noreferrer" className="hover:text-foreground transition-colors underline">
+            carol monroe
+          </a>
         </p>
       </footer>
     </main>

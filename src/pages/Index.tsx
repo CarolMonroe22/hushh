@@ -32,19 +32,13 @@ const VOICES = {
   aria: { id: "9BWtsMINqrJLrRacOk9x", name: "Aria - Classic" },
 };
 
-const AMBIENT_TRACKS = {
-  rain: "Soft rain sounds with distant thunder, peaceful and calming",
-  ocean: "Gentle ocean waves lapping on shore, meditative atmosphere",
-  forest: "Night forest ambience with crickets and wind through leaves",
-  white_noise: "Pure white noise for deep relaxation and sleep",
-  cosmic: "Cosmic ambient soundscape with ethereal drones",
+const AMBIENT_FILES: Record<string, string> = {
+  rain: '/ambient/rain.mp3',
+  ocean: '/ambient/ocean.mp3',
+  forest: '/ambient/forest.mp3',
+  white_noise: '/ambient/white-noise.mp3',
+  cosmic: '/ambient/cosmic.mp3',
 };
-
-const DURATIONS = [
-  { value: "3", label: "3 min" },
-  { value: "5", label: "5 min" },
-  { value: "10", label: "10 min" },
-];
 
 const Index = () => {
   const [isPlaying, setIsPlaying] = useState(false);
@@ -52,7 +46,6 @@ const Index = () => {
   const [isGenerating, setIsGenerating] = useState(false);
   const [selectedVoice, setSelectedVoice] = useState("aimee");
   const [selectedAmbient, setSelectedAmbient] = useState<string | null>(null);
-  const [duration, setDuration] = useState("5");
   const [showCustomText, setShowCustomText] = useState(false);
   const [customText, setCustomText] = useState("");
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
@@ -89,34 +82,21 @@ const Index = () => {
     try {
       // Start ambient music if selected
       if (selectedAmbient) {
-        try {
-          const { data: ambientData, error: ambientError } = await supabase.functions.invoke('generate-ambient', {
-            body: { 
-              prompt: AMBIENT_TRACKS[selectedAmbient as keyof typeof AMBIENT_TRACKS],
-              duration: parseInt(duration) * 60
-            }
-          });
-
-          if (ambientError) {
-            console.warn("Ambient music generation failed:", ambientError);
+        const ambientPath = AMBIENT_FILES[selectedAmbient as keyof typeof AMBIENT_FILES];
+        if (ambientPath) {
+          ambientRef.current = new Audio(ambientPath);
+          ambientRef.current.loop = true;
+          ambientRef.current.volume = 0.3;
+          
+          try {
+            await ambientRef.current.play();
+          } catch (err) {
+            console.warn("Ambient playback failed:", err);
             toast({
-              description: "ambient music unavailable, continuing with whisper only...",
+              description: "ambient music unavailable...",
               variant: "default",
             });
-          } else if (ambientData?.audioContent) {
-            const ambientBlob = new Blob(
-              [Uint8Array.from(atob(ambientData.audioContent), c => c.charCodeAt(0))],
-              { type: 'audio/mpeg' }
-            );
-            const ambientUrl = URL.createObjectURL(ambientBlob);
-            ambientRef.current = new Audio(ambientUrl);
-            ambientRef.current.loop = true;
-            ambientRef.current.volume = 0.3;
-            await ambientRef.current.play();
           }
-        } catch (ambientErr) {
-          console.warn("Ambient music error:", ambientErr);
-          // Continue without ambient - it's optional
         }
       }
 
@@ -340,37 +320,15 @@ const Index = () => {
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="none">none</SelectItem>
-                <SelectItem value="rain">rain</SelectItem>
-                <SelectItem value="ocean">ocean waves</SelectItem>
-                <SelectItem value="forest">night forest</SelectItem>
-                <SelectItem value="white_noise">white noise</SelectItem>
-                <SelectItem value="cosmic">cosmic</SelectItem>
+                <SelectItem value="rain">🌧️ rain (10 min loop)</SelectItem>
+                <SelectItem value="ocean">🌊 ocean waves (10 min loop)</SelectItem>
+                <SelectItem value="forest">🌲 night forest (10 min loop)</SelectItem>
+                <SelectItem value="white_noise">⚪ white noise (10 min loop)</SelectItem>
+                <SelectItem value="cosmic">✨ cosmic (10 min loop)</SelectItem>
               </SelectContent>
             </Select>
           </div>
         </div>
-
-        {/* Duration Selector (only shown if ambient selected) */}
-        {selectedAmbient && (
-          <div className="space-y-2">
-            <Label className="text-xs text-muted-foreground uppercase tracking-wide">
-              ambient duration
-            </Label>
-            <div className="flex gap-2">
-              {DURATIONS.map((d) => (
-                <Button
-                  key={d.value}
-                  variant={duration === d.value ? "default" : "secondary"}
-                  size="sm"
-                  onClick={() => setDuration(d.value)}
-                  className="flex-1"
-                >
-                  {d.label}
-                </Button>
-              ))}
-            </div>
-          </div>
-        )}
 
         {/* Category Buttons */}
         <div className="space-y-3">

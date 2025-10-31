@@ -397,6 +397,19 @@ const Index = () => {
           ))}
         </div>
 
+        {/* Custom Text Option */}
+        <div className="flex justify-center pt-2">
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => setShowCustomText(true)}
+            disabled={isPlaying || isGenerating}
+            className="text-muted-foreground hover:text-foreground lowercase tracking-wide text-xs"
+          >
+            or paste your own text
+          </Button>
+        </div>
+
         {/* Vote Section */}
         <div className="border border-border/50 rounded-lg p-6 space-y-4 bg-card/50">
           <div className="text-center space-y-2">
@@ -469,19 +482,6 @@ const Index = () => {
               thanks for your feedback 🌙
             </p>
           )}
-        </div>
-
-        {/* Custom Text Option */}
-        <div className="flex justify-center pt-2">
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => setShowCustomText(true)}
-            disabled={isPlaying || isGenerating}
-            className="text-muted-foreground hover:text-foreground lowercase tracking-wide text-xs"
-          >
-            or paste your own text
-          </Button>
         </div>
 
         {/* Custom Text Dialog */}

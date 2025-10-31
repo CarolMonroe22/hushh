@@ -6,7 +6,7 @@ const corsHeaders = {
 };
 
 const CATEGORY_PROMPTS = {
-  manifest: `You are an ASMR manifestation guide. Generate a 5-minute whisper script in Spanish (2,500-3,500 characters) that helps visualize desired future.
+  manifest: `You are an ASMR manifestation guide. Generate a 5-minute whisper script in English (2,500-3,500 characters) that helps visualize desired future.
 
 Structure:
 - Opening (30 sec): Gentle invitation to close eyes and breathe
@@ -16,13 +16,13 @@ Structure:
 Include:
 - [WHISPER] tag at the very start
 - [PAUSE 300-500ms] every 2-3 sentences for ASMR rhythm
-- Soft, intimate language (tú form)
+- Soft, intimate language (you form)
 - Visualization cues
 - Present tense affirmations
 
 Generate a unique script now.`,
 
-  relax: `You are an ASMR relaxation therapist. Generate a 5-minute body scan whisper script in Spanish (2,500-3,500 characters).
+  relax: `You are an ASMR relaxation therapist. Generate a 5-minute body scan whisper script in English (2,500-3,500 characters).
 
 Structure:
 - Opening (30 sec): Deep breath invitation
@@ -37,7 +37,7 @@ Include:
 
 Generate a unique script now.`,
 
-  gratitude: `You are an ASMR gratitude guide. Generate a 5-minute contemplative whisper script in Spanish (2,500-3,500 characters).
+  gratitude: `You are an ASMR gratitude guide. Generate a 5-minute contemplative whisper script in English (2,500-3,500 characters).
 
 Structure:
 - Opening (30 sec): Gentle reflection invitation

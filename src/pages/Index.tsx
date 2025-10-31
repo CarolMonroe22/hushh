@@ -55,6 +55,7 @@ const Index = () => {
   const [duration, setDuration] = useState("5");
   const [showCustomText, setShowCustomText] = useState(false);
   const [customText, setCustomText] = useState("");
+  const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const { toast } = useToast();
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const ambientRef = useRef<HTMLAudioElement | null>(null);
@@ -72,6 +73,15 @@ const Index = () => {
       }
     };
   }, []);
+
+  const getCategoryWelcomeMessage = (category: string) => {
+    const messages: Record<string, string> = {
+      manifest: "initiating your manifestation journey... close your eyes and breathe",
+      relax: "beginning your relaxation process... you can close your eyes now",
+      gratitude: "starting your gratitude meditation... take a deep breath and close your eyes"
+    };
+    return messages[category] || "preparing your experience...";
+  };
 
   const playWhisper = async (text: string) => {
     setIsPlaying(true);
@@ -164,6 +174,7 @@ const Index = () => {
   };
 
   const handleCategorySelect = async (category: string) => {
+    setSelectedCategory(category);
     setIsGenerating(true);
 
     try {
@@ -264,7 +275,19 @@ const Index = () => {
   }
 
   return (
-    <main className="min-h-screen bg-background flex items-center justify-center p-6">
+    <main className="min-h-screen bg-background flex items-center justify-center p-6 relative">
+      {/* Generating Overlay */}
+      {isGenerating && selectedCategory && (
+        <div className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center z-50 animate-in fade-in">
+          <div className="text-center space-y-4 px-4">
+            <p className="text-2xl text-white/90 font-light tracking-wide">
+              {getCategoryWelcomeMessage(selectedCategory)}
+            </p>
+            <div className="animate-pulse text-white/60 text-sm tracking-wide">generating your whisper...</div>
+          </div>
+        </div>
+      )}
+
       <div className="w-full max-w-2xl space-y-6 animate-fade-in">
         {/* Title */}
         <div className="text-center space-y-2">

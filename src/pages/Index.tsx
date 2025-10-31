@@ -1,7 +1,8 @@
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
+import { supabase } from "@/integrations/supabase/client";
 
 const PRESETS = {
   manifest: `[WHISPER] Close your eyes. Picture tomorrow unfolding softly.
@@ -47,7 +48,9 @@ const Index = () => {
   const [thought, setThought] = useState("");
   const [isPlaying, setIsPlaying] = useState(false);
   const [showAttribution, setShowAttribution] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
+  const audioRef = useRef<HTMLAudioElement | null>(null);
 
   const handlePreset = (key: keyof typeof PRESETS) => {
     setThought(PRESETS[key]);
@@ -70,25 +73,49 @@ const Index = () => {
       return;
     }
 
+    setIsLoading(true);
     setIsPlaying(true);
 
     try {
-      // TODO: Call ElevenLabs API here
-      // For now, simulate with a timeout
-      await new Promise((resolve) => setTimeout(resolve, 5000));
+      // Call edge function to generate whisper
+      const { data, error } = await supabase.functions.invoke('whisper-text', {
+        body: { text: thought }
+      });
 
-      setShowAttribution(true);
-      setTimeout(() => {
-        setShowAttribution(false);
-        setIsPlaying(false);
-        setThought("");
-      }, 5000);
+      if (error) throw error;
+
+      if (!data.audioContent) {
+        throw new Error("No audio returned");
+      }
+
+      // Convert base64 to blob and play
+      const audioBlob = new Blob(
+        [Uint8Array.from(atob(data.audioContent), c => c.charCodeAt(0))],
+        { type: 'audio/mpeg' }
+      );
+      
+      const audioUrl = URL.createObjectURL(audioBlob);
+      audioRef.current = new Audio(audioUrl);
+      
+      audioRef.current.onended = () => {
+        setShowAttribution(true);
+        setTimeout(() => {
+          setShowAttribution(false);
+          setIsPlaying(false);
+          setThought("");
+        }, 5000);
+      };
+
+      await audioRef.current.play();
+      setIsLoading(false);
     } catch (error) {
+      console.error("Whisper error:", error);
       toast({
         description: "whisper failed...",
         variant: "destructive",
       });
       setIsPlaying(false);
+      setIsLoading(false);
     }
   };
 
@@ -96,7 +123,7 @@ const Index = () => {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center animate-fade-in">
         <p className="text-muted-foreground text-sm tracking-[0.3em] uppercase animate-fade-in">
-          listening...
+          {isLoading ? "preparing..." : "listening..."}
         </p>
       </div>
     );

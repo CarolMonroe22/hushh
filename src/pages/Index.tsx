@@ -70,6 +70,13 @@ const Index = () => {
 
   const playWhisper = async (text: string) => {
     setIsPlaying(true);
+    
+    // Detect mobile environment
+    const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+    
+    if (isMobile) {
+      console.log("Mobile device detected, using optimized audio handling");
+    }
 
     try {
       // Generate whisper audio
@@ -88,21 +95,116 @@ const Index = () => {
         throw new Error("No audio returned");
       }
 
-      const audioBlob = new Blob(
-        [Uint8Array.from(atob(data.audioContent), c => c.charCodeAt(0))],
-        { type: 'audio/mpeg' }
-      );
+      // Process base64 in chunks to prevent memory issues on mobile
+      const processBase64InChunks = (base64: string) => {
+        const chunkSize = 32768;
+        const chunks: Uint8Array[] = [];
+        let position = 0;
+        
+        while (position < base64.length) {
+          const chunk = base64.slice(position, position + chunkSize);
+          const binaryChunk = atob(chunk);
+          const bytes = new Uint8Array(binaryChunk.length);
+          
+          for (let i = 0; i < binaryChunk.length; i++) {
+            bytes[i] = binaryChunk.charCodeAt(i);
+          }
+          
+          chunks.push(bytes);
+          position += chunkSize;
+        }
+
+        const totalLength = chunks.reduce((acc, chunk) => acc + chunk.length, 0);
+        const result = new Uint8Array(totalLength);
+        let offset = 0;
+
+        for (const chunk of chunks) {
+          result.set(chunk, offset);
+          offset += chunk.length;
+        }
+
+        return result;
+      };
+
+      const audioData = processBase64InChunks(data.audioContent);
+      const audioBlob = new Blob([audioData], { type: 'audio/mpeg' });
       
       const audioUrl = URL.createObjectURL(audioBlob);
       audioRef.current = new Audio(audioUrl);
       
+      // Add error handler
+      audioRef.current.onerror = (e) => {
+        console.error("Audio playback error:", e);
+        toast({
+          description: "audio playback failed, try again...",
+          variant: "destructive",
+        });
+        setIsPlaying(false);
+        setIsGenerating(false);
+        if (audioUrl) URL.revokeObjectURL(audioUrl);
+      };
+
+      // Add loading handler for mobile
+      audioRef.current.onloadeddata = () => {
+        console.log("Audio loaded successfully");
+      };
+      
       audioRef.current.onended = () => {
+        if (audioUrl) {
+          URL.revokeObjectURL(audioUrl); // Free memory
+        }
         setIsPlaying(false);
         setSessionCompleted(true);
       };
 
-      await audioRef.current.play();
-      setIsGenerating(false);
+      // Set timeout to detect stuck audio
+      const audioTimeout = setTimeout(() => {
+        if (audioRef.current && audioRef.current.paused && isPlaying) {
+          console.error("Audio stuck, attempting recovery");
+          toast({
+            description: "audio delayed, retrying...",
+            variant: "default",
+          });
+          audioRef.current.play().catch(err => {
+            console.error("Recovery failed:", err);
+            setIsPlaying(false);
+            setIsGenerating(false);
+            if (audioUrl) URL.revokeObjectURL(audioUrl);
+          });
+        }
+      }, 3000);
+
+      audioRef.current.onplay = () => {
+        clearTimeout(audioTimeout);
+      };
+
+      try {
+        await audioRef.current.play();
+        setIsGenerating(false);
+      } catch (playError: any) {
+        console.error("Play error:", playError);
+        
+        // Specific handling for autoplay restrictions
+        if (playError.name === 'NotAllowedError') {
+          toast({
+            description: "tap to play audio...",
+            variant: "default",
+          });
+          // Retry play on next user interaction
+          const retryPlay = async () => {
+            try {
+              await audioRef.current?.play();
+              setIsGenerating(false);
+              document.removeEventListener('click', retryPlay);
+            } catch (retryError) {
+              console.error("Retry play error:", retryError);
+            }
+          };
+          document.addEventListener('click', retryPlay, { once: true });
+        } else {
+          throw playError;
+        }
+      }
     } catch (error) {
       console.error("Whisper error:", error);
       

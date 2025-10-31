@@ -89,23 +89,34 @@ const Index = () => {
     try {
       // Start ambient music if selected
       if (selectedAmbient) {
-        const { data: ambientData, error: ambientError } = await supabase.functions.invoke('generate-ambient', {
-          body: { 
-            prompt: AMBIENT_TRACKS[selectedAmbient as keyof typeof AMBIENT_TRACKS],
-            duration: parseInt(duration) * 60
-          }
-        });
+        try {
+          const { data: ambientData, error: ambientError } = await supabase.functions.invoke('generate-ambient', {
+            body: { 
+              prompt: AMBIENT_TRACKS[selectedAmbient as keyof typeof AMBIENT_TRACKS],
+              duration: parseInt(duration) * 60
+            }
+          });
 
-        if (!ambientError && ambientData?.audioContent) {
-          const ambientBlob = new Blob(
-            [Uint8Array.from(atob(ambientData.audioContent), c => c.charCodeAt(0))],
-            { type: 'audio/mpeg' }
-          );
-          const ambientUrl = URL.createObjectURL(ambientBlob);
-          ambientRef.current = new Audio(ambientUrl);
-          ambientRef.current.loop = true;
-          ambientRef.current.volume = 0.3;
-          await ambientRef.current.play();
+          if (ambientError) {
+            console.warn("Ambient music generation failed:", ambientError);
+            toast({
+              description: "ambient music unavailable, continuing with whisper only...",
+              variant: "default",
+            });
+          } else if (ambientData?.audioContent) {
+            const ambientBlob = new Blob(
+              [Uint8Array.from(atob(ambientData.audioContent), c => c.charCodeAt(0))],
+              { type: 'audio/mpeg' }
+            );
+            const ambientUrl = URL.createObjectURL(ambientBlob);
+            ambientRef.current = new Audio(ambientUrl);
+            ambientRef.current.loop = true;
+            ambientRef.current.volume = 0.3;
+            await ambientRef.current.play();
+          }
+        } catch (ambientErr) {
+          console.warn("Ambient music error:", ambientErr);
+          // Continue without ambient - it's optional
         }
       }
 

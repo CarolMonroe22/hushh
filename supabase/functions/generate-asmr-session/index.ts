@@ -1,6 +1,7 @@
 import "https://deno.land/x/xhr@0.1.0/mod.ts";
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.39.3';
+import { encode as base64Encode } from "https://deno.land/std@0.168.0/encoding/base64.ts";
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -98,8 +99,7 @@ serve(async (req) => {
 
       if (audioData) {
         const arrayBuffer = await audioData.arrayBuffer();
-        const base64Audio = btoa(String.fromCharCode(...new Uint8Array(arrayBuffer)));
-        
+        const base64Audio = base64Encode(arrayBuffer);
         return new Response(
           JSON.stringify({ audioContent: base64Audio, cached: true }),
           { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
@@ -139,8 +139,7 @@ serve(async (req) => {
     }
 
     const audioBuffer = await elevenLabsResponse.arrayBuffer();
-    const base64Audio = btoa(String.fromCharCode(...new Uint8Array(audioBuffer)));
-
+    const base64Audio = base64Encode(audioBuffer);
     // Save to storage
     const fileName = `${mood}_${ambient}_${weekKey}.mp3`;
     const { error: uploadError } = await supabase.storage

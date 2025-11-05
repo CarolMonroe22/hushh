@@ -52,7 +52,7 @@ const Index = () => {
   const [isPlaying, setIsPlaying] = useState(false);
   const [timeLeft, setTimeLeft] = useState(60);
   const [isComplete, setIsComplete] = useState(false);
-  const [vibeTitle, setVibeTitle] = useState("");
+  const [generatedTitle, setGeneratedTitle] = useState("");
   const [vibeDescription, setVibeDescription] = useState("");
   
   const audioRef = useRef<HTMLAudioElement | null>(null);
@@ -159,7 +159,6 @@ const Index = () => {
         {
           body: {
             description: vibeDescription,
-            title: vibeTitle || "Custom Vibe",
           },
         }
       );
@@ -174,12 +173,14 @@ const Index = () => {
       }
 
       console.log("Step 2: Generating ASMR audio...");
+      setGeneratedTitle(interpretData.title || "your vibe");
+      
       const { data: asmrData, error: asmrError } = await supabase.functions.invoke(
         "generate-custom-asmr",
         {
           body: {
             prompt: interpretData.prompt,
-            title: vibeTitle || interpretData.title || "Custom Vibe",
+            title: interpretData.title || "your vibe",
           },
         }
       );
@@ -267,7 +268,7 @@ const Index = () => {
     setTimeLeft(60);
     setSelectedMood(null);
     setSelectedAmbient(null);
-    setVibeTitle("");
+    setGeneratedTitle("");
     setVibeDescription("");
   };
 
@@ -276,7 +277,7 @@ const Index = () => {
       <div className="min-h-screen bg-background flex items-center justify-center p-4">
         <div className="text-center space-y-8">
           <h2 className="text-3xl md:text-4xl font-light lowercase tracking-wider text-foreground">
-            {vibeTitle || `${selectedMood} + ${selectedAmbient}`}
+            {generatedTitle || `${selectedMood} + ${selectedAmbient}`}
           </h2>
 
           <div className="relative w-48 h-48 mx-auto">
@@ -345,16 +346,6 @@ const Index = () => {
 
         {/* Main Input Area - Creator Mode */}
         <div className="max-w-2xl mx-auto space-y-6 mb-12">
-          {/* Vibe Title */}
-          <div className="space-y-3">
-            <Input
-              placeholder="name your vibe"
-              value={vibeTitle}
-              onChange={(e) => setVibeTitle(e.target.value)}
-              className="text-lg py-6 text-center bg-card/50 border-border/50 focus:bg-card transition-all"
-            />
-          </div>
-
           {/* Large Textarea - Main Focus */}
           <div className="space-y-3">
             <Textarea
@@ -395,7 +386,6 @@ const Index = () => {
               <button
                 key={starter.title}
                 onClick={() => {
-                  setVibeTitle(starter.title);
                   setVibeDescription(starter.description);
                 }}
                 className="px-4 py-2 rounded-full border border-border bg-card hover:bg-accent transition-all text-sm lowercase"

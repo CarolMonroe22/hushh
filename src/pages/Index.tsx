@@ -5,7 +5,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Label } from "@/components/ui/label";
 
-type Mood = 'relax' | 'sleep' | 'focus' | 'gratitude';
+type Mood = 'relax' | 'sleep' | 'focus' | 'gratitude' | 'boost';
 type Ambient = 'rain' | 'ocean' | 'forest' | 'fireplace' | 'white-noise';
 
 const MOODS: { id: Mood; label: string; emoji: string }[] = [
@@ -13,6 +13,7 @@ const MOODS: { id: Mood; label: string; emoji: string }[] = [
   { id: 'sleep', label: 'Sleep', emoji: '😴' },
   { id: 'focus', label: 'Focus', emoji: '🎯' },
   { id: 'gratitude', label: 'Gratitude', emoji: '💚' },
+  { id: 'boost', label: 'Boost', emoji: '🚀' },
 ];
 
 const AMBIENTS: { id: Ambient; label: string; emoji: string }[] = [

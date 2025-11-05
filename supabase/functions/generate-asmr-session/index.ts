@@ -53,6 +53,16 @@ const ASMR_PROMPTS: Record<string, string> = {
   gratitude_fireplace: `1 minute ASMR gratitude meditation with tender female whispered voiceover and crackling fireplace. The voice whispers with love: "feel the warmth of appreciation... like this fire, gratitude warms you from within... notice the gifts in your life... the people... the moments... you are held by love... blessed beyond measure... grateful...". Close ASMR whisper, fireplace comforting at 25% volume, voice loving and tender.`,
   
   gratitude_whitenoise: `1 minute ASMR gratitude meditation with warm female whispered voiceover and gentle white noise. The voice whispers intimately: "in the quiet, you find gratitude... for this breath... this moment... this life... you are blessed... loved... enough... gratitude fills the space where noise once was... you are grateful...". Pure ASMR whisper, white noise subtle at 20% volume, voice tender and appreciative.`,
+
+  boost_rain: `1 minute ASMR motivational boost with energetic female voiceover and rain sounds. The voice speaks with excitement and power: "you've got this! feel the energy rising in you like a storm... you are unstoppable... capable of anything... this is YOUR moment... the rain fuels your fire... you are READY... powerful... alive... go out there and SHINE!". Energetic ASMR style, rain dynamic at 30% volume, voice empowering and excited.`,
+
+  boost_ocean: `1 minute ASMR motivational boost with powerful female voiceover and ocean waves. The voice speaks with confidence: "you have the power of the ocean within you... vast... unstoppable... ride this wave of energy... you are STRONG... capable... ready to take on anything... feel that surge... that momentum... you are INCREDIBLE... nothing can hold you back!". Empowering ASMR tone, ocean waves powerful at 35% volume, voice motivating and strong.`,
+
+  boost_forest: `1 minute ASMR motivational boost with vibrant female voiceover and forest energy. The voice speaks with enthusiasm: "feel the life force of nature flowing through you... fresh... alive... ENERGIZED... you are growing... evolving... becoming more powerful... this is YOUR time to THRIVE... you are capable of amazing things... feel that ENERGY... you are UNSTOPPABLE!". Energetic ASMR style, forest sounds vibrant at 30% volume, voice exciting and empowering.`,
+
+  boost_fireplace: `1 minute ASMR motivational boost with passionate female voiceover and crackling fire. The voice speaks with intensity: "your fire is BURNING bright... fierce... powerful... nothing can dim your light... you are on FIRE with purpose... with passion... with power... feel that heat... that drive... you are READY to conquer anything... you are BLAZING!". Intense ASMR tone, fireplace dynamic at 30% volume, voice passionate and empowering.`,
+
+  boost_whitenoise: `1 minute ASMR motivational boost with clear powerful female voiceover and energizing white noise. The voice speaks with clarity and power: "cut through the noise... your purpose is CLEAR... your energy is HIGH... you are focused... powerful... UNSTOPPABLE... this is YOUR moment... feel that surge of pure energy... you are READY... you are CAPABLE... you've GOT THIS!". Clear powerful ASMR tone, white noise energizing at 25% volume, voice strong and motivating.`,
 };
 
 // Get current week key for cache versioning

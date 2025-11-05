@@ -275,16 +275,9 @@ const Index = () => {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center p-4">
         <div className="text-center space-y-8">
-          <div className="space-y-2">
-            <h2 className="text-3xl font-light lowercase tracking-wide">
-              {vibeTitle || `${selectedMood} + ${selectedAmbient}`}
-            </h2>
-            {vibeDescription && (
-              <p className="text-sm text-muted-foreground max-w-md mx-auto">
-                {vibeDescription.length > 100 ? `${vibeDescription.slice(0, 100)}...` : vibeDescription}
-              </p>
-            )}
-          </div>
+          <h2 className="text-3xl md:text-4xl font-light lowercase tracking-wider text-foreground">
+            {vibeTitle || `${selectedMood} + ${selectedAmbient}`}
+          </h2>
 
           <div className="relative w-48 h-48 mx-auto">
             <div className="absolute inset-0 rounded-full border-4 border-primary/30" />

@@ -176,11 +176,22 @@ const Index = () => {
           <div className="space-y-4">
             <p className="text-4xl">✨</p>
             <p className="text-xl text-foreground tracking-wide">
-              Session Complete
+              session complete
             </p>
             <p className="text-sm text-muted-foreground">
               1 minute of peace
             </p>
+            <div className="flex items-center justify-center gap-3 text-sm">
+              <span>{MOODS.find(m => m.id === selectedMood)?.emoji}</span>
+              <span className="text-muted-foreground lowercase">
+                {MOODS.find(m => m.id === selectedMood)?.label}
+              </span>
+              <span className="text-muted-foreground">+</span>
+              <span>{AMBIENTS.find(a => a.id === selectedAmbient)?.emoji}</span>
+              <span className="text-muted-foreground lowercase">
+                {AMBIENTS.find(a => a.id === selectedAmbient)?.label}
+              </span>
+            </div>
           </div>
 
           <div className="space-y-3">
@@ -188,7 +199,19 @@ const Index = () => {
               onClick={() => {
                 setSessionCompleted(false);
                 setPlayTime(0);
+                startSession();
               }}
+              className="w-full lowercase tracking-wide"
+              size="lg"
+            >
+              🔁 listen again
+            </Button>
+            <Button
+              onClick={() => {
+                setSessionCompleted(false);
+                setPlayTime(0);
+              }}
+              variant="outline"
               className="w-full lowercase tracking-wide"
             >
               start another session

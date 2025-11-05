@@ -91,12 +91,6 @@ serve(async (req) => {
     if (cached && cached.audio_url) {
       console.log('Cache hit! Returning cached audio');
       
-      // Increment play count
-      await supabase
-        .from('asmr_sessions')
-        .update({ times_played: supabase.rpc('increment', { row_id: cached.id }) })
-        .eq('id', cached.id);
-
       // Fetch audio from storage
       const { data: audioData } = await supabase.storage
         .from('asmr-cache')

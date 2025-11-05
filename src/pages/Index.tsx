@@ -1,53 +1,38 @@
 import { useState, useRef, useEffect } from "react";
 import { Button } from "@/components/ui/button";
-import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Label } from "@/components/ui/label";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
 
-const CATEGORIES = [
-  { id: "manifest", label: "manifest" },
-  { id: "relax", label: "relax" },
-  { id: "gratitude", label: "gratitude" },
+type Mood = 'relax' | 'sleep' | 'focus' | 'gratitude';
+type Ambient = 'rain' | 'ocean' | 'forest' | 'fireplace' | 'white-noise';
+
+const MOODS: { id: Mood; label: string; emoji: string }[] = [
+  { id: 'relax', label: 'Relax', emoji: '😌' },
+  { id: 'sleep', label: 'Sleep', emoji: '😴' },
+  { id: 'focus', label: 'Focus', emoji: '🎯' },
+  { id: 'gratitude', label: 'Gratitude', emoji: '💚' },
 ];
 
-const VOICES = {
-  aimee: { id: "zA6D7RyKdc2EClouEMkP", name: "AImee - Soft Whisper" },
-  natasha_gentle: { id: "Atp5cNFg1Wj5gyKD7HWV", name: "Natasha - Gentle" },
-  natasha_sensual: { id: "PB6BdkFkZLbI39GHdnbQ", name: "Natasha - Sensual" },
-  aria: { id: "9BWtsMINqrJLrRacOk9x", name: "Aria - Classic" },
-};
-
+const AMBIENTS: { id: Ambient; label: string; emoji: string }[] = [
+  { id: 'rain', label: 'Rain', emoji: '🌧️' },
+  { id: 'ocean', label: 'Ocean', emoji: '🌊' },
+  { id: 'forest', label: 'Forest', emoji: '🌲' },
+  { id: 'fireplace', label: 'Fireplace', emoji: '🔥' },
+  { id: 'white-noise', label: 'White Noise', emoji: '⚪' },
+];
 
 const Index = () => {
-  const [isPlaying, setIsPlaying] = useState(false);
-  const [showAttribution, setShowAttribution] = useState(false);
+  const [selectedMood, setSelectedMood] = useState<Mood>('relax');
+  const [selectedAmbient, setSelectedAmbient] = useState<Ambient>('rain');
   const [isGenerating, setIsGenerating] = useState(false);
-  const [selectedVoice, setSelectedVoice] = useState("aimee");
-  const [showCustomText, setShowCustomText] = useState(false);
-  const [customText, setCustomText] = useState("");
-  const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
+  const [isPlaying, setIsPlaying] = useState(false);
   const [sessionCompleted, setSessionCompleted] = useState(false);
-  const [voteSubmitted, setVoteSubmitted] = useState(false);
-  const [showEmailCapture, setShowEmailCapture] = useState(false);
-  const [userEmail, setUserEmail] = useState("");
-  const [emailSubmitting, setEmailSubmitting] = useState(false);
+  const [playTime, setPlayTime] = useState(0);
   const { toast } = useToast();
   const audioRef = useRef<HTMLAudioElement | null>(null);
+  const timerRef = useRef<NodeJS.Timeout | null>(null);
 
   // Cleanup audio on unmount
   useEffect(() => {
@@ -56,83 +41,49 @@ const Index = () => {
         audioRef.current.pause();
         audioRef.current = null;
       }
+      if (timerRef.current) {
+        clearInterval(timerRef.current);
+      }
     };
   }, []);
 
-  const getCategoryWelcomeMessage = (category: string) => {
-    const messages: Record<string, string> = {
-      manifest: "initiating your manifestation journey... close your eyes and breathe",
-      relax: "beginning your relaxation process... you can close your eyes now",
-      gratitude: "starting your gratitude meditation... take a deep breath and close your eyes"
-    };
-    return messages[category] || "preparing your experience...";
+  const base64ToBlob = (base64: string, mimeType: string): Blob => {
+    const byteCharacters = atob(base64);
+    const byteNumbers = new Array(byteCharacters.length);
+    for (let i = 0; i < byteCharacters.length; i++) {
+      byteNumbers[i] = byteCharacters.charCodeAt(i);
+    }
+    const byteArray = new Uint8Array(byteNumbers);
+    return new Blob([byteArray], { type: mimeType });
   };
 
-  const playWhisper = async (text: string) => {
-    setIsPlaying(true);
-    
-    // Detect mobile environment
-    const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
-    
-    if (isMobile) {
-      console.log("Mobile device detected, using optimized audio handling");
-    }
+  const startSession = async () => {
+    setIsGenerating(true);
+    setPlayTime(0);
 
     try {
-      // Generate whisper audio
-      const { data, error } = await supabase.functions.invoke('whisper-text', {
+      const { data, error } = await supabase.functions.invoke('generate-asmr-session', {
         body: { 
-          text,
-          voiceId: VOICES[selectedVoice as keyof typeof VOICES].id,
-          stability: 0.2,
-          similarity: 0.85
+          mood: selectedMood,
+          ambient: selectedAmbient 
         }
       });
 
-      if (error) throw error;
+      if (error) {
+        console.error('Generation error:', error);
+        throw error;
+      }
 
       if (!data.audioContent) {
         throw new Error("No audio returned");
       }
 
-      // Process base64 in chunks to prevent memory issues on mobile
-      const processBase64InChunks = (base64: string) => {
-        const chunkSize = 32768;
-        const chunks: Uint8Array[] = [];
-        let position = 0;
-        
-        while (position < base64.length) {
-          const chunk = base64.slice(position, position + chunkSize);
-          const binaryChunk = atob(chunk);
-          const bytes = new Uint8Array(binaryChunk.length);
-          
-          for (let i = 0; i < binaryChunk.length; i++) {
-            bytes[i] = binaryChunk.charCodeAt(i);
-          }
-          
-          chunks.push(bytes);
-          position += chunkSize;
-        }
-
-        const totalLength = chunks.reduce((acc, chunk) => acc + chunk.length, 0);
-        const result = new Uint8Array(totalLength);
-        let offset = 0;
-
-        for (const chunk of chunks) {
-          result.set(chunk, offset);
-          offset += chunk.length;
-        }
-
-        return result;
-      };
-
-      const audioData = processBase64InChunks(data.audioContent);
-      const audioBlob = new Blob([audioData], { type: 'audio/mpeg' });
-      
+      const audioBlob = base64ToBlob(data.audioContent, 'audio/mpeg');
       const audioUrl = URL.createObjectURL(audioBlob);
-      audioRef.current = new Audio(audioUrl);
       
-      // Add error handler
+      audioRef.current = new Audio(audioUrl);
+      audioRef.current.volume = 0.85;
+
       audioRef.current.onerror = (e) => {
         console.error("Audio playback error:", e);
         toast({
@@ -141,79 +92,42 @@ const Index = () => {
         });
         setIsPlaying(false);
         setIsGenerating(false);
-        if (audioUrl) URL.revokeObjectURL(audioUrl);
+        URL.revokeObjectURL(audioUrl);
       };
 
-      // Add loading handler for mobile
-      audioRef.current.onloadeddata = () => {
-        console.log("Audio loaded successfully");
-      };
-      
       audioRef.current.onended = () => {
-        if (audioUrl) {
-          URL.revokeObjectURL(audioUrl); // Free memory
-        }
+        URL.revokeObjectURL(audioUrl);
         setIsPlaying(false);
         setSessionCompleted(true);
+        if (timerRef.current) {
+          clearInterval(timerRef.current);
+        }
       };
 
-      // Set timeout to detect stuck audio
-      const audioTimeout = setTimeout(() => {
-        if (audioRef.current && audioRef.current.paused && isPlaying) {
-          console.error("Audio stuck, attempting recovery");
-          toast({
-            description: "audio delayed, retrying...",
-            variant: "default",
-          });
-          audioRef.current.play().catch(err => {
-            console.error("Recovery failed:", err);
-            setIsPlaying(false);
-            setIsGenerating(false);
-            if (audioUrl) URL.revokeObjectURL(audioUrl);
-          });
-        }
-      }, 3000);
+      await audioRef.current.play();
+      setIsGenerating(false);
+      setIsPlaying(true);
 
-      audioRef.current.onplay = () => {
-        clearTimeout(audioTimeout);
-      };
+      // Start timer
+      timerRef.current = setInterval(() => {
+        setPlayTime(prev => prev + 1);
+      }, 1000);
 
-      try {
-        await audioRef.current.play();
-        setIsGenerating(false);
-      } catch (playError: any) {
-        console.error("Play error:", playError);
-        
-        // Specific handling for autoplay restrictions
-        if (playError.name === 'NotAllowedError') {
-          toast({
-            description: "tap to play audio...",
-            variant: "default",
-          });
-          // Retry play on next user interaction
-          const retryPlay = async () => {
-            try {
-              await audioRef.current?.play();
-              setIsGenerating(false);
-              document.removeEventListener('click', retryPlay);
-            } catch (retryError) {
-              console.error("Retry play error:", retryError);
-            }
-          };
-          document.addEventListener('click', retryPlay, { once: true });
-        } else {
-          throw playError;
-        }
+      if (data.cached) {
+        toast({
+          description: "loaded from cache ⚡",
+        });
       }
+
     } catch (error) {
-      console.error("Whisper error:", error);
+      console.error("ASMR generation error:", error);
       
-      let errorDescription = "whisper failed...";
+      let errorDescription = "failed to generate session...";
       if (error instanceof Error) {
         if (error.message.includes("quota exceeded") || error.message.includes("ElevenLabs quota")) {
-          errorDescription = "elevenlabs quota exceeded. please add credits to your account.";
+          errorDescription = "elevenlabs quota exceeded. please add credits.";
         } else if (error.message.includes("ElevenLabs")) {
-          errorDescription = "elevenlabs error. check your api key.";
+          errorDescription = "elevenlabs error. check api key.";
         }
       }
       
@@ -221,550 +135,180 @@ const Index = () => {
         description: errorDescription,
         variant: "destructive",
       });
-      setIsPlaying(false);
       setIsGenerating(false);
     }
   };
 
-  const handleCategorySelect = async (category: string) => {
-    setSelectedCategory(category);
-    setIsGenerating(true);
-
-    try {
-      const { data: contentData, error: contentError } = 
-        await supabase.functions.invoke('generate-whisper-content', {
-          body: { category }
-        });
-      
-      if (contentError) {
-        if (contentError.message?.includes('429')) {
-          toast({
-            description: "rate limit exceeded, please try again later...",
-            variant: "destructive",
-          });
-        } else if (contentError.message?.includes('402')) {
-          toast({
-            description: "please add credits to continue...",
-            variant: "destructive",
-          });
-        } else {
-          throw contentError;
-        }
-        setIsGenerating(false);
-        return;
-      }
-
-      const generatedText = contentData.text;
-      
-      if (!generatedText) {
-        throw new Error("No content generated");
-      }
-
-      await playWhisper(generatedText);
-    } catch (error) {
-      console.error("Generation error:", error);
-      toast({
-        description: "failed to generate whisper...",
-        variant: "destructive",
-      });
-      setIsGenerating(false);
-    }
+  const formatTime = (seconds: number): string => {
+    const mins = Math.floor(seconds / 60);
+    const secs = seconds % 60;
+    return `${mins}:${secs.toString().padStart(2, '0')}`;
   };
 
-  const handleCustomText = async () => {
-    if (!customText.trim()) {
-      toast({
-        description: "write something first...",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    if (customText.length > 5000) {
-      toast({
-        description: "text too long, max 5000 characters...",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    setShowCustomText(false);
-    setIsGenerating(true);
-    await playWhisper(customText);
-    setCustomText("");
-  };
-
-  const handleVote = async (vote: 'yes' | 'no') => {
-    try {
-      // Generate or retrieve session_id
-      const sessionId = localStorage.getItem('session_id') || crypto.randomUUID();
-      localStorage.setItem('session_id', sessionId);
-      
-      // Save vote to database (no select to avoid RLS read policy)
-      const { error: voteError } = await supabase
-        .from('votes')
-        .insert({
-          vote,
-          feature: '1hour_ambient',
-          session_id: sessionId,
-          user_agent: navigator.userAgent
-        });
-
-      if (voteError) {
-        console.error('Vote error details:', voteError);
-        throw voteError;
-      }
-
-      // If voted "yes", show email capture
-      if (vote === 'yes') {
-        setShowEmailCapture(true);
-        toast({
-          description: "thanks! want early access? leave your email below 🎵",
-        });
-      } else {
-        // If voted "no", just thank them
-        setVoteSubmitted(true);
-        toast({
-          description: "noted! we'll focus on other improvements 🌙",
-        });
-        setTimeout(() => setVoteSubmitted(false), 3000);
-      }
-
-    } catch (error) {
-      console.error("Vote error:", error);
-      toast({
-        description: "couldn't save vote, please try again",
-        variant: "destructive"
-      });
-    }
-  };
-
-  const handleEmailSubmit = async () => {
-    if (!userEmail || !userEmail.includes('@')) {
-      toast({
-        description: "please enter a valid email",
-        variant: "destructive"
-      });
-      return;
-    }
-
-    setEmailSubmitting(true);
-    
-    try {
-      const { error } = await supabase
-        .from('early_access_emails')
-        .insert({
-          email: userEmail.toLowerCase().trim(),
-          feature: '1hour_ambient'
-        });
-
-      if (error) {
-        // If email already exists, that's ok
-        if (error.code === '23505') {
-          toast({
-            description: "you're already on the list! we'll notify you 🌙",
-          });
-        } else {
-          throw error;
-        }
-      } else {
-        toast({
-          description: "perfect! we'll email you when it's ready 🎵",
-        });
-      }
-
-      // Reset and show confirmation
-      setUserEmail("");
-      setShowEmailCapture(false);
-      setVoteSubmitted(true);
-      setTimeout(() => setVoteSubmitted(false), 3000);
-
-    } catch (error) {
-      console.error("Email submit error:", error);
-      toast({
-        description: "couldn't save email, please try again",
-        variant: "destructive"
-      });
-    } finally {
-      setEmailSubmitting(false);
-    }
-  };
-
-  if (isPlaying && !showAttribution) {
+  // Playing screen
+  if (isPlaying) {
     return (
-      <div className="min-h-screen bg-background flex items-center justify-center animate-fade-in">
-        <p className="text-muted-foreground text-sm tracking-[0.3em] uppercase animate-fade-in">
-          {isGenerating ? "preparing..." : "listening..."}
-        </p>
-      </div>
-    );
-  }
-
-  if (showAttribution) {
-    return (
-      <div className="min-h-screen bg-background flex items-center justify-center animate-fade-in">
-        <div className="text-center space-y-2 animate-fade-in">
-          <p className="text-foreground/80 text-sm tracking-wide">
-            created by{" "}
-            <a
-              href="https://x.com/carolmonroe"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-primary hover:underline"
-            >
-              @carolmonroe
-            </a>
+      <div className="min-h-screen bg-background flex flex-col items-center justify-center animate-fade-in p-6">
+        <div className="text-center space-y-6">
+          <div className="text-6xl animate-pulse">
+            {MOODS.find(m => m.id === selectedMood)?.emoji}
+          </div>
+          <p className="text-muted-foreground text-sm tracking-[0.3em] uppercase">
+            listening...
           </p>
-          <p className="text-muted-foreground text-xs">
-            one night she couldn't sleep at 3 : 23 am
+          <p className="text-foreground/60 text-lg font-mono">
+            {formatTime(playTime)} / 1:00
           </p>
+          <div className="flex items-center gap-2 text-xs text-muted-foreground">
+            <span>{AMBIENTS.find(a => a.id === selectedAmbient)?.emoji}</span>
+            <span>{AMBIENTS.find(a => a.id === selectedAmbient)?.label}</span>
+          </div>
         </div>
       </div>
     );
   }
 
-  // Session Complete Screen
+  // Session complete screen
   if (sessionCompleted) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center p-6 animate-fade-in">
-        <div className="max-w-md mx-auto space-y-8">
-          {/* Carol's Story */}
-          <div className="text-center space-y-4 animate-fade-in">
-            <p className="text-lg text-muted-foreground tracking-wide leading-relaxed">
-              Carol couldn't sleep one day at 3:23 AM and decided to create this...
+        <div className="max-w-md mx-auto space-y-8 text-center">
+          <div className="space-y-4">
+            <p className="text-4xl">✨</p>
+            <p className="text-xl text-foreground tracking-wide">
+              Session Complete
+            </p>
+            <p className="text-sm text-muted-foreground">
+              1 minute of peace
             </p>
           </div>
 
-          {/* Vote Section */}
-          <div className="border border-border/50 rounded-lg p-6 space-y-4 bg-card/50 animate-fade-in">
-            <div className="text-center space-y-2">
-              <p className="text-sm text-muted-foreground tracking-wide">
-                would you use 1-hour versions with ambient music?
-              </p>
-              <p className="text-xs text-muted-foreground/60">
-                help us prioritize what to build next
-              </p>
-            </div>
-            
-            {!showEmailCapture && !voteSubmitted ? (
-              <div className="flex gap-3 justify-center">
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => handleVote('yes')}
-                  className="lowercase tracking-wide hover:bg-green-500/10 hover:border-green-500/50 hover:text-green-400 transition-colors"
-                >
-                  yes, i'd use it
-                </Button>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => handleVote('no')}
-                  className="lowercase tracking-wide hover:bg-red-500/10 hover:border-red-500/50 hover:text-red-400 transition-colors"
-                >
-                  no, 1 min is enough
-                </Button>
-              </div>
-            ) : null}
-            
-            {/* Email Capture Form */}
-            {showEmailCapture && !voteSubmitted ? (
-              <div className="space-y-3 animate-fade-in">
-                <div className="flex gap-2">
-                  <input
-                    type="email"
-                    placeholder="your@email.com"
-                    value={userEmail}
-                    onChange={(e) => setUserEmail(e.target.value)}
-                    onKeyDown={(e) => e.key === 'Enter' && handleEmailSubmit()}
-                    className="flex-1 px-3 py-2 text-sm bg-background border border-border rounded-md focus:outline-none focus:ring-2 focus:ring-primary lowercase"
-                  />
-                  <Button
-                    onClick={handleEmailSubmit}
-                    disabled={emailSubmitting}
-                    size="sm"
-                    className="lowercase tracking-wide"
-                  >
-                    {emailSubmitting ? "..." : "notify me"}
-                  </Button>
-                </div>
-                <button
-                  onClick={() => {
-                    setShowEmailCapture(false);
-                    setVoteSubmitted(true);
-                    setTimeout(() => setVoteSubmitted(false), 3000);
-                  }}
-                  className="text-xs text-muted-foreground/60 hover:text-muted-foreground underline w-full text-center"
-                >
-                  skip, just save my vote
-                </button>
-              </div>
-            ) : null}
-            
-            {/* Confirmation Message */}
-            {voteSubmitted && (
-              <p className="text-xs text-center text-green-400/80 animate-fade-in">
-                thanks for your feedback 🌙
-              </p>
-            )}
-          </div>
-
-          {/* Start Another Session Button */}
-          <div className="text-center animate-fade-in">
+          <div className="space-y-3">
             <Button
-              variant="ghost"
               onClick={() => {
                 setSessionCompleted(false);
-                setVoteSubmitted(false);
-                setShowEmailCapture(false);
-                setUserEmail("");
+                setPlayTime(0);
               }}
-              className="text-xs text-muted-foreground hover:text-foreground lowercase tracking-wide"
+              className="w-full lowercase tracking-wide"
             >
               start another session
             </Button>
+            <p className="text-xs text-muted-foreground/60">
+              created at 3:23 AM by{" "}
+              <a
+                href="https://x.com/carolmonroe"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-primary hover:underline"
+              >
+                @carolmonroe
+              </a>
+            </p>
           </div>
         </div>
       </div>
     );
   }
 
+  // Main selection screen
   return (
-    <main className="min-h-screen bg-background flex items-center justify-center p-6 relative">
-      {/* Generating Overlay */}
-      {isGenerating && selectedCategory && (
-        <div className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center z-50 animate-in fade-in">
-          <div className="text-center space-y-6 px-4">
-            {/* Animated circle indicator */}
-            <div className="flex justify-center">
-              <div className="w-16 h-16 rounded-full border-2 border-primary/30 flex items-center justify-center animate-breathe">
-                <div className="w-8 h-8 rounded-full bg-primary/50 animate-float" />
-              </div>
-            </div>
-            
-            {/* Messages */}
-            <div className="space-y-2">
-              <p className="text-2xl text-white/90 font-light tracking-wide animate-fade-in">
-                {getCategoryWelcomeMessage(selectedCategory)}
-              </p>
-              <div className="text-white/60 text-sm tracking-wide space-y-1">
-                <div className="flex items-center justify-center gap-1">
-                  <span>preparing your whisper</span>
-                  <span className="inline-block w-8 text-left animate-pulse">...</span>
-                </div>
-                <p className="text-white/40 text-xs animate-fade-in">
-                  (this may take a few seconds while we craft your unique session)
-                </p>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Listening Indicator - shown when audio is playing */}
-      {isPlaying && !isGenerating && (
-        <div className="fixed top-8 left-1/2 -translate-x-1/2 z-50 animate-in slide-in-from-top">
-          <div className="bg-card/90 backdrop-blur-sm border border-border rounded-full px-6 py-3 flex items-center gap-3">
-            <div className="flex gap-1">
-              <div className="w-1 h-4 bg-primary rounded-full animate-breathe" style={{ animationDelay: '0s' }} />
-              <div className="w-1 h-4 bg-primary rounded-full animate-breathe" style={{ animationDelay: '0.2s' }} />
-              <div className="w-1 h-4 bg-primary rounded-full animate-breathe" style={{ animationDelay: '0.4s' }} />
-            </div>
-            <span className="text-sm text-foreground/80 tracking-wide">listening...</span>
-          </div>
-        </div>
-      )}
-
-      <div className="w-full max-w-2xl space-y-6 animate-fade-in">
-        {/* Title */}
+    <div className="min-h-screen bg-background flex items-center justify-center p-6 animate-fade-in">
+      <div className="max-w-lg w-full mx-auto space-y-8">
+        {/* Header */}
         <div className="text-center space-y-2">
-          <h1 className="text-4xl md:text-5xl font-light tracking-[0.2em] text-foreground animate-glow-pulse">
-            3:23
+          <h1 className="text-3xl font-light tracking-wider text-foreground">
+            1-Minute ASMR
           </h1>
           <p className="text-sm text-muted-foreground tracking-wide">
-            before sleep, a whisper.
+            choose your mood + ambient sound
           </p>
         </div>
 
-        {/* Voice & Ambient Settings */}
-        <div className="grid grid-cols-1 gap-4">
-          <div className="space-y-2">
-            <Label className="text-xs text-muted-foreground uppercase tracking-wide">
-              voice
-            </Label>
-            <Select value={selectedVoice} onValueChange={setSelectedVoice}>
-              <SelectTrigger className="bg-card border-border">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                {Object.entries(VOICES).map(([key, voice]) => (
-                  <SelectItem key={key} value={key}>
-                    {voice.name}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-
-          <div className="space-y-2">
-            <Label className="text-xs text-muted-foreground uppercase tracking-wide">
-              ambient sound <span className="normal-case text-muted-foreground/60">(very soon)</span>
-            </Label>
-            <Select disabled value="coming-soon">
-              <SelectTrigger className="bg-card border-border opacity-60">
-                <SelectValue placeholder="rain, ocean, fire..." />
-              </SelectTrigger>
-            </Select>
-          </div>
-        </div>
-
-        {/* Category Buttons */}
-        <div className="space-y-3">
-          {CATEGORIES.map((category) => (
-            <Button
-              key={category.id}
-              onClick={() => handleCategorySelect(category.id)}
-              disabled={isPlaying || isGenerating}
-              size="lg"
-              className="w-full py-8 text-lg lowercase tracking-wide bg-primary hover:bg-primary/90 text-primary-foreground disabled:opacity-50"
-            >
-              {category.label}
-              <span className="text-xs ml-2 opacity-70">(1 min)</span>
-            </Button>
-          ))}
-        </div>
-
-        {/* Custom Text Option */}
-        <div className="flex justify-center pt-2">
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => setShowCustomText(true)}
-            disabled={isPlaying || isGenerating}
-            className="text-muted-foreground hover:text-foreground lowercase tracking-wide text-xs"
+        {/* Mood Selection */}
+        <div className="space-y-4">
+          <Label className="text-sm text-muted-foreground uppercase tracking-wider">
+            Choose Your Mood
+          </Label>
+          <RadioGroup 
+            value={selectedMood} 
+            onValueChange={(value) => setSelectedMood(value as Mood)}
+            className="grid grid-cols-2 gap-3"
           >
-            or paste your own text
-          </Button>
-        </div>
-
-        {/* Vote Section */}
-        <div className="border border-border/50 rounded-lg p-6 space-y-4 bg-card/50">
-          <div className="text-center space-y-2">
-            <p className="text-sm text-muted-foreground tracking-wide">
-              would you use 1-hour versions with ambient music?
-            </p>
-            <p className="text-xs text-muted-foreground/60">
-              help us prioritize what to build next
-            </p>
-          </div>
-          
-          {!showEmailCapture && !voteSubmitted ? (
-            <div className="flex gap-3 justify-center">
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => handleVote('yes')}
-                className="lowercase tracking-wide hover:bg-green-500/10 hover:border-green-500/50 hover:text-green-400 transition-colors"
-              >
-                yes, i'd use it
-              </Button>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => handleVote('no')}
-                className="lowercase tracking-wide hover:bg-red-500/10 hover:border-red-500/50 hover:text-red-400 transition-colors"
-              >
-                no, 1 min is enough
-              </Button>
-            </div>
-          ) : null}
-          
-          {/* Email Capture Form (solo para "YES" votes) */}
-          {showEmailCapture && !voteSubmitted ? (
-            <div className="space-y-3 animate-fade-in">
-              <div className="flex gap-2">
-                <input
-                  type="email"
-                  placeholder="your@email.com"
-                  value={userEmail}
-                  onChange={(e) => setUserEmail(e.target.value)}
-                  onKeyDown={(e) => e.key === 'Enter' && handleEmailSubmit()}
-                  className="flex-1 px-3 py-2 text-sm bg-background border border-border rounded-md focus:outline-none focus:ring-2 focus:ring-primary lowercase"
+            {MOODS.map((mood) => (
+              <div key={mood.id} className="relative">
+                <RadioGroupItem
+                  value={mood.id}
+                  id={mood.id}
+                  className="peer sr-only"
                 />
-                <Button
-                  onClick={handleEmailSubmit}
-                  disabled={emailSubmitting}
-                  size="sm"
-                  className="lowercase tracking-wide"
+                <Label
+                  htmlFor={mood.id}
+                  className="flex flex-col items-center justify-center gap-2 rounded-lg border-2 border-border bg-card p-4 hover:bg-accent hover:text-accent-foreground peer-data-[state=checked]:border-primary peer-data-[state=checked]:bg-primary/10 cursor-pointer transition-all"
                 >
-                  {emailSubmitting ? "..." : "notify me"}
-                </Button>
+                  <span className="text-3xl">{mood.emoji}</span>
+                  <span className="text-sm lowercase tracking-wide">{mood.label}</span>
+                </Label>
               </div>
-              <button
-                onClick={() => {
-                  setShowEmailCapture(false);
-                  setVoteSubmitted(true);
-                  setTimeout(() => setVoteSubmitted(false), 3000);
-                }}
-                className="text-xs text-muted-foreground/60 hover:text-muted-foreground underline w-full text-center"
-              >
-                skip, just save my vote
-              </button>
-            </div>
-          ) : null}
-          
-          {/* Confirmation Message */}
-          {voteSubmitted && (
-            <p className="text-xs text-center text-green-400/80 animate-fade-in">
-              thanks for your feedback 🌙
-            </p>
-          )}
+            ))}
+          </RadioGroup>
         </div>
 
-        {/* Custom Text Dialog */}
-        <Dialog open={showCustomText} onOpenChange={setShowCustomText}>
-          <DialogContent className="max-w-2xl">
-            <DialogHeader>
-              <DialogTitle className="lowercase tracking-wide">custom whisper</DialogTitle>
-              <DialogDescription className="text-xs">
-                paste your text (max 5,000 characters)
-              </DialogDescription>
-            </DialogHeader>
-            <div className="space-y-4">
-              <Textarea
-                value={customText}
-                onChange={(e) => setCustomText(e.target.value)}
-                placeholder="paste your text here..."
-                maxLength={5000}
-                className="min-h-[300px] bg-card border-border text-foreground resize-none"
-              />
-              <div className="flex justify-between items-center">
-                <p className="text-xs text-muted-foreground">
-                  {customText.length} / 5,000
-                </p>
-                <Button
-                  onClick={handleCustomText}
-                  disabled={!customText.trim()}
-                  className="lowercase tracking-wide"
-                >
-                  generate whisper
-                </Button>
-              </div>
-            </div>
-          </DialogContent>
-        </Dialog>
+        {/* Ambient Selection */}
+        <div className="space-y-4">
+          <Label className="text-sm text-muted-foreground uppercase tracking-wider">
+            Choose Ambient Sound
+          </Label>
+          <div className="grid grid-cols-3 gap-2">
+            {AMBIENTS.map((ambient) => (
+              <button
+                key={ambient.id}
+                onClick={() => setSelectedAmbient(ambient.id)}
+                className={`flex flex-col items-center justify-center gap-2 rounded-lg border-2 p-3 transition-all hover:bg-accent ${
+                  selectedAmbient === ambient.id
+                    ? 'border-primary bg-primary/10'
+                    : 'border-border bg-card'
+                }`}
+              >
+                <span className="text-2xl">{ambient.emoji}</span>
+                <span className="text-xs lowercase tracking-wide text-foreground/80">
+                  {ambient.label}
+                </span>
+              </button>
+            ))}
+          </div>
+        </div>
+
+        {/* Start Button */}
+        <Button
+          onClick={startSession}
+          disabled={isGenerating}
+          className="w-full py-6 text-base lowercase tracking-wide"
+          size="lg"
+        >
+          {isGenerating ? "creating your session..." : "▶️  start session"}
+        </Button>
+
+        {/* Info */}
+        <p className="text-xs text-center text-muted-foreground/60">
+          AI-generated ASMR meditation • 60 seconds
+        </p>
       </div>
 
-      {/* Footer */}
-      <footer className="fixed bottom-4 left-0 right-0 text-center">
-        <p className="text-xs text-muted-foreground tracking-wide">
-          made at 3:23 am because i couldn't sleep · by{" "}
-          <a href="https://x.com/carolmonroe" target="_blank" rel="noopener noreferrer" className="hover:text-foreground transition-colors underline">
-            carol monroe
-          </a>
-        </p>
-      </footer>
-    </main>
+      {/* Generation Overlay */}
+      {isGenerating && (
+        <div className="fixed inset-0 bg-background/80 backdrop-blur-sm flex items-center justify-center z-50 animate-fade-in">
+          <div className="text-center space-y-4">
+            <div className="inline-block h-8 w-8 animate-spin rounded-full border-4 border-solid border-primary border-r-transparent"></div>
+            <p className="text-sm text-muted-foreground tracking-wide">
+              generating your ASMR session...
+            </p>
+            <p className="text-xs text-muted-foreground/60">
+              this may take 15-20 seconds
+            </p>
+          </div>
+        </div>
+      )}
+    </div>
   );
 };
 

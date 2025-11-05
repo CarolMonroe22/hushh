@@ -14,6 +14,36 @@ export type Database = {
   }
   public: {
     Tables: {
+      asmr_sessions: {
+        Row: {
+          ambient: string
+          audio_url: string
+          created_at: string | null
+          id: string
+          mood: string
+          times_played: number | null
+          week_key: string
+        }
+        Insert: {
+          ambient: string
+          audio_url: string
+          created_at?: string | null
+          id?: string
+          mood: string
+          times_played?: number | null
+          week_key: string
+        }
+        Update: {
+          ambient?: string
+          audio_url?: string
+          created_at?: string | null
+          id?: string
+          mood?: string
+          times_played?: number | null
+          week_key?: string
+        }
+        Relationships: []
+      }
       early_access_emails: {
         Row: {
           created_at: string | null

@@ -8,3 +8,6 @@ verify_jwt = false
 
 [functions.test-music-api]
 verify_jwt = false
+
+[functions.generate-asmr-session]
+verify_jwt = false

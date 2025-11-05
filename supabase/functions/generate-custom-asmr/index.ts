@@ -24,23 +24,17 @@ serve(async (req) => {
 
     console.log(`Generating custom ASMR: "${title}"`);
 
-    // Call ElevenLabs
-    const response = await fetch('https://api.elevenlabs.io/v1/text-to-speech/9BWtsMINqrJLrRacOk9x', {
+    // Call ElevenLabs Music API
+    const response = await fetch('https://api.elevenlabs.io/v1/music/compose', {
       method: 'POST',
       headers: {
-        'Accept': 'audio/mpeg',
+        'Accept': 'application/json',
         'xi-api-key': elevenLabsKey,
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        text: prompt,
-        model_id: 'eleven_multilingual_v2',
-        voice_settings: {
-          stability: 0.7,
-          similarity_boost: 0.8,
-          style: 0.3,
-          use_speaker_boost: true
-        }
+        prompt: prompt,
+        duration: 60,
       }),
     });
 

@@ -25,16 +25,17 @@ serve(async (req) => {
     console.log(`Interpreting vibe: "${title}" - ${description}`);
 
     // System prompt para el AI interpreter
-    const systemPrompt = `You are a professional ASMR script writer. Your job is to take a user's simple description of how they want to feel and convert it into a professional, optimized 1-minute ASMR prompt for ElevenLabs text-to-speech.
+    const systemPrompt = `You are a professional ASMR script writer for the ElevenLabs Music API. Your job is to take a user's simple description and convert it into a detailed, optimized prompt that will generate 1-minute ASMR audio with voice AND ambient sounds.
 
 CRITICAL RULES:
 1. Output must be EXACTLY 100-150 words (for 1 minute audio)
-2. Must include: voiceover description, ambient sound, specific phrases to say
+2. Must include: voiceover description, ambient sound specification, and the actual script
 3. Use ASMR language: "whispered", "gentle", "soothing", "calm", "powerful"
-4. Specify voice characteristics (e.g., "female voiceover", "warm tone", "confident voice")
-5. Specify ambient sound volume (e.g., "rain at 30% volume")
+4. Specify voice characteristics (e.g., "soft female whispered voiceover", "warm tone", "confident voice")
+5. Specify ambient sound type and volume (e.g., "gentle rain sounds at 30% volume")
 6. Include 3-5 actual phrases the voice should say
 7. Start with "1 minute ASMR"
+8. The Music API generates BOTH voice and ambient sounds together
 
 EXAMPLES:
 
@@ -44,7 +45,10 @@ You generate: "1 minute ASMR deep focus session with calm female voiceover and r
 User says: "Help me sleep, I'm anxious"
 You generate: "1 minute ASMR sleep preparation with soothing whispered female voiceover and gentle white noise. The voice whispers tenderly: release the worry... let it all go... your body is heavy... safe... held... tomorrow can wait... right now, you rest... you are at peace... deeply at peace. Close ASMR whisper, white noise soft at 20% volume, voice loving and calming."
 
-Now interpret the user's description into a professional ASMR prompt.`;
+User says: "I need confidence for my presentation"
+You generate: "1 minute ASMR confidence boost with powerful female voiceover and energizing white noise. The voice speaks with strength: you are powerful... prepared... ready... they will listen... they will understand... your voice is clear... strong... confident... you belong here... you know your material... you've got this... absolutely unstoppable. Empowering ASMR tone, white noise energizing at 25% volume, voice motivating and strong."
+
+Now interpret the user's description into a professional ASMR prompt for the Music API.`;
 
     // Call Lovable AI
     const response = await fetch('https://ai.gateway.lovable.dev/v1/chat/completions', {

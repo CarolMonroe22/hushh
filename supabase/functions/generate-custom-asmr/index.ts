@@ -57,7 +57,16 @@ serve(async (req) => {
     }
 
     const audioArrayBuffer = await response.arrayBuffer();
-    const audioBase64 = btoa(String.fromCharCode(...new Uint8Array(audioArrayBuffer)));
+    const uint8Array = new Uint8Array(audioArrayBuffer);
+    let binaryString = '';
+    const chunkSize = 8192; // Process in 8KB chunks to avoid stack overflow
+    
+    for (let i = 0; i < uint8Array.length; i += chunkSize) {
+      const chunk = uint8Array.slice(i, i + chunkSize);
+      binaryString += String.fromCharCode(...chunk);
+    }
+    
+    const audioBase64 = btoa(binaryString);
 
     console.log(`Custom ASMR generated: ${audioBase64.length} bytes`);
 

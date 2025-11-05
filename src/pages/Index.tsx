@@ -1,544 +1,498 @@
 import { useState, useRef, useEffect } from "react";
 import { Button } from "@/components/ui/button";
-import { useToast } from "@/hooks/use-toast";
-import { supabase } from "@/integrations/supabase/client";
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
 import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { Label } from "@/components/ui/label";
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
+import { supabase } from "@/integrations/supabase/client";
+import { useToast } from "@/hooks/use-toast";
 
-type Mode = 'presets' | 'creator';
-type Mood = 'relax' | 'sleep' | 'focus' | 'gratitude' | 'boost';
-type Ambient = 'rain' | 'ocean' | 'forest' | 'fireplace' | 'white-noise';
+type Mood = "calm" | "energized" | "focused" | "sleepy";
+type Ambient = "rain" | "nature" | "city" | "ocean" | "cafe" | "silence";
 
-const MOODS: { id: Mood; label: string; emoji: string }[] = [
-  { id: 'relax', label: 'Relax', emoji: '😌' },
-  { id: 'sleep', label: 'Sleep', emoji: '😴' },
-  { id: 'focus', label: 'Focus', emoji: '🎯' },
-  { id: 'gratitude', label: 'Gratitude', emoji: '💚' },
-  { id: 'boost', label: 'Boost', emoji: '🚀' },
+const MOODS: { value: Mood; label: string; emoji: string }[] = [
+  { value: "calm", label: "calm", emoji: "🌙" },
+  { value: "energized", label: "energized", emoji: "⚡" },
+  { value: "focused", label: "focused", emoji: "🎯" },
+  { value: "sleepy", label: "sleepy", emoji: "😴" },
 ];
 
-const AMBIENTS: { id: Ambient; label: string; emoji: string }[] = [
-  { id: 'rain', label: 'Rain', emoji: '🌧️' },
-  { id: 'ocean', label: 'Ocean', emoji: '🌊' },
-  { id: 'forest', label: 'Forest', emoji: '🌲' },
-  { id: 'fireplace', label: 'Fireplace', emoji: '🔥' },
-  { id: 'white-noise', label: 'White Noise', emoji: '⚪' },
+const AMBIENTS: { value: Ambient; label: string; emoji: string }[] = [
+  { value: "rain", label: "rain", emoji: "🌧️" },
+  { value: "nature", label: "nature", emoji: "🌲" },
+  { value: "city", label: "city", emoji: "🏙️" },
+  { value: "ocean", label: "ocean", emoji: "🌊" },
+  { value: "cafe", label: "cafe", emoji: "☕" },
+  { value: "silence", label: "silence", emoji: "🤫" },
 ];
 
 const VIBE_STARTERS = [
   {
-    title: "Morning focus ritual",
-    description: "I need to start my day with clarity and focus, ready to tackle my work with energy"
+    title: "deep focus",
+    description: "I need to concentrate deeply on complex work. Create a focused atmosphere with subtle background sounds that help me stay in the zone without any distractions.",
   },
   {
-    title: "Night wind-down",
-    description: "Help me release the day's stress and prepare for deep, restorative sleep"
+    title: "calm evening",
+    description: "Help me wind down after a long day. I want gentle, soothing sounds that ease my mind and help me transition into a peaceful evening routine.",
   },
   {
-    title: "Creative flow",
-    description: "I want to unlock my creativity and get into a flow state for my project"
+    title: "creative flow",
+    description: "I'm working on something creative and need sounds that inspire without overwhelming. Something that keeps my energy up while letting my imagination flow.",
   },
   {
-    title: "Confidence boost",
-    description: "Give me a surge of confidence and self-belief before my big presentation"
+    title: "peaceful sleep",
+    description: "Guide me into deep, restful sleep with calming sounds that quiet my racing thoughts and create a cocoon of tranquility around me.",
   },
-  {
-    title: "Study session",
-    description: "I need deep focus to absorb and understand complex information while studying"
-  }
 ];
 
 const Index = () => {
-  const [mode, setMode] = useState<Mode>('presets');
-  const [selectedMood, setSelectedMood] = useState<Mood>('relax');
-  const [selectedAmbient, setSelectedAmbient] = useState<Ambient>('rain');
-  const [vibeDescription, setVibeDescription] = useState('');
-  const [vibeTitle, setVibeTitle] = useState('');
+  const [selectedMood, setSelectedMood] = useState<Mood | null>(null);
+  const [selectedAmbient, setSelectedAmbient] = useState<Ambient | null>(null);
   const [isGenerating, setIsGenerating] = useState(false);
   const [isPlaying, setIsPlaying] = useState(false);
-  const [sessionCompleted, setSessionCompleted] = useState(false);
-  const [playTime, setPlayTime] = useState(0);
-  const { toast } = useToast();
+  const [timeLeft, setTimeLeft] = useState(60);
+  const [isComplete, setIsComplete] = useState(false);
+  const [vibeTitle, setVibeTitle] = useState("");
+  const [vibeDescription, setVibeDescription] = useState("");
+  
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const timerRef = useRef<NodeJS.Timeout | null>(null);
+  const { toast } = useToast();
 
-  // Cleanup audio on unmount
   useEffect(() => {
     return () => {
+      if (timerRef.current) clearInterval(timerRef.current);
       if (audioRef.current) {
         audioRef.current.pause();
         audioRef.current = null;
       }
-      if (timerRef.current) {
-        clearInterval(timerRef.current);
-      }
     };
   }, []);
 
-  const base64ToBlob = (base64: string, mimeType: string): Blob => {
+  const base64ToBlob = (base64: string, type: string = "audio/mpeg") => {
     const byteCharacters = atob(base64);
     const byteNumbers = new Array(byteCharacters.length);
     for (let i = 0; i < byteCharacters.length; i++) {
       byteNumbers[i] = byteCharacters.charCodeAt(i);
     }
     const byteArray = new Uint8Array(byteNumbers);
-    return new Blob([byteArray], { type: mimeType });
+    return new Blob([byteArray], { type });
   };
 
   const startSession = async () => {
-    setIsGenerating(true);
-    setPlayTime(0);
-
-    try {
-      const { data, error } = await supabase.functions.invoke('generate-asmr-session', {
-        body: { 
-          mood: selectedMood,
-          ambient: selectedAmbient 
-        }
-      });
-
-      if (error) {
-        console.error('Generation error:', error);
-        throw error;
-      }
-
-      if (!data.audioContent) {
-        throw new Error("No audio returned");
-      }
-
-      const audioBlob = base64ToBlob(data.audioContent, 'audio/mpeg');
-      const audioUrl = URL.createObjectURL(audioBlob);
-      
-      audioRef.current = new Audio(audioUrl);
-      audioRef.current.volume = 0.85;
-
-      audioRef.current.onerror = (e) => {
-        console.error("Audio playback error:", e);
-        toast({
-          description: "audio playback failed, try again...",
-          variant: "destructive",
-        });
-        setIsPlaying(false);
-        setIsGenerating(false);
-        URL.revokeObjectURL(audioUrl);
-      };
-
-      audioRef.current.onended = () => {
-        URL.revokeObjectURL(audioUrl);
-        setIsPlaying(false);
-        setSessionCompleted(true);
-        if (timerRef.current) {
-          clearInterval(timerRef.current);
-        }
-      };
-
-      await audioRef.current.play();
-      setIsGenerating(false);
-      setIsPlaying(true);
-
-      // Start timer
-      timerRef.current = setInterval(() => {
-        setPlayTime(prev => prev + 1);
-      }, 1000);
-
-      if (data.cached) {
-        toast({
-          description: "loaded from cache ⚡",
-        });
-      }
-
-    } catch (error) {
-      console.error("ASMR generation error:", error);
-      
-      let errorDescription = "failed to generate session...";
-      if (error instanceof Error) {
-        if (error.message.includes("quota exceeded") || error.message.includes("ElevenLabs quota")) {
-          errorDescription = "elevenlabs quota exceeded. please add credits.";
-        } else if (error.message.includes("ElevenLabs")) {
-          errorDescription = "elevenlabs error. check api key.";
-        }
-      }
-      
+    if (!selectedMood || !selectedAmbient) {
       toast({
-        description: errorDescription,
+        title: "Selection Required",
+        description: "Please select both a mood and an ambient sound",
         variant: "destructive",
       });
+      return;
+    }
+
+    setIsGenerating(true);
+
+    try {
+      const { data, error } = await supabase.functions.invoke("generate-asmr-session", {
+        body: { mood: selectedMood, ambient: selectedAmbient },
+      });
+
+      if (error) throw error;
+
+      if (data?.audioContent) {
+        const audioBlob = base64ToBlob(data.audioContent);
+        const audioUrl = URL.createObjectURL(audioBlob);
+
+        audioRef.current = new Audio(audioUrl);
+        audioRef.current.play();
+
+        setIsPlaying(true);
+        setTimeLeft(60);
+
+        timerRef.current = setInterval(() => {
+          setTimeLeft((prev) => {
+            if (prev <= 1) {
+              if (timerRef.current) clearInterval(timerRef.current);
+              setIsPlaying(false);
+              setIsComplete(true);
+              return 0;
+            }
+            return prev - 1;
+          });
+        }, 1000);
+
+        if (audioRef.current) {
+          audioRef.current.onended = () => {
+            if (timerRef.current) clearInterval(timerRef.current);
+            setIsPlaying(false);
+            setIsComplete(true);
+          };
+        }
+      }
+    } catch (error) {
+      console.error("Session generation error:", error);
+      toast({
+        title: "Generation Failed",
+        description: error instanceof Error ? error.message : "Failed to generate ASMR session",
+        variant: "destructive",
+      });
+    } finally {
       setIsGenerating(false);
     }
   };
 
   const startCreatorSession = async () => {
+    if (!vibeDescription.trim() || vibeDescription.trim().length < 20) {
+      toast({
+        title: "Description Required",
+        description: "Please describe your desired vibe (at least 20 characters)",
+        variant: "destructive",
+      });
+      return;
+    }
+
     setIsGenerating(true);
-    setPlayTime(0);
 
     try {
-      // Step 1: Interpret user's description into professional prompt
-      toast({
-        description: "✨ interpreting your vibe...",
-      });
-
-      const { data: interpretData, error: interpretError } = await supabase.functions.invoke('interpret-vibe-prompt', {
-        body: { 
-          description: vibeDescription,
-          title: vibeTitle || 'Custom Vibe'
+      console.log("Step 1: Interpreting vibe prompt...");
+      const { data: interpretData, error: interpretError } = await supabase.functions.invoke(
+        "interpret-vibe-prompt",
+        {
+          body: {
+            description: vibeDescription,
+            title: vibeTitle || "Custom Vibe",
+          },
         }
-      });
+      );
 
-      if (interpretError) throw interpretError;
-      if (!interpretData.prompt) throw new Error("Failed to interpret vibe");
+      if (interpretError) {
+        console.error("Interpretation error:", interpretError);
+        throw interpretError;
+      }
 
-      console.log("Interpreted prompt:", interpretData.prompt);
+      if (!interpretData?.prompt) {
+        throw new Error("No prompt received from interpreter");
+      }
 
-      // Step 2: Generate audio with interpreted prompt
-      toast({
-        description: "🎵 generating your audio...",
-      });
-
-      const { data: audioData, error: audioError } = await supabase.functions.invoke('generate-custom-asmr', {
-        body: { 
-          prompt: interpretData.prompt,
-          title: interpretData.title
+      console.log("Step 2: Generating ASMR audio...");
+      const { data: asmrData, error: asmrError } = await supabase.functions.invoke(
+        "generate-custom-asmr",
+        {
+          body: {
+            prompt: interpretData.prompt,
+            title: vibeTitle || interpretData.title || "Custom Vibe",
+          },
         }
-      });
+      );
 
-      if (audioError) throw audioError;
-      if (!audioData.audioContent) throw new Error("No audio returned");
+      if (asmrError) {
+        console.error("ASMR generation error:", asmrError);
+        throw asmrError;
+      }
 
-      // Play audio
-      const audioBlob = base64ToBlob(audioData.audioContent, 'audio/mpeg');
-      const audioUrl = URL.createObjectURL(audioBlob);
-      
-      audioRef.current = new Audio(audioUrl);
-      audioRef.current.volume = 0.85;
+      if (asmrData?.audioContent) {
+        console.log("Step 3: Playing audio...");
+        const audioBlob = base64ToBlob(asmrData.audioContent);
+        const audioUrl = URL.createObjectURL(audioBlob);
 
-      audioRef.current.onerror = (e) => {
-        console.error("Audio playback error:", e);
-        toast({
-          description: "audio playback failed, try again...",
-          variant: "destructive",
-        });
-        setIsPlaying(false);
-        setIsGenerating(false);
-        URL.revokeObjectURL(audioUrl);
-      };
+        audioRef.current = new Audio(audioUrl);
+        audioRef.current.play();
 
-      audioRef.current.onended = () => {
-        URL.revokeObjectURL(audioUrl);
-        setIsPlaying(false);
-        setSessionCompleted(true);
-        if (timerRef.current) {
-          clearInterval(timerRef.current);
+        setIsPlaying(true);
+        setTimeLeft(60);
+
+        timerRef.current = setInterval(() => {
+          setTimeLeft((prev) => {
+            if (prev <= 1) {
+              if (timerRef.current) clearInterval(timerRef.current);
+              setIsPlaying(false);
+              setIsComplete(true);
+              return 0;
+            }
+            return prev - 1;
+          });
+        }, 1000);
+
+        if (audioRef.current) {
+          audioRef.current.onended = () => {
+            if (timerRef.current) clearInterval(timerRef.current);
+            setIsPlaying(false);
+            setIsComplete(true);
+          };
         }
-      };
-
-      await audioRef.current.play();
-      setIsGenerating(false);
-      setIsPlaying(true);
-
-      timerRef.current = setInterval(() => {
-        setPlayTime(prev => prev + 1);
-      }, 1000);
-
-      toast({
-        description: `✨ ${audioData.title} created!`,
-      });
-
+      }
     } catch (error) {
       console.error("Creator session error:", error);
       toast({
-        description: "failed to create vibe...",
+        title: "Generation Failed",
+        description: error instanceof Error ? error.message : "Failed to create your vibe",
         variant: "destructive",
       });
+    } finally {
       setIsGenerating(false);
     }
   };
 
-  const formatTime = (seconds: number): string => {
-    const mins = Math.floor(seconds / 60);
-    const secs = seconds % 60;
-    return `${mins}:${secs.toString().padStart(2, '0')}`;
+  const handleReplay = () => {
+    if (audioRef.current) {
+      audioRef.current.currentTime = 0;
+      audioRef.current.play();
+      setIsComplete(false);
+      setIsPlaying(true);
+      setTimeLeft(60);
+
+      timerRef.current = setInterval(() => {
+        setTimeLeft((prev) => {
+          if (prev <= 1) {
+            if (timerRef.current) clearInterval(timerRef.current);
+            setIsPlaying(false);
+            setIsComplete(true);
+            return 0;
+          }
+          return prev - 1;
+        });
+      }, 1000);
+    }
   };
 
-  // Playing screen
-  if (isPlaying) {
-    const displayEmoji = mode === 'creator' ? '✨' : MOODS.find(m => m.id === selectedMood)?.emoji;
-    const displayInfo = mode === 'creator' ? vibeTitle || 'Custom Vibe' : AMBIENTS.find(a => a.id === selectedAmbient)?.label;
-    
-    return (
-      <div className="min-h-screen bg-background flex flex-col items-center justify-center animate-fade-in p-6">
-        <div className="text-center space-y-6">
-          <div className="text-6xl animate-pulse">
-            {displayEmoji}
-          </div>
-          <p className="text-muted-foreground text-sm tracking-[0.3em] uppercase">
-            listening...
-          </p>
-          <p className="text-foreground/60 text-lg font-mono">
-            {formatTime(playTime)} / 1:00
-          </p>
-          <div className="flex items-center gap-2 text-xs text-muted-foreground">
-            <span>{displayInfo}</span>
-          </div>
-        </div>
-      </div>
-    );
-  }
+  const handleNewSession = () => {
+    if (audioRef.current) {
+      audioRef.current.pause();
+      audioRef.current = null;
+    }
+    if (timerRef.current) {
+      clearInterval(timerRef.current);
+    }
+    setIsComplete(false);
+    setIsPlaying(false);
+    setTimeLeft(60);
+    setSelectedMood(null);
+    setSelectedAmbient(null);
+    setVibeTitle("");
+    setVibeDescription("");
+  };
 
-  // Session complete screen
-  if (sessionCompleted) {
+  if (isPlaying) {
     return (
-      <div className="min-h-screen bg-background flex items-center justify-center p-6 animate-fade-in">
-        <div className="max-w-md mx-auto space-y-8 text-center">
-          <div className="space-y-4">
-            <p className="text-4xl">✨</p>
-            <p className="text-xl text-foreground tracking-wide">
-              session complete
-            </p>
-            <p className="text-sm text-muted-foreground">
-              1 minute of peace
-            </p>
-            <div className="flex items-center justify-center gap-3 text-sm">
-              <span>{MOODS.find(m => m.id === selectedMood)?.emoji}</span>
-              <span className="text-muted-foreground lowercase">
-                {MOODS.find(m => m.id === selectedMood)?.label}
-              </span>
-              <span className="text-muted-foreground">+</span>
-              <span>{AMBIENTS.find(a => a.id === selectedAmbient)?.emoji}</span>
-              <span className="text-muted-foreground lowercase">
-                {AMBIENTS.find(a => a.id === selectedAmbient)?.label}
-              </span>
+      <div className="min-h-screen bg-background flex items-center justify-center p-4">
+        <div className="text-center space-y-8">
+          <div className="space-y-2">
+            <h2 className="text-3xl font-light lowercase tracking-wide">
+              {vibeTitle || `${selectedMood} + ${selectedAmbient}`}
+            </h2>
+            {vibeDescription && (
+              <p className="text-sm text-muted-foreground max-w-md mx-auto">
+                {vibeDescription.length > 100 ? `${vibeDescription.slice(0, 100)}...` : vibeDescription}
+              </p>
+            )}
+          </div>
+
+          <div className="relative w-48 h-48 mx-auto">
+            <div className="absolute inset-0 rounded-full border-4 border-primary/30" />
+            <div className="absolute inset-0 rounded-full border-4 border-primary border-t-transparent animate-spin" />
+            <div className="absolute inset-0 flex items-center justify-center">
+              <div className="text-center">
+                <div className="text-5xl font-light">{timeLeft}</div>
+                <div className="text-sm text-muted-foreground lowercase tracking-wide">seconds</div>
+              </div>
             </div>
           </div>
 
-          <div className="space-y-3">
+          <p className="text-sm text-muted-foreground lowercase tracking-wide">
+            breathe deep, let go
+          </p>
+        </div>
+      </div>
+    );
+  }
+
+  if (isComplete) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center p-4">
+        <div className="text-center space-y-8 max-w-md">
+          <div className="space-y-2">
+            <div className="text-6xl mb-4">✨</div>
+            <h2 className="text-3xl font-light lowercase tracking-wide">session complete</h2>
+            <p className="text-muted-foreground">how do you feel?</p>
+          </div>
+
+          <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Button
-              onClick={() => {
-                setSessionCompleted(false);
-                setPlayTime(0);
-                startSession();
-              }}
-              className="w-full lowercase tracking-wide"
-              size="lg"
-            >
-              🔁 listen again
-            </Button>
-            <Button
-              onClick={() => {
-                setSessionCompleted(false);
-                setPlayTime(0);
-              }}
+              onClick={handleReplay}
               variant="outline"
-              className="w-full lowercase tracking-wide"
+              size="lg"
+              className="lowercase tracking-wide"
             >
-              start another session
+              replay
             </Button>
-            <p className="text-xs text-muted-foreground/60">
-              created at 3:23 AM by{" "}
-              <a
-                href="https://x.com/carolmonroe"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-primary hover:underline"
-              >
-                @carolmonroe
-              </a>
-            </p>
+            <Button
+              onClick={handleNewSession}
+              size="lg"
+              className="lowercase tracking-wide"
+            >
+              new session
+            </Button>
           </div>
         </div>
       </div>
     );
   }
 
-  // Main selection screen
   return (
-    <div className="min-h-screen bg-background flex items-center justify-center p-6 animate-fade-in">
-      <div className="max-w-lg w-full mx-auto space-y-8">
-        {/* Header */}
-        <div className="text-center space-y-4">
-          <h1 className="text-3xl font-light tracking-wider text-foreground">
+    <div className="min-h-screen bg-background text-foreground">
+      <div className="container mx-auto px-4 py-12 md:py-20 max-w-4xl">
+        {/* Hero Section */}
+        <div className="text-center space-y-6 mb-16">
+          <h1 className="text-5xl md:text-7xl font-light tracking-wider text-foreground">
             1-Minute ASMR
           </h1>
-          <p className="text-sm text-muted-foreground tracking-wide">
+          <p className="text-lg md:text-xl text-muted-foreground tracking-wide">
             build beautiful feelings, in sound
           </p>
-          
-          {/* Mode Toggle */}
-          <div className="inline-flex rounded-lg border border-border p-1 bg-card">
-            <button
-              onClick={() => setMode('presets')}
-              className={`px-6 py-2 rounded-md text-sm transition-all lowercase tracking-wide ${
-                mode === 'presets' 
-                  ? 'bg-primary text-primary-foreground' 
-                  : 'text-muted-foreground hover:text-foreground'
-              }`}
-            >
-              quick presets
-            </button>
-            <button
-              onClick={() => setMode('creator')}
-              className={`px-6 py-2 rounded-md text-sm transition-all lowercase tracking-wide ${
-                mode === 'creator' 
-                  ? 'bg-primary text-primary-foreground' 
-                  : 'text-muted-foreground hover:text-foreground'
-              }`}
-            >
-              vibe creator
-            </button>
+        </div>
+
+        {/* Main Input Area - Creator Mode */}
+        <div className="max-w-2xl mx-auto space-y-6 mb-12">
+          {/* Vibe Title */}
+          <div className="space-y-3">
+            <Input
+              placeholder="name your vibe"
+              value={vibeTitle}
+              onChange={(e) => setVibeTitle(e.target.value)}
+              className="text-lg py-6 text-center bg-card/50 border-border/50 focus:bg-card transition-all"
+            />
+          </div>
+
+          {/* Large Textarea - Main Focus */}
+          <div className="space-y-3">
+            <Textarea
+              placeholder="describe how you want to feel... (e.g., 'I need deep focus for studying with calming rain')"
+              value={vibeDescription}
+              onChange={(e) => setVibeDescription(e.target.value)}
+              className="min-h-[140px] resize-none text-base py-4 bg-card/50 border-border/50 focus:bg-card transition-all"
+              maxLength={300}
+            />
+            <div className="flex justify-between items-center px-1">
+              <p className="text-xs text-muted-foreground/60">
+                ✨ we'll interpret your vibe into the perfect audio
+              </p>
+              <p className="text-xs text-muted-foreground/60">
+                {vibeDescription.length}/300
+              </p>
+            </div>
+          </div>
+
+          {/* Generate Button - Prominent */}
+          <Button
+            onClick={startCreatorSession}
+            disabled={isGenerating || !vibeDescription.trim() || vibeDescription.trim().length < 20}
+            className="w-full py-6 text-lg lowercase tracking-wide bg-primary hover:bg-primary/90 transition-all"
+            size="lg"
+          >
+            {isGenerating ? "creating your vibe..." : "✨ create my vibe"}
+          </Button>
+        </div>
+
+        {/* Vibe Starters - Quick Inspiration */}
+        <div className="max-w-2xl mx-auto space-y-4 mb-12">
+          <p className="text-sm text-muted-foreground text-center">
+            or start from these →
+          </p>
+          <div className="flex flex-wrap gap-2 justify-center">
+            {VIBE_STARTERS.map((starter) => (
+              <button
+                key={starter.title}
+                onClick={() => {
+                  setVibeTitle(starter.title);
+                  setVibeDescription(starter.description);
+                }}
+                className="px-4 py-2 rounded-full border border-border bg-card hover:bg-accent transition-all text-sm lowercase"
+              >
+                {starter.title}
+              </button>
+            ))}
           </div>
         </div>
 
-        {mode === 'creator' ? (
-          // CREATOR MODE
-          <div className="space-y-6">
-            {/* Vibe Title */}
-            <div className="space-y-2">
-              <Label className="text-sm text-muted-foreground uppercase tracking-wider">
-                Name Your Vibe
-              </Label>
-              <Input
-                placeholder="e.g., Morning power-up"
-                value={vibeTitle}
-                onChange={(e) => setVibeTitle(e.target.value)}
-                className="text-base lowercase"
-              />
-            </div>
-
-            {/* Vibe Description */}
-            <div className="space-y-2">
-              <Label className="text-sm text-muted-foreground uppercase tracking-wider">
-                Describe Your Feeling
-              </Label>
-              <Textarea
-                placeholder="tell me what you need... (e.g., 'I need to focus deeply for my exam with calming rain sounds')"
-                value={vibeDescription}
-                onChange={(e) => setVibeDescription(e.target.value)}
-                className="min-h-[100px] resize-none text-base"
-                maxLength={300}
-              />
-              <p className="text-xs text-muted-foreground/60">
-                ✨ just describe how you want to feel - we'll handle the rest
-              </p>
-            </div>
-
-            {/* Starter Templates */}
-            <div className="space-y-2">
-              <Label className="text-sm text-muted-foreground uppercase tracking-wider">
-                Or Start From These
-              </Label>
-              <div className="grid grid-cols-1 gap-2">
-                {VIBE_STARTERS.slice(0, 3).map((starter) => (
-                  <button
-                    key={starter.title}
-                    onClick={() => {
-                      setVibeTitle(starter.title);
-                      setVibeDescription(starter.description);
-                    }}
-                    className="text-left p-3 rounded-lg border border-border bg-card hover:bg-accent transition-all"
-                  >
-                    <p className="text-sm font-medium lowercase tracking-wide">{starter.title}</p>
-                    <p className="text-xs text-muted-foreground mt-1">{starter.description}</p>
-                  </button>
-                ))}
-              </div>
-            </div>
-
-            {/* Generate Button */}
-            <Button
-              onClick={startCreatorSession}
-              disabled={isGenerating || !vibeDescription.trim() || vibeDescription.trim().length < 20}
-              className="w-full py-6 text-base lowercase tracking-wide"
-              size="lg"
-            >
-              {isGenerating ? "building your vibe..." : "✨ create my vibe"}
-            </Button>
-          </div>
-        ) : (
-          // PRESETS MODE
-          <>
-            {/* Mood Selection */}
-            <div className="space-y-4">
-              <Label className="text-sm text-muted-foreground uppercase tracking-wider">
-                Choose Your Mood
-              </Label>
-              <RadioGroup 
-                value={selectedMood} 
-                onValueChange={(value) => setSelectedMood(value as Mood)}
-                className="grid grid-cols-2 gap-3"
-              >
-                {MOODS.map((mood) => (
-                  <div key={mood.id} className="relative">
-                    <RadioGroupItem
-                      value={mood.id}
-                      id={mood.id}
-                      className="peer sr-only"
-                    />
-                    <Label
-                      htmlFor={mood.id}
-                      className="flex flex-col items-center justify-center gap-2 rounded-lg border-2 border-border bg-card p-4 hover:bg-accent hover:text-accent-foreground peer-data-[state=checked]:border-primary peer-data-[state=checked]:bg-primary/10 cursor-pointer transition-all"
-                    >
-                      <span className="text-3xl">{mood.emoji}</span>
-                      <span className="text-sm lowercase tracking-wide">{mood.label}</span>
-                    </Label>
+        {/* Quick Presets - Accordion */}
+        <div className="max-w-2xl mx-auto">
+          <Accordion type="single" collapsible className="border-t border-border/50">
+            <AccordionItem value="presets" className="border-b-0">
+              <AccordionTrigger className="py-6 hover:no-underline">
+                <span className="text-sm text-muted-foreground lowercase tracking-wide">
+                  or choose a quick preset →
+                </span>
+              </AccordionTrigger>
+              <AccordionContent className="pb-6 space-y-6">
+                {/* Mood Selection */}
+                <div className="space-y-3">
+                  <Label className="text-xs text-muted-foreground uppercase tracking-wider">
+                    mood
+                  </Label>
+                  <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
+                    {MOODS.map((mood) => (
+                      <button
+                        key={mood.value}
+                        onClick={() => setSelectedMood(mood.value)}
+                        className={`p-4 rounded-lg border transition-all text-left ${
+                          selectedMood === mood.value
+                            ? "border-primary bg-primary/10"
+                            : "border-border bg-card hover:bg-accent"
+                        }`}
+                      >
+                        <div className="text-2xl mb-1">{mood.emoji}</div>
+                        <div className="text-sm lowercase">{mood.label}</div>
+                      </button>
+                    ))}
                   </div>
-                ))}
-              </RadioGroup>
-            </div>
+                </div>
 
-            {/* Ambient Selection */}
-            <div className="space-y-4">
-              <Label className="text-sm text-muted-foreground uppercase tracking-wider">
-                Choose Ambient Sound
-              </Label>
-              <div className="grid grid-cols-3 gap-2">
-                {AMBIENTS.map((ambient) => (
-                  <button
-                    key={ambient.id}
-                    onClick={() => setSelectedAmbient(ambient.id)}
-                    className={`flex flex-col items-center justify-center gap-2 rounded-lg border-2 p-3 transition-all hover:bg-accent ${
-                      selectedAmbient === ambient.id
-                        ? 'border-primary bg-primary/10'
-                        : 'border-border bg-card'
-                    }`}
-                  >
-                    <span className="text-2xl">{ambient.emoji}</span>
-                    <span className="text-xs lowercase tracking-wide text-foreground/80">
-                      {ambient.label}
-                    </span>
-                  </button>
-                ))}
-              </div>
-            </div>
+                {/* Ambient Selection */}
+                <div className="space-y-3">
+                  <Label className="text-xs text-muted-foreground uppercase tracking-wider">
+                    ambient
+                  </Label>
+                  <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
+                    {AMBIENTS.map((ambient) => (
+                      <button
+                        key={ambient.value}
+                        onClick={() => setSelectedAmbient(ambient.value)}
+                        className={`p-4 rounded-lg border transition-all text-left ${
+                          selectedAmbient === ambient.value
+                            ? "border-primary bg-primary/10"
+                            : "border-border bg-card hover:bg-accent"
+                        }`}
+                      >
+                        <div className="text-2xl mb-1">{ambient.emoji}</div>
+                        <div className="text-sm lowercase">{ambient.label}</div>
+                      </button>
+                    ))}
+                  </div>
+                </div>
 
-            {/* Start Button */}
-            <Button
-              onClick={startSession}
-              disabled={isGenerating}
-              className="w-full py-6 text-base lowercase tracking-wide"
-              size="lg"
-            >
-              {isGenerating ? "creating your session..." : "▶️  start session"}
-            </Button>
-
-            {/* Info */}
-            <p className="text-xs text-center text-muted-foreground/60">
-              AI-generated ASMR meditation • 60 seconds
-            </p>
-          </>
-        )}
+                {/* Generate Preset Button */}
+                <Button
+                  onClick={startSession}
+                  disabled={isGenerating || !selectedMood || !selectedAmbient}
+                  className="w-full py-6 text-base lowercase tracking-wide"
+                  size="lg"
+                >
+                  {isGenerating ? "creating..." : "generate preset"}
+                </Button>
+              </AccordionContent>
+            </AccordionItem>
+          </Accordion>
+        </div>
       </div>
 
-      {/* Generation Overlay */}
+      {/* Loading Overlay */}
       {isGenerating && (
-        <div className="fixed inset-0 bg-background/80 backdrop-blur-sm flex items-center justify-center z-50 animate-fade-in">
+        <div className="fixed inset-0 bg-background/95 backdrop-blur-sm z-50 flex items-center justify-center">
           <div className="text-center space-y-4">
-            <div className="inline-block h-8 w-8 animate-spin rounded-full border-4 border-solid border-primary border-r-transparent"></div>
-            <p className="text-sm text-muted-foreground tracking-wide">
-              generating your ASMR session...
-            </p>
-            <p className="text-xs text-muted-foreground/60">
-              this may take 15-20 seconds
+            <div className="w-16 h-16 mx-auto">
+              <div className="w-full h-full border-4 border-primary/30 border-t-primary rounded-full animate-spin" />
+            </div>
+            <p className="text-sm text-muted-foreground lowercase tracking-wide">
+              building your vibe...
             </p>
           </div>
         </div>

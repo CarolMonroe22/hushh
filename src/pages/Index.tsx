@@ -69,6 +69,7 @@ const Index = () => {
   const [generatedTitle, setGeneratedTitle] = useState("");
   const [vibeDescription, setVibeDescription] = useState("");
   const [currentTitleIndex, setCurrentTitleIndex] = useState(0);
+  const [titleFade, setTitleFade] = useState(true);
   
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const timerRef = useRef<NodeJS.Timeout | null>(null);
@@ -87,10 +88,18 @@ const Index = () => {
   // Title rotation effect
   useEffect(() => {
     const titleInterval = setInterval(() => {
-      setCurrentTitleIndex((prevIndex) => 
-        (prevIndex + 1) % TITLE_ROTATIONS.length
-      );
-    }, 3000);
+      // Fade out
+      setTitleFade(false);
+      
+      // Change word after fade out
+      setTimeout(() => {
+        setCurrentTitleIndex((prevIndex) => 
+          (prevIndex + 1) % TITLE_ROTATIONS.length
+        );
+        // Fade in
+        setTitleFade(true);
+      }, 300); // 300ms for fade out
+    }, 3000); // Change every 3 seconds
 
     return () => clearInterval(titleInterval);
   }, []);
@@ -362,8 +371,15 @@ const Index = () => {
       <div className="container mx-auto px-4 py-12 md:py-20 max-w-4xl">
         {/* Hero Section */}
         <div className="text-center space-y-6 mb-16">
-          <h1 className="text-5xl md:text-7xl font-light tracking-wider text-foreground transition-opacity duration-500">
-            1-Minute {TITLE_ROTATIONS[currentTitleIndex]}
+          <h1 className="text-5xl md:text-7xl font-light tracking-wider text-foreground">
+            <span>1-Minute </span>
+            <span 
+              className={`inline-block transition-opacity duration-300 ${
+                titleFade ? 'opacity-100' : 'opacity-0'
+              }`}
+            >
+              {TITLE_ROTATIONS[currentTitleIndex]}
+            </span>
           </h1>
           <p className="text-lg md:text-xl text-muted-foreground tracking-wide">
             build beautiful feelings, in sound

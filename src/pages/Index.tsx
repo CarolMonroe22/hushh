@@ -45,6 +45,20 @@ const VIBE_STARTERS = [
   },
 ];
 
+const TITLE_ROTATIONS = [
+  "1-Minute ASMR",
+  "1-Minute Meditation", 
+  "1-Minute Focus",
+  "1-Minute Calm",
+  "1-Minute Flow",
+  "1-Minute Lullaby",
+  "1-Minute Reset",
+  "1-Minute Breathe",
+  "1-Minute Pray",
+  "1-Minute Pause",
+  "1-Minute Dream",
+];
+
 const Index = () => {
   const [selectedMood, setSelectedMood] = useState<Mood | null>(null);
   const [selectedAmbient, setSelectedAmbient] = useState<Ambient | null>(null);
@@ -54,6 +68,7 @@ const Index = () => {
   const [isComplete, setIsComplete] = useState(false);
   const [generatedTitle, setGeneratedTitle] = useState("");
   const [vibeDescription, setVibeDescription] = useState("");
+  const [currentTitleIndex, setCurrentTitleIndex] = useState(0);
   
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const timerRef = useRef<NodeJS.Timeout | null>(null);
@@ -67,6 +82,17 @@ const Index = () => {
         audioRef.current = null;
       }
     };
+  }, []);
+
+  // Title rotation effect
+  useEffect(() => {
+    const titleInterval = setInterval(() => {
+      setCurrentTitleIndex((prevIndex) => 
+        (prevIndex + 1) % TITLE_ROTATIONS.length
+      );
+    }, 3000);
+
+    return () => clearInterval(titleInterval);
   }, []);
 
   const base64ToBlob = (base64: string, type: string = "audio/mpeg") => {
@@ -336,8 +362,8 @@ const Index = () => {
       <div className="container mx-auto px-4 py-12 md:py-20 max-w-4xl">
         {/* Hero Section */}
         <div className="text-center space-y-6 mb-16">
-          <h1 className="text-5xl md:text-7xl font-light tracking-wider text-foreground">
-            1-Minute ASMR
+          <h1 className="text-5xl md:text-7xl font-light tracking-wider text-foreground transition-opacity duration-500">
+            {TITLE_ROTATIONS[currentTitleIndex]}
           </h1>
           <p className="text-lg md:text-xl text-muted-foreground tracking-wide">
             build beautiful feelings, in sound

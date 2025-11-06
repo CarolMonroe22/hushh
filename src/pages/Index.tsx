@@ -78,6 +78,9 @@ const Index = () => {
   const [vibeDescription, setVibeDescription] = useState("");
   const [currentTitleIndex, setCurrentTitleIndex] = useState(0);
   const [titleFade, setTitleFade] = useState(true);
+  const [sessionFeedback, setSessionFeedback] = useState<'loved' | 'liked' | null>(null);
+  const [waitlistEmail, setWaitlistEmail] = useState("");
+  const [emailSubmitted, setEmailSubmitted] = useState(false);
   
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const timerRef = useRef<NodeJS.Timeout | null>(null);
@@ -298,6 +301,23 @@ const Index = () => {
     }
   };
 
+  const handleWaitlistSubmit = async () => {
+    if (!waitlistEmail.trim() || !waitlistEmail.includes('@')) {
+      toast({
+        title: "Invalid Email",
+        description: "Please enter a valid email address",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setEmailSubmitted(true);
+    toast({
+      title: "You're on the list! 🎉",
+      description: "We'll let you know when extended sessions are ready",
+    });
+  };
+
   const handleNewSession = () => {
     if (audioRef.current) {
       audioRef.current.pause();
@@ -313,6 +333,9 @@ const Index = () => {
     setSelectedAmbient(null);
     setGeneratedTitle("");
     setVibeDescription("");
+    setSessionFeedback(null);
+    setWaitlistEmail("");
+    setEmailSubmitted(false);
   };
 
   if (isPlaying) {
@@ -345,28 +368,99 @@ const Index = () => {
   if (isComplete) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center p-4">
-        <div className="text-center space-y-8 max-w-md">
+        <div className="text-center space-y-6 max-w-lg w-full px-4">
+          {/* Header */}
           <div className="space-y-2">
             <div className="text-6xl mb-4">✨</div>
             <h2 className="text-3xl font-light lowercase tracking-wide">session complete</h2>
-            <p className="text-muted-foreground">how do you feel?</p>
           </div>
 
-          <div className="flex flex-col sm:flex-row gap-4 justify-center">
+          {/* Feedback Section */}
+          <div className="space-y-4 py-6 border-y border-border/30">
+            <p className="text-muted-foreground text-sm">how was your experience?</p>
+            <div className="flex gap-3 justify-center">
+              <button
+                onClick={() => setSessionFeedback('loved')}
+                className={`px-6 py-3 rounded-lg border transition-all ${
+                  sessionFeedback === 'loved'
+                    ? 'border-primary bg-primary/10 scale-105'
+                    : 'border-border hover:border-primary/50'
+                }`}
+              >
+                <span className="text-2xl">❤️</span>
+                <p className="text-xs mt-1 lowercase">loved it</p>
+              </button>
+              <button
+                onClick={() => setSessionFeedback('liked')}
+                className={`px-6 py-3 rounded-lg border transition-all ${
+                  sessionFeedback === 'liked'
+                    ? 'border-primary bg-primary/10 scale-105'
+                    : 'border-border hover:border-primary/50'
+                }`}
+              >
+                <span className="text-2xl">👍</span>
+                <p className="text-xs mt-1 lowercase">it was good</p>
+              </button>
+            </div>
+          </div>
+
+          {/* Extended Sessions Teaser + Waitlist */}
+          {sessionFeedback && (
+            <div className="space-y-4 py-6 bg-card/30 rounded-lg px-6">
+              <div className="space-y-2">
+                <p className="text-sm font-medium lowercase">
+                  ✨ want longer sessions?
+                </p>
+                <p className="text-xs text-muted-foreground">
+                  join the waitlist for extended 5, 10, and 30-minute experiences
+                </p>
+              </div>
+
+              {!emailSubmitted ? (
+                <div className="flex flex-col sm:flex-row gap-2">
+                  <Input
+                    type="email"
+                    placeholder="your email"
+                    value={waitlistEmail}
+                    onChange={(e) => setWaitlistEmail(e.target.value)}
+                    className="lowercase"
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter') handleWaitlistSubmit();
+                    }}
+                  />
+                  <Button
+                    onClick={handleWaitlistSubmit}
+                    size="sm"
+                    className="lowercase tracking-wide whitespace-nowrap"
+                  >
+                    join waitlist
+                  </Button>
+                </div>
+              ) : (
+                <div className="text-sm text-primary lowercase flex items-center justify-center gap-2">
+                  <span>✓</span> you're on the list!
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* Action Buttons */}
+          <div className="flex flex-col sm:flex-row gap-3 justify-center pt-4">
             <Button
               onClick={handleReplay}
               variant="outline"
               size="lg"
               className="lowercase tracking-wide"
             >
-              replay
+              <span className="mr-2">🔄</span>
+              replay this session
             </Button>
             <Button
               onClick={handleNewSession}
               size="lg"
               className="lowercase tracking-wide"
             >
-              new session
+              create new session
             </Button>
           </div>
         </div>

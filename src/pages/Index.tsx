@@ -90,9 +90,11 @@ const Index = () => {
   const [sessionFeedback, setSessionFeedback] = useState<'loved' | 'liked' | null>(null);
   const [waitlistEmail, setWaitlistEmail] = useState("");
   const [emailSubmitted, setEmailSubmitted] = useState(false);
+  const [needsManualPlay, setNeedsManualPlay] = useState(false);
   
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const timerRef = useRef<NodeJS.Timeout | null>(null);
+  const audioContextRef = useRef<AudioContext | null>(null);
   const { toast } = useToast();
 
   useEffect(() => {
@@ -134,6 +136,18 @@ const Index = () => {
     return new Blob([byteArray], { type });
   };
 
+  const initAudioContext = () => {
+    if (!audioContextRef.current) {
+      audioContextRef.current = new (window.AudioContext || (window as any).webkitAudioContext)();
+      console.log('AudioContext initialized for mobile');
+    }
+    
+    if (audioContextRef.current.state === 'suspended') {
+      audioContextRef.current.resume();
+      console.log('AudioContext resumed');
+    }
+  };
+
   const startSession = async () => {
     if (!selectedMood || !selectedAmbient) {
       toast({
@@ -144,7 +158,9 @@ const Index = () => {
       return;
     }
 
+    initAudioContext();
     setIsGenerating(true);
+    setNeedsManualPlay(false);
 
     try {
       const { data, error } = await supabase.functions.invoke("generate-asmr-session", {
@@ -161,9 +177,28 @@ const Index = () => {
         const audioUrl = URL.createObjectURL(audioBlob);
 
         audioRef.current = new Audio(audioUrl);
-        audioRef.current.play();
+        
+        const playPromise = audioRef.current.play();
+        
+        if (playPromise !== undefined) {
+          playPromise
+            .then(() => {
+              console.log('Audio started playing successfully');
+              setIsPlaying(true);
+              setNeedsManualPlay(false);
+            })
+            .catch((error) => {
+              console.error('Play was prevented:', error);
+              setNeedsManualPlay(true);
+              toast({
+                title: "Tap to Play",
+                description: "Please tap the play button to start audio",
+              });
+            });
+        } else {
+          setIsPlaying(true);
+        }
 
-        setIsPlaying(true);
         setTimeLeft(60);
 
         timerRef.current = setInterval(() => {
@@ -208,7 +243,9 @@ const Index = () => {
       return;
     }
 
+    initAudioContext();
     setIsGenerating(true);
+    setNeedsManualPlay(false);
 
     try {
       console.log("Step 1: Interpreting vibe prompt...");
@@ -260,9 +297,28 @@ const Index = () => {
         const audioUrl = URL.createObjectURL(audioBlob);
 
         audioRef.current = new Audio(audioUrl);
-        audioRef.current.play();
+        
+        const playPromise = audioRef.current.play();
+        
+        if (playPromise !== undefined) {
+          playPromise
+            .then(() => {
+              console.log('Audio started playing successfully');
+              setIsPlaying(true);
+              setNeedsManualPlay(false);
+            })
+            .catch((error) => {
+              console.error('Play was prevented:', error);
+              setNeedsManualPlay(true);
+              toast({
+                title: "Tap to Play",
+                description: "Please tap the play button to start audio",
+              });
+            });
+        } else {
+          setIsPlaying(true);
+        }
 
-        setIsPlaying(true);
         setTimeLeft(60);
 
         timerRef.current = setInterval(() => {
@@ -372,7 +428,7 @@ const Index = () => {
     );
   }
 
-  if (isPlaying) {
+  if (isPlaying || needsManualPlay) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center p-4">
         <div className="text-center space-y-8">
@@ -390,6 +446,29 @@ const Index = () => {
               </div>
             </div>
           </div>
+
+          {needsManualPlay && audioRef.current && (
+            <Button 
+              onClick={() => {
+                audioRef.current?.play().then(() => {
+                  setNeedsManualPlay(false);
+                  setIsPlaying(true);
+                  console.log('Manual play successful');
+                }).catch((error) => {
+                  console.error('Manual play failed:', error);
+                  toast({
+                    title: "Playback Error",
+                    description: "Unable to play audio. Please try again.",
+                    variant: "destructive",
+                  });
+                });
+              }}
+              size="lg"
+              className="lowercase tracking-wide"
+            >
+              ▶️ tap to play audio
+            </Button>
+          )}
 
           <p className="text-sm text-muted-foreground lowercase tracking-wide">
             breathe deep, let go

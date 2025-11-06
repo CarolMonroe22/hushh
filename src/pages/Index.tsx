@@ -9,23 +9,24 @@ import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { useAnonymousAuth } from "@/hooks/useAnonymousAuth";
 
-type Mood = "calm" | "energized" | "focused" | "sleepy";
-type Ambient = "rain" | "nature" | "city" | "ocean" | "cafe" | "silence";
+type Mood = "relax" | "sleep" | "focus" | "gratitude" | "boost";
+type Ambient = "rain" | "ocean" | "forest" | "fireplace" | "whitenoise" | "city";
 
 const MOODS: { value: Mood; label: string; emoji: string }[] = [
-  { value: "calm", label: "calm", emoji: "🌙" },
-  { value: "energized", label: "energized", emoji: "⚡" },
-  { value: "focused", label: "focused", emoji: "🎯" },
-  { value: "sleepy", label: "sleepy", emoji: "😴" },
+  { value: "relax", label: "relax", emoji: "🌙" },
+  { value: "sleep", label: "sleep", emoji: "😴" },
+  { value: "focus", label: "focus", emoji: "🎯" },
+  { value: "gratitude", label: "gratitude", emoji: "🙏" },
+  { value: "boost", label: "boost", emoji: "⚡" },
 ];
 
 const AMBIENTS: { value: Ambient; label: string; emoji: string }[] = [
   { value: "rain", label: "rain", emoji: "🌧️" },
-  { value: "nature", label: "nature", emoji: "🌲" },
-  { value: "city", label: "city", emoji: "🏙️" },
   { value: "ocean", label: "ocean", emoji: "🌊" },
-  { value: "cafe", label: "cafe", emoji: "☕" },
-  { value: "silence", label: "silence", emoji: "🤫" },
+  { value: "forest", label: "forest", emoji: "🌲" },
+  { value: "fireplace", label: "fireplace", emoji: "🔥" },
+  { value: "whitenoise", label: "white noise", emoji: "📻" },
+  { value: "city", label: "city", emoji: "🏙️" },
 ];
 
 const VIBE_STARTERS = [

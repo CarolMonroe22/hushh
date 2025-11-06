@@ -536,6 +536,14 @@ const Index = () => {
         <div className="max-w-2xl mx-auto space-y-6 mb-12">
           {/* Large Textarea - Main Focus */}
           <div className="space-y-3">
+            {/* Formula hint */}
+            <div className="mb-2 px-1">
+              <p className="text-xs text-muted-foreground/60 font-mono">
+                formula: <span className="text-foreground/80">[goal/feeling]</span> + 
+                <span className="text-muted-foreground/40"> with [sound]</span> + 
+                <span className="text-muted-foreground/40"> [voice type]</span>
+              </p>
+            </div>
             <Textarea
               placeholder="describe how you want to feel... (e.g., 'I need deep focus for studying with calming rain')"
               value={vibeDescription}
@@ -550,6 +558,33 @@ const Index = () => {
               <p className="text-xs text-muted-foreground/60">
                 {vibeDescription.length}/300
               </p>
+            </div>
+          </div>
+
+          {/* Prompt Examples */}
+          <div className="space-y-2">
+            <p className="text-xs text-muted-foreground/70 px-1">
+              💡 try examples like:
+            </p>
+            <div className="flex flex-wrap gap-1.5">
+              {[
+                "I need deep focus with rain sounds",
+                "Can you help me sleep?",
+                "Confidence boost for my presentation",
+                "How can I calm my anxiety with ocean?",
+                "Morning energy, no background music",
+                "Help me meditate with singing bowls",
+                "Study session with male voice and rain",
+                "Can you create a peaceful lullaby?",
+              ].map((example) => (
+                <button
+                  key={example}
+                  onClick={() => setVibeDescription(example)}
+                  className="px-2.5 py-1 rounded-md text-xs bg-muted/40 hover:bg-muted/70 text-muted-foreground hover:text-foreground transition-all border border-transparent hover:border-border/50"
+                >
+                  {example}
+                </button>
+              ))}
             </div>
           </div>
 

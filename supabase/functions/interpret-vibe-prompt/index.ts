@@ -47,7 +47,7 @@ PROMPT RULES:
 4. Specify voice characteristics including gender (e.g., "soft female whispered voiceover", "deep male confident voice", "warm tone")
 5. Specify ambient sound type and volume (e.g., "gentle rain sounds at 30% volume")
 6. Include 3-5 actual phrases the voice should say
-7. Start with "1 minute ASMR"
+7. Start with "1 minute ASMR" EXCEPT for lullabies - lullabies should start naturally (e.g., "1 minute gentle lullaby", "1 minuto de canción de cuna tierna")
 8. The Music API generates BOTH voice and ambient sounds together
 
 VOICE GENDER SELECTION RULES:
@@ -102,6 +102,11 @@ LULLABY SPECIAL RULES (HIGHEST PRIORITY):
    - Examples: "sleep now, sweet [name]... close your eyes, little one... you are loved... safe and warm..."
 7. **Volume**: Ambient sounds at 10-15% maximum (babies need very subtle background)
 8. **Language**: MUST match the language of the user's request (see LANGUAGE RULES below)
+9. **NEVER use "ASMR" terminology**: Lullabies should sound natural and sweet, not technical
+   - ❌ "1 minuto ASMR canción de cuna"
+   - ✅ "1 minuto de canción de cuna tierna" or "Canción de cuna suave"
+   - ❌ "1 minute ASMR gentle lullaby"
+   - ✅ "1 minute gentle lullaby" or "Gentle lullaby"
 
 LANGUAGE DETECTION RULES (CRITICAL):
 1. **Detect user's language**:
@@ -180,19 +185,19 @@ You return: {
 User says: "crea una canción de cuna para mi bebé Jorge"
 You return: {
   "title": "canción de jorge",
-  "prompt": "1 minuto ASMR canción de cuna tierna con voz susurrada femenina muy suave y caja de música delicada. La voz susurra con amor maternal: duerme ahora, dulce Jorge... cierra tus ojitos, mi amor... estás seguro y amado... duerme tranquilo, pequeño Jorge... mamá está aquí... descansa, mi tesoro... sueña bonito, mi niño hermoso. Susurro ASMR muy tierno, caja de música suave al 12% de volumen, voz maternal y cálida."
+  "prompt": "1 minuto de canción de cuna tierna con voz susurrada femenina muy suave y caja de música delicada. La voz susurra con amor maternal: duerme ahora, dulce Jorge... cierra tus ojitos, mi amor... estás seguro y amado... duerme tranquilo, pequeño Jorge... mamá está aquí... descansa, mi tesoro... sueña bonito, mi niño hermoso. Susurro muy tierno, caja de música suave al 12% de volumen, voz maternal y cálida."
 }
 
 User says: "create a lullaby for baby Emma"
 You return: {
   "title": "emma's lullaby",
-  "prompt": "1 minute ASMR gentle lullaby with soft female whispered voice and delicate music box. The voice whispers lovingly: sleep now, sweet Emma... close your little eyes, my love... you are safe and cherished... rest peacefully, little Emma... mama is here... dream sweetly, precious one. Very tender ASMR whisper, music box gentle at 12% volume, voice warm and maternal."
+  "prompt": "1 minute gentle lullaby with soft female whispered voice and delicate music box. The voice whispers lovingly: sleep now, sweet Emma... close your little eyes, my love... you are safe and cherished... rest peacefully, little Emma... mama is here... dream sweetly, precious one. Very tender whisper, music box gentle at 12% volume, voice warm and maternal."
 }
 
 User says: "lullaby para dormir a mi bebé sin mencionar nombre"
 You return: {
   "title": "dulces sueños",
-  "prompt": "1 minuto ASMR canción de cuna suave con voz susurrada femenina tierna y campanitas delicadas. La voz susurra: duerme, mi pequeño... cierra tus ojitos... estás seguro y amado... descansa tranquilo... eres mi tesoro... sueña bonito, mi amor. Susurro ASMR muy dulce, campanitas suaves al 10% de volumen, voz maternal y cálida."
+  "prompt": "1 minuto de canción de cuna suave con voz susurrada femenina tierna y campanitas delicadas. La voz susurra: duerme, mi pequeño... cierra tus ojitos... estás seguro y amado... descansa tranquilo... eres mi tesoro... sueña bonito, mi amor. Susurro muy dulce, campanitas suaves al 10% de volumen, voz maternal y cálida."
 }
 
 User says: "necesito paz profunda con voz masculina"

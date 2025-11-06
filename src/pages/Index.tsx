@@ -472,6 +472,98 @@ const Index = () => {
   return (
     <div className="min-h-screen bg-background text-foreground">
       <div className="container mx-auto px-4 py-12 md:py-20 max-w-4xl">
+        {/* About/Story Section - Opening */}
+        <div className="max-w-2xl mx-auto mb-16 px-4">
+          <div className="text-center space-y-6 py-8">
+            {/* Title */}
+            <h2 className="text-4xl md:text-5xl font-light lowercase tracking-wide">
+              🌙 hushh
+            </h2>
+            
+            {/* Credit with link */}
+            <p className="text-sm text-muted-foreground">
+              created by{" "}
+              <a 
+                href="https://x.com/carolmonroe" 
+                target="_blank" 
+                rel="noopener noreferrer"
+                className="text-primary hover:underline"
+              >
+                @carolmonroe
+              </a>
+            </p>
+
+            {/* Story */}
+            <div className="max-w-lg mx-auto space-y-4 text-muted-foreground leading-relaxed">
+              <p className="text-base">
+                My mom used to tell me to relax before bed —<br />
+                to fall asleep to the sound of rain.<br />
+                We had those ambient CDs, soft music, slow rhythms...<br />
+                and I'd rest my head on her lap as she whispered songs.
+              </p>
+              
+              <p className="text-base">
+                That feeling of calm, safety, and sound —<br />
+                I brought it here.
+              </p>
+            </div>
+
+            {/* Waitlist CTA with Dialog */}
+            <div className="pt-4">
+              <Dialog>
+                <DialogTrigger asChild>
+                  <Button 
+                    variant="outline" 
+                    size="lg"
+                    className="lowercase tracking-wide"
+                  >
+                    ✨ join the waitlist →
+                  </Button>
+                </DialogTrigger>
+                <DialogContent className="sm:max-w-md">
+                  <DialogHeader>
+                    <DialogTitle className="lowercase text-2xl tracking-wide">
+                      join the waitlist
+                    </DialogTitle>
+                  </DialogHeader>
+                  <div className="space-y-4 pt-4">
+                    <p className="text-sm text-muted-foreground">
+                      be the first to know when extended sessions (5, 10, and 30 minutes) are available
+                    </p>
+                    
+                    {!emailSubmitted ? (
+                      <div className="flex flex-col gap-3">
+                        <Input
+                          type="email"
+                          placeholder="your email"
+                          value={waitlistEmail}
+                          onChange={(e) => setWaitlistEmail(e.target.value)}
+                          className="lowercase"
+                          onKeyDown={(e) => {
+                            if (e.key === 'Enter') handleWaitlistSubmit();
+                          }}
+                        />
+                        <Button
+                          onClick={handleWaitlistSubmit}
+                          className="lowercase tracking-wide w-full"
+                        >
+                          join waitlist
+                        </Button>
+                      </div>
+                    ) : (
+                      <div className="text-center py-4">
+                        <div className="text-primary lowercase flex items-center justify-center gap-2 text-lg">
+                          <span>✓</span> you're on the list!
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                </DialogContent>
+              </Dialog>
+            </div>
+          </div>
+        </div>
+
         {/* Hero Section */}
         <div className="text-center space-y-6 mb-16">
           <h1 className="text-5xl md:text-7xl font-light tracking-wider text-foreground">
@@ -612,97 +704,6 @@ const Index = () => {
               </AccordionContent>
             </AccordionItem>
           </Accordion>
-        </div>
-
-        {/* About/Story Section */}
-        <div className="max-w-2xl mx-auto mt-20 mb-12 px-4">
-          <div className="text-center space-y-6 py-12 border-t border-border/30">
-            {/* Title */}
-            <h2 className="text-3xl md:text-4xl font-light lowercase tracking-wide">
-              🌙 hushh
-            </h2>
-            
-            {/* Credit with link */}
-            <p className="text-sm text-muted-foreground">
-              created by{" "}
-              <a 
-                href="https://x.com/carolmonroe" 
-                target="_blank" 
-                rel="noopener noreferrer"
-                className="text-primary hover:underline"
-              >
-                @carolmonroe
-              </a>
-            </p>
-
-            {/* Story */}
-            <div className="max-w-lg mx-auto space-y-4 text-muted-foreground text-sm leading-relaxed">
-              <p>
-                My mom used to tell me to relax before bed —<br />
-                to fall asleep to the sound of rain.<br />
-                We had those ambient CDs, soft music, slow rhythms...<br />
-                and I'd rest my head on her lap as she whispered songs.
-              </p>
-              
-              <p>
-                That feeling of calm, safety, and sound —<br />
-                I brought it here.
-              </p>
-            </div>
-
-            {/* Waitlist CTA with Dialog */}
-            <div className="pt-6">
-              <Dialog>
-                <DialogTrigger asChild>
-                  <Button 
-                    variant="outline" 
-                    className="lowercase tracking-wide"
-                  >
-                    ✨ join the waitlist →
-                  </Button>
-                </DialogTrigger>
-                <DialogContent className="sm:max-w-md">
-                  <DialogHeader>
-                    <DialogTitle className="lowercase text-2xl tracking-wide">
-                      join the waitlist
-                    </DialogTitle>
-                  </DialogHeader>
-                  <div className="space-y-4 pt-4">
-                    <p className="text-sm text-muted-foreground">
-                      be the first to know when extended sessions (5, 10, and 30 minutes) are available
-                    </p>
-                    
-                    {!emailSubmitted ? (
-                      <div className="flex flex-col gap-3">
-                        <Input
-                          type="email"
-                          placeholder="your email"
-                          value={waitlistEmail}
-                          onChange={(e) => setWaitlistEmail(e.target.value)}
-                          className="lowercase"
-                          onKeyDown={(e) => {
-                            if (e.key === 'Enter') handleWaitlistSubmit();
-                          }}
-                        />
-                        <Button
-                          onClick={handleWaitlistSubmit}
-                          className="lowercase tracking-wide w-full"
-                        >
-                          join waitlist
-                        </Button>
-                      </div>
-                    ) : (
-                      <div className="text-center py-4">
-                        <div className="text-primary lowercase flex items-center justify-center gap-2 text-lg">
-                          <span>✓</span> you're on the list!
-                        </div>
-                      </div>
-                    )}
-                  </div>
-                </DialogContent>
-              </Dialog>
-            </div>
-          </div>
         </div>
       </div>
 

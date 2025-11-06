@@ -7,6 +7,7 @@ import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
+import { useAnonymousAuth } from "@/hooks/useAnonymousAuth";
 
 type Mood = "calm" | "energized" | "focused" | "sleepy";
 type Ambient = "rain" | "nature" | "city" | "ocean" | "cafe" | "silence";
@@ -69,6 +70,7 @@ const TITLE_ROTATIONS = [
 ];
 
 const Index = () => {
+  const { session, loading } = useAnonymousAuth();
   const [selectedMood, setSelectedMood] = useState<Mood | null>(null);
   const [selectedAmbient, setSelectedAmbient] = useState<Ambient | null>(null);
   const [isGenerating, setIsGenerating] = useState(false);
@@ -141,6 +143,9 @@ const Index = () => {
     try {
       const { data, error } = await supabase.functions.invoke("generate-asmr-session", {
         body: { mood: selectedMood, ambient: selectedAmbient },
+        headers: session?.access_token ? {
+          Authorization: `Bearer ${session.access_token}`,
+        } : {},
       });
 
       if (error) throw error;
@@ -207,6 +212,9 @@ const Index = () => {
           body: {
             description: vibeDescription,
           },
+          headers: session?.access_token ? {
+            Authorization: `Bearer ${session.access_token}`,
+          } : {},
         }
       );
 
@@ -229,6 +237,9 @@ const Index = () => {
             prompt: interpretData.prompt,
             title: interpretData.title || "your vibe",
           },
+          headers: session?.access_token ? {
+            Authorization: `Bearer ${session.access_token}`,
+          } : {},
         }
       );
 
@@ -338,6 +349,22 @@ const Index = () => {
     setWaitlistEmail("");
     setEmailSubmitted(false);
   };
+
+  // Show loading state while creating anonymous session
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center p-4">
+        <div className="text-center space-y-4">
+          <div className="w-16 h-16 mx-auto">
+            <div className="w-full h-full border-4 border-primary/30 border-t-primary rounded-full animate-spin" />
+          </div>
+          <p className="text-sm text-muted-foreground lowercase tracking-wide">
+            preparing your session...
+          </p>
+        </div>
+      </div>
+    );
+  }
 
   if (isPlaying) {
     return (

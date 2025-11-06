@@ -5,6 +5,46 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
+// Utility function to detect lullaby requests
+function isLullaby(text: string): boolean {
+  if (!text) return false;
+  const patterns = [
+    /\blullaby\b/i,
+    /\bbaby\s*(?:sleep|bed|lull)\b/i,
+    /\bcanci[oó]n\s+de\s+cuna\b/i,
+    /\barrullo\b/i,
+    /\bnana\b/i,
+    /\bsleep\s+baby\b/i,
+    /\bdormir\s+beb[eé]\b/i,
+  ];
+  return patterns.some((rx) => rx.test(text));
+}
+
+// Utility function to sanitize lullaby prompts - removes ASMR and normalizes start
+function sanitizeLullabyPrompt(prompt: string): string {
+  if (!prompt) return prompt;
+  
+  // Remove all instances of "ASMR"
+  let out = prompt.replace(/\bASMR\b/gi, "").replace(/\s{2,}/g, " ").trim();
+
+  const startPhrase = "1 minute gentle lullaby";
+
+  // Remove problematic "1 minute ASMR ..." header
+  out = out.replace(/^\s*1\s*(?:minute|min)\s*ASMR\s*/i, "");
+
+  // If starts with "1 minute ..." but doesn't mention lullaby in the first part, normalize
+  if (/^\s*1\s*(?:minute|min)\b/i.test(out) && !/\blullaby\b/i.test(out.slice(0, 80))) {
+    out = out.replace(/^\s*1\s*(?:minute|min)\b.*?(?=\s+with|\s+and|\.)/i, startPhrase);
+  }
+
+  // Guarantee it starts with "1 minute gentle lullaby"
+  if (!/^\s*1\s*(?:minute|min)\s+gentle\s+lullaby\b/i.test(out)) {
+    out = `${startPhrase} ${out}`;
+  }
+
+  return out.trim();
+}
+
 serve(async (req) => {
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders });
@@ -202,13 +242,31 @@ Now interpret the user's description. Return ONLY valid JSON.`;
     const parsedResponse = JSON.parse(responseContent);
     const { title: generatedTitle, prompt: interpretedPrompt } = parsedResponse;
 
-    console.log(`Generated title: ${generatedTitle}`);
-    console.log(`Interpreted prompt: ${interpretedPrompt}`);
+    // Post-process for lullabies to guarantee no ASMR and correct start
+    const inputIsLullaby = isLullaby(description);
+    const outputIsLullaby = isLullaby(generatedTitle) || isLullaby(interpretedPrompt);
+    const shouldSanitize = inputIsLullaby || outputIsLullaby;
+
+    let finalPrompt = interpretedPrompt;
+    let finalTitle = generatedTitle || 'your vibe';
+
+    if (shouldSanitize) {
+      finalPrompt = sanitizeLullabyPrompt(finalPrompt);
+      finalTitle = finalTitle.replace(/\bASMR\b/gi, "").trim();
+      console.log("Lullaby sanitation applied", {
+        inputIsLullaby,
+        outputIsLullaby,
+        titlePreview: finalTitle.slice(0, 50),
+      });
+    }
+
+    console.log(`Generated title: ${finalTitle}`);
+    console.log(`Interpreted prompt: ${finalPrompt}`);
 
     return new Response(
       JSON.stringify({ 
-        prompt: interpretedPrompt,
-        title: generatedTitle || 'your vibe'
+        prompt: finalPrompt,
+        title: finalTitle
       }),
       { 
         headers: { ...corsHeaders, 'Content-Type': 'application/json' }

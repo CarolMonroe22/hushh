@@ -98,8 +98,8 @@ const Index = () => {
         );
         // Fade in
         setTitleFade(true);
-      }, 300); // 300ms for fade out
-    }, 3000); // Change every 3 seconds
+      }, 600); // 600ms for smooth fade out
+    }, 5000); // Change every 5 seconds for more contemplative feel
 
     return () => clearInterval(titleInterval);
   }, []);
@@ -374,9 +374,12 @@ const Index = () => {
           <h1 className="text-5xl md:text-7xl font-light tracking-wider text-foreground">
             <span>1-Minute </span>
             <span 
-              className={`inline-block transition-opacity duration-300 ${
-                titleFade ? 'opacity-100' : 'opacity-0'
+              className={`inline-block transition-all duration-600 ease-in-out ${
+                titleFade 
+                  ? 'opacity-100 translate-y-0' 
+                  : 'opacity-0 -translate-y-2'
               }`}
+              style={{ transitionTimingFunction: 'cubic-bezier(0.4, 0.0, 0.2, 1)' }}
             >
               {TITLE_ROTATIONS[currentTitleIndex]}
             </span>

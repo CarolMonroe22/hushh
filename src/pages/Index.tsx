@@ -46,17 +46,17 @@ const VIBE_STARTERS = [
 ];
 
 const TITLE_ROTATIONS = [
-  "1-Minute ASMR",
-  "1-Minute Meditation", 
-  "1-Minute Focus",
-  "1-Minute Calm",
-  "1-Minute Flow",
-  "1-Minute Lullaby",
-  "1-Minute Reset",
-  "1-Minute Breathe",
-  "1-Minute Pray",
-  "1-Minute Pause",
-  "1-Minute Dream",
+  "ASMR",
+  "Meditation", 
+  "Focus",
+  "Calm",
+  "Flow",
+  "Lullaby",
+  "Reset",
+  "Breathe",
+  "Pray",
+  "Pause",
+  "Dream",
 ];
 
 const Index = () => {
@@ -363,7 +363,7 @@ const Index = () => {
         {/* Hero Section */}
         <div className="text-center space-y-6 mb-16">
           <h1 className="text-5xl md:text-7xl font-light tracking-wider text-foreground transition-opacity duration-500">
-            {TITLE_ROTATIONS[currentTitleIndex]}
+            1-Minute {TITLE_ROTATIONS[currentTitleIndex]}
           </h1>
           <p className="text-lg md:text-xl text-muted-foreground tracking-wide">
             build beautiful feelings, in sound

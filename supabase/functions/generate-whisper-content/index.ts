@@ -1,28 +1,59 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.38.4';
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
-// Simple in-memory rate limiting
-const rateLimitMap = new Map<string, { count: number; resetTime: number }>();
+// Extract user_id from JWT token
+function getUserIdFromAuth(req: Request): string | null {
+  const authHeader = req.headers.get('Authorization');
+  if (!authHeader?.startsWith('Bearer ')) return null;
+  
+  try {
+    const token = authHeader.substring(7);
+    const payload = JSON.parse(atob(token.split('.')[1]));
+    return payload.sub || null;
+  } catch {
+    return null;
+  }
+}
 
-function checkRateLimit(ip: string): boolean {
-  const now = Date.now();
-  const limit = rateLimitMap.get(ip);
-  
-  if (!limit || now > limit.resetTime) {
-    rateLimitMap.set(ip, { count: 1, resetTime: now + 60000 });
-    return true;
-  }
-  
-  if (limit.count >= 15) {
-    return false;
-  }
-  
-  limit.count++;
-  return true;
+// Check persistent rate limit using database
+async function checkPersistentRateLimit(
+  supabase: any,
+  userId: string,
+  endpoint: string,
+  maxRequests: number
+): Promise<{ allowed: boolean; remaining: number }> {
+  const windowStart = new Date();
+  windowStart.setMinutes(Math.floor(windowStart.getMinutes() / 1) * 1);
+  windowStart.setSeconds(0, 0);
+
+  // Increment counter
+  await supabase.rpc('increment_rate_limit', {
+    p_user_id: userId,
+    p_endpoint: endpoint,
+    p_window_start: windowStart.toISOString(),
+  });
+
+  // Check current count
+  const { data } = await supabase
+    .from('rate_limits')
+    .select('request_count')
+    .eq('user_id', userId)
+    .eq('endpoint', endpoint)
+    .eq('window_start', windowStart.toISOString())
+    .single();
+
+  const count = data?.request_count || 0;
+  const remaining = Math.max(0, maxRequests - count);
+
+  return {
+    allowed: count <= maxRequests,
+    remaining,
+  };
 }
 
 const CATEGORY_PROMPTS = {
@@ -81,10 +112,35 @@ serve(async (req) => {
   }
 
   try {
-    // Rate limiting
-    const ip = req.headers.get('x-forwarded-for')?.split(',')[0] || 'unknown';
-    if (!checkRateLimit(ip)) {
-      console.warn(`Rate limit exceeded for IP: ${ip}`);
+    // Extract user_id from JWT
+    const userId = getUserIdFromAuth(req);
+    if (!userId) {
+      console.warn('[generate-whisper-content] Missing or invalid JWT');
+      return new Response(
+        JSON.stringify({ error: 'Unauthorized' }),
+        { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
+    console.log(`[generate-whisper-content] User: ${userId}`);
+
+    // Create Supabase client with service role key
+    const supabaseUrl = Deno.env.get('SUPABASE_URL');
+    const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY');
+    
+    if (!supabaseUrl || !supabaseServiceKey) {
+      throw new Error('Supabase credentials not configured');
+    }
+
+    const supabase = createClient(supabaseUrl, supabaseServiceKey);
+
+    // Persistent rate limiting (15 requests/minute)
+    const rateLimit = await checkPersistentRateLimit(supabase, userId, 'generate-whisper-content', 15);
+    
+    console.log(`[generate-whisper-content] Rate limit: ${rateLimit.remaining}/15`);
+    
+    if (!rateLimit.allowed) {
+      console.warn(`[generate-whisper-content] Rate limit exceeded for user: ${userId}`);
       return new Response(
         JSON.stringify({ error: 'Too many requests. Please try again in a minute.' }),
         { status: 429, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
@@ -102,6 +158,8 @@ serve(async (req) => {
       );
     }
 
+    console.log(`[generate-whisper-content] Input validation: passed`);
+
     const LOVABLE_API_KEY = Deno.env.get('LOVABLE_API_KEY');
     if (!LOVABLE_API_KEY) {
       throw new Error('LOVABLE_API_KEY not configured');
@@ -109,7 +167,8 @@ serve(async (req) => {
 
     const systemPrompt = CATEGORY_PROMPTS[category as keyof typeof CATEGORY_PROMPTS];
 
-    console.log(`Generating whisper for category: ${category}`);
+    console.log(`[generate-whisper-content] Generating whisper for category: ${category}`);
+    console.log(`[generate-whisper-content] External API call: started`);
 
     const response = await fetch('https://ai.gateway.lovable.dev/v1/chat/completions', {
       method: 'POST',
@@ -129,7 +188,7 @@ serve(async (req) => {
 
     if (!response.ok) {
       const errorText = await response.text();
-      console.error('Lovable AI Gateway error:', response.status, errorText);
+      console.error('[generate-whisper-content] Lovable AI Gateway error:', response.status, errorText);
       
       // Generic user-facing error
       return new Response(
@@ -145,7 +204,8 @@ serve(async (req) => {
       throw new Error('No content generated');
     }
 
-    console.log(`Generated ${generatedText.length} characters`);
+    console.log(`[generate-whisper-content] Generated ${generatedText.length} characters`);
+    console.log(`[generate-whisper-content] Success`);
 
     return new Response(
       JSON.stringify({ text: generatedText }),
@@ -155,7 +215,7 @@ serve(async (req) => {
     );
 
   } catch (error) {
-    console.error('Error in generate-whisper-content:', error);
+    console.error('[generate-whisper-content] Error:', error);
     return new Response(
       JSON.stringify({ error: error instanceof Error ? error.message : 'Unknown error' }),
       { 

@@ -1,29 +1,59 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.38.4';
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
-// Simple in-memory rate limiting (resets on function cold start)
-const rateLimitMap = new Map<string, { count: number; resetTime: number }>();
+// Extract user_id from JWT token
+function getUserIdFromAuth(req: Request): string | null {
+  const authHeader = req.headers.get('Authorization');
+  if (!authHeader?.startsWith('Bearer ')) return null;
+  
+  try {
+    const token = authHeader.substring(7);
+    const payload = JSON.parse(atob(token.split('.')[1]));
+    return payload.sub || null;
+  } catch {
+    return null;
+  }
+}
 
-function checkRateLimit(ip: string): boolean {
-  const now = Date.now();
-  const limit = rateLimitMap.get(ip);
-  
-  if (!limit || now > limit.resetTime) {
-    // Reset limit every minute
-    rateLimitMap.set(ip, { count: 1, resetTime: now + 60000 });
-    return true;
-  }
-  
-  if (limit.count >= 20) {
-    return false;
-  }
-  
-  limit.count++;
-  return true;
+// Check persistent rate limit using database
+async function checkPersistentRateLimit(
+  supabase: any,
+  userId: string,
+  endpoint: string,
+  maxRequests: number
+): Promise<{ allowed: boolean; remaining: number }> {
+  const windowStart = new Date();
+  windowStart.setMinutes(Math.floor(windowStart.getMinutes() / 1) * 1);
+  windowStart.setSeconds(0, 0);
+
+  // Increment counter
+  await supabase.rpc('increment_rate_limit', {
+    p_user_id: userId,
+    p_endpoint: endpoint,
+    p_window_start: windowStart.toISOString(),
+  });
+
+  // Check current count
+  const { data } = await supabase
+    .from('rate_limits')
+    .select('request_count')
+    .eq('user_id', userId)
+    .eq('endpoint', endpoint)
+    .eq('window_start', windowStart.toISOString())
+    .single();
+
+  const count = data?.request_count || 0;
+  const remaining = Math.max(0, maxRequests - count);
+
+  return {
+    allowed: count <= maxRequests,
+    remaining,
+  };
 }
 
 serve(async (req) => {
@@ -33,10 +63,35 @@ serve(async (req) => {
   }
 
   try {
-    // Rate limiting by IP
-    const ip = req.headers.get('x-forwarded-for')?.split(',')[0] || 'unknown';
-    if (!checkRateLimit(ip)) {
-      console.warn(`Rate limit exceeded for IP: ${ip}`);
+    // Extract user_id from JWT
+    const userId = getUserIdFromAuth(req);
+    if (!userId) {
+      console.warn('[whisper-text] Missing or invalid JWT');
+      return new Response(
+        JSON.stringify({ error: 'Unauthorized' }),
+        { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
+    console.log(`[whisper-text] User: ${userId}`);
+
+    // Create Supabase client with service role key
+    const supabaseUrl = Deno.env.get('SUPABASE_URL');
+    const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY');
+    
+    if (!supabaseUrl || !supabaseServiceKey) {
+      throw new Error('Supabase credentials not configured');
+    }
+
+    const supabase = createClient(supabaseUrl, supabaseServiceKey);
+
+    // Persistent rate limiting (20 requests/minute)
+    const rateLimit = await checkPersistentRateLimit(supabase, userId, 'whisper-text', 20);
+    
+    console.log(`[whisper-text] Rate limit: ${rateLimit.remaining}/20`);
+    
+    if (!rateLimit.allowed) {
+      console.warn(`[whisper-text] Rate limit exceeded for user: ${userId}`);
       return new Response(
         JSON.stringify({ error: 'Too many requests. Please try again in a minute.' }),
         { status: 429, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
@@ -73,7 +128,8 @@ serve(async (req) => {
       );
     }
 
-    console.log("Generating whisper for text:", text.substring(0, 50));
+    console.log("[whisper-text] Input validation: passed");
+    console.log("[whisper-text] Generating whisper for text:", text.substring(0, 50));
 
     // Get voice settings from request or use defaults
     const voiceId = body.voiceId || '9BWtsMINqrJLrRacOk9x';
@@ -85,6 +141,8 @@ serve(async (req) => {
       .replace(/\[WHISPER\]/g, '')
       .replace(/\[PAUSE (\d+)ms\]/g, '<break time="$1ms"/>')
       .trim();
+
+    console.log("[whisper-text] External API call: started");
 
     // Call ElevenLabs TTS API with custom voice settings
     const response = await fetch(`https://api.elevenlabs.io/v1/text-to-speech/${voiceId}`, {
@@ -108,7 +166,7 @@ serve(async (req) => {
 
     if (!response.ok) {
       const errorText = await response.text();
-      console.error("ElevenLabs API error:", response.status, errorText);
+      console.error("[whisper-text] ElevenLabs API error:", response.status, errorText);
       
       // Return generic error to user, log details server-side
       let userMessage = 'Audio generation temporarily unavailable. Please try again.';
@@ -143,6 +201,8 @@ serve(async (req) => {
     
     const base64Audio = btoa(binaryString);
 
+    console.log("[whisper-text] Success");
+
     return new Response(
       JSON.stringify({ audioContent: base64Audio }),
       {
@@ -150,7 +210,7 @@ serve(async (req) => {
       },
     );
   } catch (error) {
-    console.error("Error in whisper-text function:", error);
+    console.error("[whisper-text] Error:", error);
     const errorMessage = error instanceof Error ? error.message : "Unknown error";
     return new Response(
       JSON.stringify({ error: errorMessage }),

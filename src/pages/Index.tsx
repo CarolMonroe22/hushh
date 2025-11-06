@@ -56,7 +56,7 @@ const VIBE_STARTERS = [
     description: "Create a sacred space for prayer and spiritual connection. I want gentle, reverent whispers that help me feel grounded, connected to something greater, and at peace in this moment of reflection.",
   },
   {
-    title: "estoico",
+    title: "stoic",
     description: "I need strength and clarity rooted in ancient wisdom. Create a grounded atmosphere that reminds me to focus on what I can control, accept what I cannot change, and act with virtue and reason regardless of external circumstances.",
   },
 ];

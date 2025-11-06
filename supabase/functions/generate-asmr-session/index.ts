@@ -8,6 +8,52 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
+function getUserIdFromAuth(req: Request): string | null {
+  const authHeader = req.headers.get('Authorization');
+  if (!authHeader?.startsWith('Bearer ')) return null;
+  
+  try {
+    const token = authHeader.substring(7);
+    const payload = JSON.parse(atob(token.split('.')[1]));
+    return payload.sub || null;
+  } catch {
+    return null;
+  }
+}
+
+async function checkPersistentRateLimit(
+  supabase: any,
+  userId: string,
+  endpoint: string,
+  maxRequests: number
+): Promise<{ allowed: boolean; remaining: number }> {
+  const windowStart = new Date();
+  windowStart.setMinutes(Math.floor(windowStart.getMinutes() / 1) * 1);
+  windowStart.setSeconds(0, 0);
+
+  await supabase.rpc('increment_rate_limit', {
+    p_user_id: userId,
+    p_endpoint: endpoint,
+    p_window_start: windowStart.toISOString(),
+  });
+
+  const { data } = await supabase
+    .from('rate_limits')
+    .select('request_count')
+    .eq('user_id', userId)
+    .eq('endpoint', endpoint)
+    .eq('window_start', windowStart.toISOString())
+    .single();
+
+  const count = data?.request_count || 0;
+  const remaining = Math.max(0, maxRequests - count);
+
+  return {
+    allowed: count <= maxRequests,
+    remaining,
+  };
+}
+
 const ELEVENLABS_API_KEY = Deno.env.get('ELEVENLABS_API_KEY');
 const SUPABASE_URL = Deno.env.get('SUPABASE_URL')!;
 const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
@@ -88,15 +134,46 @@ serve(async (req) => {
     return new Response(null, { headers: corsHeaders });
   }
 
+  const userId = getUserIdFromAuth(req);
+  if (!userId) {
+    return new Response(
+      JSON.stringify({ error: 'Authentication required' }),
+      { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+    );
+  }
+
+  const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
+
+  const rateLimit = await checkPersistentRateLimit(supabase, userId, 'generate-asmr-session', 10);
+  if (!rateLimit.allowed) {
+    return new Response(
+      JSON.stringify({ 
+        error: 'Rate limit exceeded. Please try again later.',
+        remaining: rateLimit.remaining 
+      }),
+      { status: 429, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+    );
+  }
+
+  console.log(`[generate-asmr-session] User: ${userId}, Rate limit: ${rateLimit.remaining}/10`);
+
   try {
     const { mood, ambient } = await req.json();
     
-    if (!mood || !ambient) {
-      throw new Error('Missing mood or ambient parameter');
+    const validMoods = ['relax', 'sleep', 'focus', 'gratitude', 'boost'];
+    const validAmbients = ['rain', 'ocean', 'forest', 'fireplace', 'whitenoise', 'city'];
+    
+    if (!mood || !validMoods.includes(mood)) {
+      throw new Error('Invalid mood. Must be one of: relax, sleep, focus, gratitude, boost');
+    }
+    
+    if (!ambient || !validAmbients.includes(ambient)) {
+      throw new Error('Invalid ambient. Must be one of: rain, ocean, forest, fireplace, whitenoise, city');
     }
 
+    console.log(`[generate-asmr-session] Input validation passed`);
+
     const weekKey = getWeekKey();
-    const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
 
     console.log(`Checking cache for: ${mood}_${ambient}_${weekKey}`);
 

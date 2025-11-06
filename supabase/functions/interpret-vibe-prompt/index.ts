@@ -1,9 +1,56 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.7.1';
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
+
+function getUserIdFromAuth(req: Request): string | null {
+  const authHeader = req.headers.get('Authorization');
+  if (!authHeader?.startsWith('Bearer ')) return null;
+  
+  try {
+    const token = authHeader.substring(7);
+    const payload = JSON.parse(atob(token.split('.')[1]));
+    return payload.sub || null;
+  } catch {
+    return null;
+  }
+}
+
+async function checkPersistentRateLimit(
+  supabase: any,
+  userId: string,
+  endpoint: string,
+  maxRequests: number
+): Promise<{ allowed: boolean; remaining: number }> {
+  const windowStart = new Date();
+  windowStart.setMinutes(Math.floor(windowStart.getMinutes() / 1) * 1);
+  windowStart.setSeconds(0, 0);
+
+  await supabase.rpc('increment_rate_limit', {
+    p_user_id: userId,
+    p_endpoint: endpoint,
+    p_window_start: windowStart.toISOString(),
+  });
+
+  const { data } = await supabase
+    .from('rate_limits')
+    .select('request_count')
+    .eq('user_id', userId)
+    .eq('endpoint', endpoint)
+    .eq('window_start', windowStart.toISOString())
+    .single();
+
+  const count = data?.request_count || 0;
+  const remaining = Math.max(0, maxRequests - count);
+
+  return {
+    allowed: count <= maxRequests,
+    remaining,
+  };
+}
 
 // Utility function to detect lullaby requests
 function isLullaby(text: string): boolean {
@@ -50,19 +97,53 @@ serve(async (req) => {
     return new Response(null, { headers: corsHeaders });
   }
 
+  const userId = getUserIdFromAuth(req);
+  if (!userId) {
+    return new Response(
+      JSON.stringify({ error: 'Authentication required' }),
+      { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+    );
+  }
+
+  const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
+  const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
+  const supabase = createClient(supabaseUrl, supabaseServiceKey);
+
+  const rateLimit = await checkPersistentRateLimit(supabase, userId, 'interpret-vibe-prompt', 10);
+  if (!rateLimit.allowed) {
+    return new Response(
+      JSON.stringify({ 
+        error: 'Rate limit exceeded. Please try again later.',
+        remaining: rateLimit.remaining 
+      }),
+      { status: 429, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+    );
+  }
+
+  console.log(`[interpret-vibe-prompt] User: ${userId}, Rate limit: ${rateLimit.remaining}/10`);
+
   try {
     const { description } = await req.json();
     
-    if (!description) {
-      throw new Error('Description is required');
+    if (!description || typeof description !== 'string') {
+      throw new Error('Description is required and must be a string');
     }
+
+    const trimmedDescription = description.trim();
+    if (trimmedDescription.length < 10) {
+      throw new Error('Description must be at least 10 characters');
+    }
+    if (trimmedDescription.length > 500) {
+      throw new Error('Description must be less than 500 characters');
+    }
+
+    console.log(`[interpret-vibe-prompt] Input validation passed`);
+    console.log(`[interpret-vibe-prompt] Interpreting vibe: ${trimmedDescription}`);
 
     const LOVABLE_API_KEY = Deno.env.get('LOVABLE_API_KEY');
     if (!LOVABLE_API_KEY) {
       throw new Error('LOVABLE_API_KEY not configured');
     }
-
-    console.log(`Interpreting vibe: ${description}`);
 
     // System prompt para el AI interpreter
     const systemPrompt = `IMPORTANT: All output MUST be in ENGLISH ONLY. Title and prompt must always be in English, regardless of how the user phrases their request.
@@ -222,7 +303,7 @@ Now interpret the user's description. Return ONLY valid JSON.`;
         model: 'google/gemini-2.5-flash',
         messages: [
           { role: 'system', content: systemPrompt },
-          { role: 'user', content: description }
+          { role: 'user', content: trimmedDescription }
         ],
         temperature: 0.7,
         response_format: { type: 'json_object' }

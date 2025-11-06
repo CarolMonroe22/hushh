@@ -83,6 +83,44 @@ AMBIENT SOUND RULES (CRITICAL):
    - ❌ NO loud music, NO beats, NO jarring sounds
 5. Keep ambient sounds **subtle and supporting**, never overwhelming the voice
 
+LULLABY SPECIAL RULES (HIGHEST PRIORITY):
+1. **Detection**: If user mentions "lullaby", "canción de cuna", "dormir bebé", "sleep baby", detect as LULLABY mode
+2. **Tone**: MUST be extra gentle, cute, and loving - this is for a baby
+3. **Voice**: 
+   - ALWAYS use soft, warm, maternal/paternal whispered voice
+   - Speak very slowly and soothingly
+   - Use baby-appropriate language (simple, repetitive, loving)
+4. **Names**: If user mentions a baby's name, incorporate it naturally and lovingly throughout
+5. **Ambient sounds for lullabies**:
+   - ✅ music box, soft chimes, gentle lullaby melody, soft bells
+   - ✅ very gentle rain (10-15% volume max)
+   - ❌ NO ocean waves, NO wind, NO nature sounds (too stimulating for babies)
+6. **Script for lullabies**:
+   - Use repetitive, simple phrases
+   - Include the baby's name if provided
+   - Use loving terms: "little one", "my sweet baby", "precious [name]"
+   - Examples: "sleep now, sweet [name]... close your eyes, little one... you are loved... safe and warm..."
+7. **Volume**: Ambient sounds at 10-15% maximum (babies need very subtle background)
+8. **Language**: MUST match the language of the user's request (see LANGUAGE RULES below)
+
+LANGUAGE DETECTION RULES (CRITICAL):
+1. **Detect user's language**:
+   - If user writes in Spanish (uses words like: "necesito", "quiero", "ayúdame", "para", "con", "crea", "bebé", etc.) → Output in SPANISH
+   - If user writes in English (uses words like: "I need", "help me", "I want", "create", "baby", etc.) → Output in ENGLISH
+   - Default: English if unclear
+
+2. **Match the language**:
+   - Spanish input → Title in Spanish, Prompt in Spanish
+   - English input → Title in English, Prompt in English
+   
+3. **Preserve names and proper nouns**: Keep names as provided (e.g., "Jorge", "María", "Emma", "Sarah")
+
+4. **Translation rules**:
+   - Spanish title: Use natural Spanish (e.g., "canción de jorge", "dulces sueños", "paz profunda")
+   - Spanish prompt: All instructions and script in Spanish
+   - English title: Use natural English (e.g., "sarah's lullaby", "deep focus", "peaceful sleep")
+   - English prompt: All instructions and script in English
+
 EXAMPLES:
 
 User says: "I need focus for studying with rain"
@@ -137,6 +175,30 @@ User says: "meditación guiada con voz de mujer y cuencos tibetanos"
 You return: {
   "title": "guided peace",
   "prompt": "1 minute ASMR guided meditation with gentle female voiceover and Tibetan singing bowls. The voice whispers softly: breathe deeply... find your center... you are present... calm flows through you... peace resides within... let go of all tension... you are exactly where you need to be. Tender ASMR whisper, singing bowls soft at 20% volume, voice warm and spiritual."
+}
+
+User says: "crea una canción de cuna para mi bebé Jorge"
+You return: {
+  "title": "canción de jorge",
+  "prompt": "1 minuto ASMR canción de cuna tierna con voz susurrada femenina muy suave y caja de música delicada. La voz susurra con amor maternal: duerme ahora, dulce Jorge... cierra tus ojitos, mi amor... estás seguro y amado... duerme tranquilo, pequeño Jorge... mamá está aquí... descansa, mi tesoro... sueña bonito, mi niño hermoso. Susurro ASMR muy tierno, caja de música suave al 12% de volumen, voz maternal y cálida."
+}
+
+User says: "create a lullaby for baby Emma"
+You return: {
+  "title": "emma's lullaby",
+  "prompt": "1 minute ASMR gentle lullaby with soft female whispered voice and delicate music box. The voice whispers lovingly: sleep now, sweet Emma... close your little eyes, my love... you are safe and cherished... rest peacefully, little Emma... mama is here... dream sweetly, precious one. Very tender ASMR whisper, music box gentle at 12% volume, voice warm and maternal."
+}
+
+User says: "lullaby para dormir a mi bebé sin mencionar nombre"
+You return: {
+  "title": "dulces sueños",
+  "prompt": "1 minuto ASMR canción de cuna suave con voz susurrada femenina tierna y campanitas delicadas. La voz susurra: duerme, mi pequeño... cierra tus ojitos... estás seguro y amado... descansa tranquilo... eres mi tesoro... sueña bonito, mi amor. Susurro ASMR muy dulce, campanitas suaves al 10% de volumen, voz maternal y cálida."
+}
+
+User says: "necesito paz profunda con voz masculina"
+You return: {
+  "title": "paz profunda",
+  "prompt": "1 minuto ASMR paz profunda con voz masculina susurrada suave y sonidos de lluvia gentil. La voz susurra: estás en paz... suelta todo... respira profundamente... la calma te envuelve... este momento es tuyo... simplemente ser... estás bien. Susurro ASMR masculino calmado, lluvia suave al 25% de volumen, voz reconfortante y serena."
 }
 
 Now interpret the user's description. Return ONLY valid JSON.`;

@@ -119,6 +119,18 @@ const ASMR_PROMPTS: Record<string, string> = {
   gratitude_city: `1 minute ASMR gratitude meditation with warm female whispered voiceover and gentle city ambience. The voice whispers tenderly: "you are grateful for this urban life... for opportunities... for connections... the city offers abundance... notice the gifts around you... each sound represents possibility... you are blessed by this vibrant environment... grateful for where you are... this moment... this place...". Intimate ASMR whisper, city sounds soft at 25% volume, voice loving and warm.`,
   
   boost_city: `1 minute ASMR motivational boost with energetic female voiceover and dynamic city sounds. The voice speaks with excitement and power: "the city's energy is YOURS! feel the pulse... the momentum... the possibility... you are UNSTOPPABLE in this urban jungle... you navigate it with CONFIDENCE... with POWER... this is YOUR city... YOUR moment... the energy of millions fuels YOUR success... you are READY... you are FIERCE!". Energetic ASMR style, city sounds dynamic at 30% volume, voice empowering and excited.`,
+
+  stoic_rain: `1 minute ASMR stoic meditation with deep male whispered voiceover and gentle rain sounds. The voice speaks with wisdom: "you control your thoughts... not external events... the rain falls regardless... but you choose your response... focus on what is within your power... your character... your choices... accept what you cannot change... you are resilient... virtuous... unshaken by circumstance... like a rock in the storm, you remain...". Clear ASMR whisper with gravitas, rain steady at 30% volume, voice wise and grounded.`,
+
+  stoic_ocean: `1 minute ASMR stoic meditation with steady male whispered voiceover and ocean waves. The voice whispers with strength: "the ocean does not resist the moon... it flows with nature... you too can accept what is... while acting on what you control... your virtue... your discipline... your reason... the waves teach acceptance and power... you are both flexible and strong... guided by wisdom...". ASMR whisper with clarity, ocean rhythmic at 30% volume, voice philosophical and steady.`,
+
+  stoic_forest: `1 minute ASMR stoic meditation with grounded male whispered voiceover and forest ambience. The voice speaks with wisdom: "the tree does not complain about the wind... it bends but does not break... you are like this... rooted in virtue... flexible in response... strong in character... nature teaches what philosophy speaks... resilience... acceptance... endurance... you are enough as you are... acting with virtue...". ASMR whisper, forest sounds grounding at 30% volume, voice philosophical and authoritative.`,
+
+  stoic_fireplace: `1 minute ASMR stoic meditation with deep male whispered voiceover and crackling fireplace. The voice whispers with gravitas: "the flame is controlled... purposeful... like your will... you focus on what matters... your actions... your integrity... your reason... external circumstances are beyond you... but your response is yours alone... burn away what does not serve virtue... remain focused on what you can control...". Close ASMR whisper, fireplace contemplative at 25% volume, voice wise and powerful.`,
+
+  stoic_whitenoise: `1 minute ASMR stoic meditation with clear male whispered voiceover and white noise. The voice speaks with clarity: "in the noise of life, you find your center... you cannot control chaos... but you control your mind... your discipline... your choices... focus on virtue... on wisdom... on courage... external events pass like this noise... but your character remains... you are unmoved by what you cannot control... powerful in what you can...". Pure ASMR whisper, white noise at 20% volume, voice philosophical and clear.`,
+
+  stoic_city: `1 minute ASMR stoic meditation with steady male whispered voiceover and distant city sounds. The voice whispers with wisdom: "the city moves around you... chaos and order... you observe without attachment... you cannot control others... only yourself... your virtue guides you through the urban storm... you act with reason... with justice... with courage... unmoved by external noise... rooted in what matters... your character... your choices...". ASMR whisper with depth, city ambience at 25% volume, voice philosophical and authoritative.`,
 };
 
 // Get current week key for cache versioning
@@ -160,7 +172,7 @@ serve(async (req) => {
   try {
     const { mood, ambient } = await req.json();
     
-    const validMoods = ['relax', 'sleep', 'focus', 'gratitude', 'boost'];
+    const validMoods = ['relax', 'sleep', 'focus', 'gratitude', 'boost', 'stoic'];
     const validAmbients = ['rain', 'ocean', 'forest', 'fireplace', 'whitenoise', 'city'];
     
     if (!mood || !validMoods.includes(mood)) {

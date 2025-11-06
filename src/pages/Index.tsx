@@ -9,7 +9,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { useAnonymousAuth } from "@/hooks/useAnonymousAuth";
 
-type Mood = "relax" | "sleep" | "focus" | "gratitude" | "boost";
+type Mood = "relax" | "sleep" | "focus" | "gratitude" | "boost" | "stoic";
 type Ambient = "rain" | "ocean" | "forest" | "fireplace" | "whitenoise" | "city";
 
 const MOODS: { value: Mood; label: string; emoji: string }[] = [
@@ -18,6 +18,7 @@ const MOODS: { value: Mood; label: string; emoji: string }[] = [
   { value: "focus", label: "focus", emoji: "🎯" },
   { value: "gratitude", label: "gratitude", emoji: "🙏" },
   { value: "boost", label: "boost", emoji: "⚡" },
+  { value: "stoic", label: "stoic", emoji: "🗿" },
 ];
 
 const AMBIENTS: { value: Ambient; label: string; emoji: string }[] = [

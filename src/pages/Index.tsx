@@ -507,7 +507,7 @@ const Index = () => {
               placeholder="describe how you want to feel... (e.g., 'I need deep focus for studying with calming rain')"
               value={vibeDescription}
               onChange={(e) => setVibeDescription(e.target.value)}
-              className="min-h-[140px] resize-none text-base py-4 bg-card/60 border-border hover:border-border/80 focus:border-primary focus:bg-card/80 transition-all"
+              className="min-h-[140px] resize-none text-base py-4 bg-card/70 border-border/90 hover:bg-card/75 focus:bg-card/80 focus:border-border transition-all"
               maxLength={300}
             />
             <div className="flex justify-between items-center px-1">

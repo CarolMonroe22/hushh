@@ -43,6 +43,14 @@ const VIBE_STARTERS = [
     title: "peaceful sleep",
     description: "Guide me into deep, restful sleep with calming sounds that quiet my racing thoughts and create a cocoon of tranquility around me.",
   },
+  {
+    title: "manifestation",
+    description: "Help me manifest my goals and dreams. I want powerful, affirming whispers that strengthen my belief in what I'm creating and fill me with confidence and clarity about my vision.",
+  },
+  {
+    title: "prayer",
+    description: "Create a sacred space for prayer and spiritual connection. I want gentle, reverent whispers that help me feel grounded, connected to something greater, and at peace in this moment of reflection.",
+  },
 ];
 
 const TITLE_ROTATIONS = [

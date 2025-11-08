@@ -8,15 +8,15 @@ export const useConnectivity = () => {
   useEffect(() => {
     const handleOffline = () =>
       toast({
-        title: "Sin conexión",
-        description: "Estás offline. Algunas funciones pueden no funcionar.",
+        title: "You're offline",
+        description: "You're offline. Some features may not work.",
         variant: "destructive",
       });
 
     const handleOnline = () =>
       toast({
-        title: "De nuevo en línea",
-        description: "La conexión se ha restablecido.",
+        title: "Back online",
+        description: "Connection restored.",
       });
 
     window.addEventListener("offline", handleOffline);

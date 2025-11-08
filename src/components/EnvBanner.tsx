@@ -41,7 +41,7 @@ const EnvBanner = () => {
         <div className="rounded-lg border bg-secondary text-secondary-foreground shadow-sm">
           <div className="flex flex-col gap-3 p-3 sm:flex-row sm:items-center sm:justify-between">
             <p className="text-sm">
-              Estás viendo un enlace temporal. Usa el enlace estable para compartir sin problemas.
+              You're viewing a temporary link. Use the stable link to share without issues.
             </p>
             <div className="flex items-center gap-2">
               <Button
@@ -51,18 +51,18 @@ const EnvBanner = () => {
                   navigator.clipboard
                     .writeText(urlToCopy)
                     .then(() =>
-                      toast({ title: "Enlace copiado", description: urlToCopy })
+                      toast({ title: "Link copied", description: urlToCopy })
                     )
                     .catch(() =>
                       toast({
-                        title: "No se pudo copiar",
-                        description: "Cópialo manualmente desde la barra de direcciones.",
+                        title: "Could not copy",
+                        description: "Copy manually from the address bar.",
                         variant: "destructive",
                       })
                     );
                 }}
               >
-                Copiar enlace
+                Copy link
               </Button>
               <Button
                 onClick={() => {
@@ -70,18 +70,18 @@ const EnvBanner = () => {
                     window.location.href = stableUrl;
                   } else {
                     toast({
-                      title: "Enlace estable no configurado",
+                      title: "Stable link not configured",
                       description:
-                        "Publica el sitio con un subdominio estable o define x-primary-domain.",
+                        "Publish the site with a stable subdomain or define x-primary-domain.",
                     });
                   }
                 }}
                 disabled={!stableUrl}
               >
-                Abrir enlace estable
+                Open stable link
               </Button>
-              <Button variant="ghost" onClick={() => setDismissed(true)} aria-label="Cerrar aviso">
-                Cerrar
+              <Button variant="ghost" onClick={() => setDismissed(true)} aria-label="Close banner">
+                Close
               </Button>
             </div>
           </div>

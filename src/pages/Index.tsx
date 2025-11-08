@@ -1,4 +1,5 @@
 import { useState, useRef, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -7,7 +8,8 @@ import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
-import { useAnonymousAuth } from "@/hooks/useAnonymousAuth";
+import { useAuth } from "@/hooks/useAuth";
+import { LogOut } from "lucide-react";
 
 type Mood = "relax" | "sleep" | "focus" | "gratitude" | "boost" | "stoic";
 type Ambient = "rain" | "ocean" | "forest" | "fireplace" | "whitenoise" | "city";
@@ -76,7 +78,8 @@ const TITLE_ROTATIONS = [
 ];
 
 const Index = () => {
-  const { session, loading } = useAnonymousAuth();
+  const { user, session, loading, signOut } = useAuth();
+  const navigate = useNavigate();
   const [selectedMood, setSelectedMood] = useState<Mood | null>(null);
   const [selectedAmbient, setSelectedAmbient] = useState<Ambient | null>(null);
   const [isGenerating, setIsGenerating] = useState(false);
@@ -412,7 +415,14 @@ const Index = () => {
     setEmailSubmitted(false);
   };
 
-  // Show loading state while creating anonymous session
+  // Redirect to auth if not logged in
+  useEffect(() => {
+    if (!loading && !user) {
+      navigate('/auth');
+    }
+  }, [loading, user, navigate]);
+
+  // Show loading state while checking auth
   if (loading) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center p-4">
@@ -421,12 +431,25 @@ const Index = () => {
             <div className="w-full h-full border-4 border-primary/30 border-t-primary rounded-full animate-spin" />
           </div>
           <p className="text-sm text-muted-foreground lowercase tracking-wide">
-            preparing your session...
+            loading...
           </p>
         </div>
       </div>
     );
   }
+
+  const handleSignOut = async () => {
+    const { error } = await signOut();
+    if (error) {
+      toast({
+        title: "Error",
+        description: "Failed to sign out",
+        variant: "destructive",
+      });
+    } else {
+      navigate('/auth');
+    }
+  };
 
   if (isPlaying || needsManualPlay) {
     return (
@@ -584,11 +607,23 @@ const Index = () => {
   return (
     <div className="min-h-screen bg-background text-foreground">
       <div className="container mx-auto px-4 py-12 md:py-20 max-w-4xl">
-        {/* Logo Header */}
-        <div className="text-center mb-16">
+        {/* Logo Header with Logout */}
+        <div className="flex items-center justify-between mb-16">
+          <div className="flex-1" />
           <h1 className="text-4xl md:text-5xl font-light lowercase tracking-wide">
             🌙 hushh
           </h1>
+          <div className="flex-1 flex justify-end">
+            <Button
+              onClick={handleSignOut}
+              variant="ghost"
+              size="sm"
+              className="lowercase tracking-wide text-muted-foreground hover:text-foreground"
+            >
+              <LogOut className="w-4 h-4 mr-2" />
+              sign out
+            </Button>
+          </div>
         </div>
 
         {/* Hero Section */}

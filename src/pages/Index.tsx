@@ -9,6 +9,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/useAuth";
+import { AuthModal } from "@/components/AuthModal";
 import { LogOut } from "lucide-react";
 
 type Mood = "relax" | "sleep" | "focus" | "gratitude" | "boost" | "stoic";
@@ -94,6 +95,7 @@ const Index = () => {
   const [waitlistEmail, setWaitlistEmail] = useState("");
   const [emailSubmitted, setEmailSubmitted] = useState(false);
   const [needsManualPlay, setNeedsManualPlay] = useState(false);
+  const [showAuthModal, setShowAuthModal] = useState(false);
   
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const timerRef = useRef<NodeJS.Timeout | null>(null);
@@ -152,6 +154,12 @@ const Index = () => {
   };
 
   const startSession = async () => {
+    // Check authentication FIRST
+    if (!user) {
+      setShowAuthModal(true);
+      return;
+    }
+
     if (!selectedMood || !selectedAmbient) {
       toast({
         title: "Selection Required",
@@ -237,6 +245,12 @@ const Index = () => {
   };
 
   const startCreatorSession = async () => {
+    // Check authentication FIRST
+    if (!user) {
+      setShowAuthModal(true);
+      return;
+    }
+
     if (!vibeDescription.trim() || vibeDescription.trim().length < 20) {
       toast({
         title: "Description Required",
@@ -415,12 +429,7 @@ const Index = () => {
     setEmailSubmitted(false);
   };
 
-  // Redirect to auth if not logged in
-  useEffect(() => {
-    if (!loading && !user) {
-      navigate('/auth');
-    }
-  }, [loading, user, navigate]);
+  // No automatic redirect - let users browse the page
 
   // Show loading state while checking auth
   if (loading) {
@@ -614,15 +623,17 @@ const Index = () => {
             🌙 hushh
           </h1>
           <div className="flex-1 flex justify-end">
-            <Button
-              onClick={handleSignOut}
-              variant="ghost"
-              size="sm"
-              className="lowercase tracking-wide text-muted-foreground hover:text-foreground"
-            >
-              <LogOut className="w-4 h-4 mr-2" />
-              sign out
-            </Button>
+            {user && (
+              <Button
+                onClick={handleSignOut}
+                variant="ghost"
+                size="sm"
+                className="lowercase tracking-wide text-muted-foreground hover:text-foreground"
+              >
+                <LogOut className="w-4 h-4 mr-2" />
+                sign out
+              </Button>
+            )}
           </div>
         </div>
 
@@ -904,6 +915,16 @@ const Index = () => {
           </div>
         </div>
       )}
+
+      {/* Auth Modal */}
+      <AuthModal 
+        open={showAuthModal}
+        onOpenChange={setShowAuthModal}
+        onSuccess={() => {
+          setShowAuthModal(false);
+          // User will now be authenticated, they can retry their action
+        }}
+      />
     </div>
   );
 };

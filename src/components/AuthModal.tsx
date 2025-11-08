@@ -5,7 +5,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/use-toast';
-import { X, ArrowLeft } from 'lucide-react';
+import { X } from 'lucide-react';
 import { z } from 'zod';
 
 const authSchema = z.object({
@@ -14,8 +14,6 @@ const authSchema = z.object({
   fullName: z.string().trim().min(2, { message: "Name must be at least 2 characters" }).max(100).optional(),
 });
 
-type AuthView = 'options' | 'email';
-
 interface AuthModalProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
@@ -23,13 +21,12 @@ interface AuthModalProps {
 }
 
 export const AuthModal = ({ open, onOpenChange, onSuccess }: AuthModalProps) => {
-  const [view, setView] = useState<AuthView>('options');
   const [isLogin, setIsLogin] = useState(true);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [fullName, setFullName] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const { signUp, signIn, signInWithGoogle } = useAuth();
+  const { signUp, signIn } = useAuth();
   const { toast } = useToast();
 
   const handleClose = () => {
@@ -37,40 +34,11 @@ export const AuthModal = ({ open, onOpenChange, onSuccess }: AuthModalProps) => 
       onOpenChange(false);
       // Reset state after close animation
       setTimeout(() => {
-        setView('options');
         setEmail('');
         setPassword('');
         setFullName('');
         setIsLogin(true);
       }, 200);
-    }
-  };
-
-  const handleGoogleAuth = async () => {
-    setIsSubmitting(true);
-    try {
-      const { error } = await signInWithGoogle();
-      if (error) {
-        toast({
-          title: "Authentication Error",
-          description: error.message,
-          variant: "destructive",
-        });
-      } else {
-        // OAuth will redirect, so we don't need to do anything here
-        toast({
-          title: "Redirecting...",
-          description: "Taking you to Google sign in",
-        });
-      }
-    } catch (error) {
-      toast({
-        title: "Error",
-        description: error instanceof Error ? error.message : "Failed to authenticate with Google",
-        variant: "destructive",
-      });
-    } finally {
-      setIsSubmitting(false);
     }
   };
 
@@ -159,155 +127,94 @@ export const AuthModal = ({ open, onOpenChange, onSuccess }: AuthModalProps) => 
         </button>
 
         <div className="p-8 space-y-6">
-          {view === 'options' ? (
-            <>
-              {/* Heart icon */}
-              <div className="flex justify-center mb-2">
-                <div className="text-5xl">💖</div>
-              </div>
+          {/* Heart icon */}
+          <div className="flex justify-center mb-2">
+            <div className="text-5xl">💖</div>
+          </div>
 
-              {/* Title */}
-              <div className="text-center space-y-2">
-                <h2 className="text-2xl font-light lowercase tracking-wide">
-                  Start Creating.
-                </h2>
-                <p className="text-sm text-muted-foreground lowercase">
-                  Create free account
-                </p>
-              </div>
+          {/* Title */}
+          <div className="text-center space-y-2">
+            <h2 className="text-2xl font-light lowercase tracking-wide">
+              {isLogin ? 'Welcome back' : 'Create account'}
+            </h2>
+            <p className="text-sm text-muted-foreground lowercase">
+              {isLogin ? 'sign in to continue' : 'sign up to get started'}
+            </p>
+          </div>
 
-              {/* Auth options */}
-              <div className="space-y-3">
-                {/* Google button */}
-                <Button
-                  onClick={handleGoogleAuth}
+          {/* Email form */}
+          <form onSubmit={handleEmailSubmit} className="space-y-4">
+            {!isLogin && (
+              <div className="space-y-2">
+                <Label htmlFor="fullName" className="lowercase text-sm">
+                  full name
+                </Label>
+                <Input
+                  id="fullName"
+                  type="text"
+                  value={fullName}
+                  onChange={(e) => setFullName(e.target.value)}
+                  placeholder="your name"
+                  required={!isLogin}
                   disabled={isSubmitting}
-                  variant="outline"
-                  className="w-full py-6 text-base lowercase tracking-wide border-border hover:bg-accent"
-                  size="lg"
-                >
-                  <span className="mr-2 text-xl font-semibold">G</span>
-                  Continue with Google
-                </Button>
-
-                {/* Divider */}
-                <div className="relative py-2">
-                  <div className="absolute inset-0 flex items-center">
-                    <div className="w-full border-t border-border/50"></div>
-                  </div>
-                  <div className="relative flex justify-center text-xs uppercase">
-                    <span className="bg-card px-2 text-muted-foreground">OR</span>
-                  </div>
-                </div>
-
-                {/* Email button */}
-                <Button
-                  onClick={() => setView('email')}
-                  disabled={isSubmitting}
-                  className="w-full py-6 text-base lowercase tracking-wide bg-foreground text-background hover:bg-foreground/90"
-                  size="lg"
-                >
-                  Continue with email
-                </Button>
+                  className="bg-input border-border"
+                />
               </div>
-            </>
-          ) : (
-            <>
-              {/* Back button */}
-              <button
-                onClick={() => setView('options')}
+            )}
+
+            <div className="space-y-2">
+              <Label htmlFor="email" className="lowercase text-sm">
+                email
+              </Label>
+              <Input
+                id="email"
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                placeholder="you@example.com"
+                required
                 disabled={isSubmitting}
-                className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors"
-              >
-                <ArrowLeft className="w-4 h-4" />
-                Back
-              </button>
+                className="bg-input border-border"
+              />
+            </div>
 
-              {/* Title */}
-              <div className="text-center space-y-2">
-                <h2 className="text-2xl font-light lowercase tracking-wide">
-                  {isLogin ? 'Welcome back' : 'Create account'}
-                </h2>
-                <p className="text-sm text-muted-foreground lowercase">
-                  {isLogin ? 'sign in to continue' : 'sign up to get started'}
-                </p>
-              </div>
+            <div className="space-y-2">
+              <Label htmlFor="password" className="lowercase text-sm">
+                password
+              </Label>
+              <Input
+                id="password"
+                type="password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                placeholder="••••••"
+                required
+                disabled={isSubmitting}
+                minLength={6}
+                className="bg-input border-border"
+              />
+            </div>
 
-              {/* Email form */}
-              <form onSubmit={handleEmailSubmit} className="space-y-4">
-                {!isLogin && (
-                  <div className="space-y-2">
-                    <Label htmlFor="fullName" className="lowercase text-sm">
-                      full name
-                    </Label>
-                    <Input
-                      id="fullName"
-                      type="text"
-                      value={fullName}
-                      onChange={(e) => setFullName(e.target.value)}
-                      placeholder="your name"
-                      required={!isLogin}
-                      disabled={isSubmitting}
-                      className="bg-input border-border"
-                    />
-                  </div>
-                )}
+            <Button
+              type="submit"
+              className="w-full py-6 text-base lowercase tracking-wide"
+              disabled={isSubmitting}
+              size="lg"
+            >
+              {isSubmitting ? 'loading...' : (isLogin ? 'sign in' : 'create account')}
+            </Button>
+          </form>
 
-                <div className="space-y-2">
-                  <Label htmlFor="email" className="lowercase text-sm">
-                    email
-                  </Label>
-                  <Input
-                    id="email"
-                    type="email"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    placeholder="you@example.com"
-                    required
-                    disabled={isSubmitting}
-                    className="bg-input border-border"
-                  />
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="password" className="lowercase text-sm">
-                    password
-                  </Label>
-                  <Input
-                    id="password"
-                    type="password"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    placeholder="••••••"
-                    required
-                    disabled={isSubmitting}
-                    minLength={6}
-                    className="bg-input border-border"
-                  />
-                </div>
-
-                <Button
-                  type="submit"
-                  className="w-full py-6 text-base lowercase tracking-wide"
-                  disabled={isSubmitting}
-                  size="lg"
-                >
-                  {isSubmitting ? 'loading...' : (isLogin ? 'sign in' : 'create account')}
-                </Button>
-              </form>
-
-              {/* Toggle login/signup */}
-              <div className="text-center">
-                <button
-                  onClick={() => setIsLogin(!isLogin)}
-                  disabled={isSubmitting}
-                  className="text-sm text-muted-foreground hover:text-foreground transition-colors lowercase"
-                >
-                  {isLogin ? "don't have an account? sign up" : 'already have an account? sign in'}
-                </button>
-              </div>
-            </>
-          )}
+          {/* Toggle login/signup */}
+          <div className="text-center">
+            <button
+              onClick={() => setIsLogin(!isLogin)}
+              disabled={isSubmitting}
+              className="text-sm text-muted-foreground hover:text-foreground transition-colors lowercase"
+            >
+              {isLogin ? "don't have an account? sign up" : 'already have an account? sign in'}
+            </button>
+          </div>
         </div>
       </DialogContent>
     </Dialog>

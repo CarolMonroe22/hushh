@@ -102,6 +102,15 @@ const Index = () => {
   const audioContextRef = useRef<AudioContext | null>(null);
   const { toast } = useToast();
 
+  // Debug auth state and modal open
+  useEffect(() => {
+    console.log('Auth state', { user, session, loading });
+  }, [user, session, loading]);
+
+  useEffect(() => {
+    console.log('showAuthModal changed:', showAuthModal);
+  }, [showAuthModal]);
+
   useEffect(() => {
     return () => {
       if (timerRef.current) clearInterval(timerRef.current);
@@ -156,6 +165,7 @@ const Index = () => {
   const startSession = async () => {
     // Check authentication FIRST
     if (!user) {
+      console.log('Opening AuthModal from startSession');
       setShowAuthModal(true);
       return;
     }
@@ -247,6 +257,7 @@ const Index = () => {
   const startCreatorSession = async () => {
     // Check authentication FIRST
     if (!user) {
+      console.log('Opening AuthModal from startCreatorSession');
       setShowAuthModal(true);
       return;
     }

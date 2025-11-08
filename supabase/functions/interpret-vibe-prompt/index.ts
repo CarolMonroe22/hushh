@@ -317,7 +317,16 @@ Now interpret the user's description. Return ONLY valid JSON.`;
     }
 
     const data = await response.json();
-    const responseContent = data.choices[0].message.content.trim();
+    let responseContent = data.choices[0].message.content.trim();
+    
+    // Clean markdown code blocks if present (```json ... ```)
+    if (responseContent.startsWith('```')) {
+      // Remove opening ```json or ```
+      responseContent = responseContent.replace(/^```(?:json)?\n?/, '');
+      // Remove closing ```
+      responseContent = responseContent.replace(/\n?```$/, '');
+      responseContent = responseContent.trim();
+    }
     
     // Parse JSON response
     const parsedResponse = JSON.parse(responseContent);

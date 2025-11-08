@@ -8,9 +8,6 @@ import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
-import { useAuth } from "@/hooks/useAuth";
-import { AuthModal } from "@/components/AuthModal";
-import { LogOut } from "lucide-react";
 
 type Mood = "relax" | "sleep" | "focus" | "gratitude" | "boost" | "stoic";
 type Ambient = "rain" | "ocean" | "forest" | "fireplace" | "whitenoise" | "city";
@@ -79,7 +76,6 @@ const TITLE_ROTATIONS = [
 ];
 
 const Index = () => {
-  const { user, session, loading, signOut } = useAuth();
   const navigate = useNavigate();
   const [selectedMood, setSelectedMood] = useState<Mood | null>(null);
   const [selectedAmbient, setSelectedAmbient] = useState<Ambient | null>(null);
@@ -95,21 +91,11 @@ const Index = () => {
   const [waitlistEmail, setWaitlistEmail] = useState("");
   const [emailSubmitted, setEmailSubmitted] = useState(false);
   const [needsManualPlay, setNeedsManualPlay] = useState(false);
-  const [showAuthModal, setShowAuthModal] = useState(false);
   
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const timerRef = useRef<NodeJS.Timeout | null>(null);
   const audioContextRef = useRef<AudioContext | null>(null);
   const { toast } = useToast();
-
-  // Debug auth state and modal open
-  useEffect(() => {
-    console.log('Auth state', { user, session, loading });
-  }, [user, session, loading]);
-
-  useEffect(() => {
-    console.log('showAuthModal changed:', showAuthModal);
-  }, [showAuthModal]);
 
   useEffect(() => {
     return () => {
@@ -163,13 +149,6 @@ const Index = () => {
   };
 
   const startSession = async () => {
-    // Check authentication FIRST
-    if (!user) {
-      console.log('Opening AuthModal from startSession');
-      setShowAuthModal(true);
-      return;
-    }
-
     if (!selectedMood || !selectedAmbient) {
       toast({
         title: "Selection Required",
@@ -186,9 +165,6 @@ const Index = () => {
     try {
       const { data, error } = await supabase.functions.invoke("generate-asmr-session", {
         body: { mood: selectedMood, ambient: selectedAmbient },
-        headers: session?.access_token ? {
-          Authorization: `Bearer ${session.access_token}`,
-        } : {},
       });
 
       if (error) throw error;
@@ -255,13 +231,6 @@ const Index = () => {
   };
 
   const startCreatorSession = async () => {
-    // Check authentication FIRST
-    if (!user) {
-      console.log('Opening AuthModal from startCreatorSession');
-      setShowAuthModal(true);
-      return;
-    }
-
     if (!vibeDescription.trim() || vibeDescription.trim().length < 20) {
       toast({
         title: "Description Required",
@@ -283,9 +252,6 @@ const Index = () => {
           body: {
             description: vibeDescription,
           },
-          headers: session?.access_token ? {
-            Authorization: `Bearer ${session.access_token}`,
-          } : {},
         }
       );
 
@@ -308,9 +274,6 @@ const Index = () => {
             prompt: interpretData.prompt,
             title: interpretData.title || "your vibe",
           },
-          headers: session?.access_token ? {
-            Authorization: `Bearer ${session.access_token}`,
-          } : {},
         }
       );
 
@@ -438,37 +401,6 @@ const Index = () => {
     setSessionFeedback(null);
     setWaitlistEmail("");
     setEmailSubmitted(false);
-  };
-
-  // No automatic redirect - let users browse the page
-
-  // Show loading state while checking auth
-  if (loading) {
-    return (
-      <div className="min-h-screen bg-background flex items-center justify-center p-4">
-        <div className="text-center space-y-4">
-          <div className="w-16 h-16 mx-auto">
-            <div className="w-full h-full border-4 border-primary/30 border-t-primary rounded-full animate-spin" />
-          </div>
-          <p className="text-sm text-muted-foreground lowercase tracking-wide">
-            loading...
-          </p>
-        </div>
-      </div>
-    );
-  }
-
-  const handleSignOut = async () => {
-    const { error } = await signOut();
-    if (error) {
-      toast({
-        title: "Error",
-        description: "Failed to sign out",
-        variant: "destructive",
-      });
-    } else {
-      navigate('/auth');
-    }
   };
 
   if (isPlaying || needsManualPlay) {
@@ -627,25 +559,11 @@ const Index = () => {
   return (
     <div className="min-h-screen bg-background text-foreground">
       <div className="container mx-auto px-4 py-12 md:py-20 max-w-4xl">
-        {/* Logo Header with Logout */}
-        <div className="flex items-center justify-between mb-16">
-          <div className="flex-1" />
+        {/* Logo Header */}
+        <div className="flex items-center justify-center mb-16">
           <h1 className="text-4xl md:text-5xl font-light lowercase tracking-wide">
             🌙 hushh
           </h1>
-          <div className="flex-1 flex justify-end">
-            {user && (
-              <Button
-                onClick={handleSignOut}
-                variant="ghost"
-                size="sm"
-                className="lowercase tracking-wide text-muted-foreground hover:text-foreground"
-              >
-                <LogOut className="w-4 h-4 mr-2" />
-                sign out
-              </Button>
-            )}
-          </div>
         </div>
 
         {/* Hero Section */}
@@ -926,16 +844,6 @@ const Index = () => {
           </div>
         </div>
       )}
-
-      {/* Auth Modal */}
-      <AuthModal 
-        open={showAuthModal}
-        onOpenChange={setShowAuthModal}
-        onSuccess={() => {
-          setShowAuthModal(false);
-          // User will now be authenticated, they can retry their action
-        }}
-      />
     </div>
   );
 };

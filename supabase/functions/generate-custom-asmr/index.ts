@@ -6,17 +6,11 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
-function getUserIdFromAuth(req: Request): string | null {
-  const authHeader = req.headers.get('Authorization');
-  if (!authHeader?.startsWith('Bearer ')) return null;
-  
-  try {
-    const token = authHeader.substring(7);
-    const payload = JSON.parse(atob(token.split('.')[1]));
-    return payload.sub || null;
-  } catch {
-    return null;
-  }
+function getClientId(req: Request): string {
+  // Use IP address as identifier for public endpoints
+  const forwarded = req.headers.get('x-forwarded-for');
+  const ip = forwarded ? forwarded.split(',')[0] : 'unknown';
+  return `ip_${ip}`;
 }
 
 async function checkPersistentRateLimit(
@@ -76,19 +70,13 @@ serve(async (req) => {
     return new Response(null, { headers: corsHeaders });
   }
 
-  const userId = getUserIdFromAuth(req);
-  if (!userId) {
-    return new Response(
-      JSON.stringify({ error: 'Authentication required' }),
-      { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-    );
-  }
+  const clientId = getClientId(req);
 
   const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
   const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
   const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
-  const rateLimit = await checkPersistentRateLimit(supabase, userId, 'generate-custom-asmr', 5);
+  const rateLimit = await checkPersistentRateLimit(supabase, clientId, 'generate-custom-asmr', 5);
   if (!rateLimit.allowed) {
     return new Response(
       JSON.stringify({ 
@@ -99,7 +87,7 @@ serve(async (req) => {
     );
   }
 
-  console.log(`[generate-custom-asmr] User: ${userId}, Rate limit: ${rateLimit.remaining}/5`);
+  console.log(`[generate-custom-asmr] Client: ${clientId}, Rate limit: ${rateLimit.remaining}/5`);
 
   try {
     const { prompt, title } = await req.json();

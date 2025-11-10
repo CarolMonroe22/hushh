@@ -36,9 +36,10 @@ serve(async (req) => {
     if (!ELEVENLABS_API_KEY) {
       throw new Error('ElevenLabs API key not configured');
     }
+    console.log(`ELEVENLABS key present, len=${ELEVENLABS_API_KEY.length}`);
 
     const prompt = BINAURAL_PROMPTS[experience];
-    console.log(`Generating binaural experience: ${experience}`);
+    console.log(`Generating binaural experience: ${experience}, promptLen=${prompt.length}`);
 
     const response = await fetch('https://api.elevenlabs.io/v1/music/compose', {
       method: 'POST',
@@ -49,7 +50,7 @@ serve(async (req) => {
       },
       body: JSON.stringify({
         prompt: prompt,
-        music_length_ms: 60000,
+        duration: 60,
       }),
     });
 

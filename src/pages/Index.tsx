@@ -93,8 +93,8 @@ const VOICE_JOURNEYS: {
     label: "Story",
     emoji: "📖",
     voices: {
-      female: "FGY2WhTYpPnrIDTdsKH5", // Laura (ultra suave)
-      male: "N2lVS1w4EtoT3dr4eOWO"    // Callum (suave)
+      female: "FGY2WhTYpPnrIDTdsKH5", // Laura - perfecta para storytelling suave
+      male: "N2lVS1w4EtoT3dr4eOWO"    // Callum - cálido y envolvente
     },
     shortDesc: "immersive bedtime tale"
   },
@@ -103,48 +103,48 @@ const VOICE_JOURNEYS: {
     label: "Prayer",
     emoji: "🙏",
     voices: {
-      female: "XB0fDUnXU5powFXDhCwa", // Charlotte (calmante)
-      male: "TX3LPaxmHKxFdv7VOQHJ"    // Liam (cálido)
+      female: "pFZP5JQG7iQjIQuC4Bku", // Lily - dulce y reverente
+      male: "TX3LPaxmHKxFdv7VOQHJ"    // Liam - cálido y reconfortante
     },
     shortDesc: "guided peaceful prayer"
   },
   {
     value: "stoic",
-    label: "Stoic Reading",
+    label: "Stoic",
     emoji: "🏛️",
     voices: {
-      female: "EXAVITQu4vr4xnSDxMaL", // Sarah (clara)
-      male: "JBFqnCBsd6RMkjVDRZzb"    // George (profundo)
+      female: "FGY2WhTYpPnrIDTdsKH5", // Laura - sabia pero suave
+      male: "TX3LPaxmHKxFdv7VOQHJ"    // Liam - sabio y cálido
     },
-    shortDesc: "ancient wisdom reflection"
+    shortDesc: "wisdom & inner strength"
   },
   {
     value: "manifestation",
-    label: "Manifestation",
+    label: "Manifest",
     emoji: "✨",
     voices: {
-      female: "pFZP5JQG7iQjIQuC4Bku", // Lily (dulce)
-      male: "onwK4e9ZLuTAKqWW03F9"    // Daniel (enfocado)
+      female: "pFZP5JQG7iQjIQuC4Bku", // Lily - afirmaciones dulces
+      male: "N2lVS1w4EtoT3dr4eOWO"    // Callum - confiado pero suave
     },
-    shortDesc: "powerful affirmations"
+    shortDesc: "abundance affirmations"
   },
   {
     value: "motivational",
-    label: "Motivational Coach",
+    label: "Motivate",
     emoji: "🔥",
     voices: {
-      female: "EXAVITQu4vr4xnSDxMaL", // Sarah (clara y energética)
-      male: "nPczCjzI2devNBz1zQrb"    // Brian (motivacional)
+      female: "FGY2WhTYpPnrIDTdsKH5", // Laura - motivación suave
+      male: "N2lVS1w4EtoT3dr4eOWO"    // Callum - apoyo cálido
     },
-    shortDesc: "energizing pep talk"
+    shortDesc: "powerful encouragement"
   },
   {
     value: "brainwash",
     label: "Brain Wash",
     emoji: "🧠",
     voices: {
-      female: "FGY2WhTYpPnrIDTdsKH5", // Laura (hipnótica)
-      male: "N2lVS1w4EtoT3dr4eOWO"    // Callum (relajante)
+      female: "FGY2WhTYpPnrIDTdsKH5", // Laura - hipnótica
+      male: "N2lVS1w4EtoT3dr4eOWO"    // Callum - relajante
     },
     shortDesc: "mental cleanse & reset"
   },
@@ -153,47 +153,26 @@ const VOICE_JOURNEYS: {
     label: "Full Attention",
     emoji: "🎯",
     voices: {
-      female: "EXAVITQu4vr4xnSDxMaL", // Sarah (clara)
-      male: "onwK4e9ZLuTAKqWW03F9"    // Daniel (enfocado)
+      female: "pFZP5JQG7iQjIQuC4Bku", // Lily - foco gentil
+      male: "TX3LPaxmHKxFdv7VOQHJ"    // Liam - guía cálida
     },
     shortDesc: "deep focus activation"
   },
 ];
 
-const VOICE_VIBES = {
-  whisper: {
-    label: "Whisper ASMR",
-    emoji: "🤫",
-    description: "intimate & soft",
-    settings: {
-      stability: 0.15,
-      similarity: 0.90,
-      style: 0.05,
-      use_speaker_boost: false
-    }
-  },
-  calm: {
-    label: "Calm ASMR",
-    emoji: "😌",
-    description: "soothing & gentle",
-    settings: {
-      stability: 0.25,
-      similarity: 0.85,
-      style: 0.10,
-      use_speaker_boost: false
-    }
-  },
-  deep: {
-    label: "Deep ASMR",
-    emoji: "🌊",
-    description: "hypnotic & slow",
-    settings: {
-      stability: 0.30,
-      similarity: 0.88,
-      style: 0.08,
-      use_speaker_boost: false
-    }
-  }
+const JOURNEY_VOICE_SETTINGS: Record<VoiceJourney, {
+  stability: number;
+  similarity: number;
+  style: number;
+  use_speaker_boost: boolean;
+}> = {
+  story: { stability: 0.15, similarity: 0.92, style: 0.03, use_speaker_boost: false }, // Ultra suave
+  prayer: { stability: 0.18, similarity: 0.90, style: 0.05, use_speaker_boost: false }, // Reverente
+  stoic: { stability: 0.22, similarity: 0.88, style: 0.06, use_speaker_boost: false }, // Sabio pero suave
+  manifestation: { stability: 0.20, similarity: 0.90, style: 0.07, use_speaker_boost: false }, // Confiado
+  motivational: { stability: 0.20, similarity: 0.88, style: 0.08, use_speaker_boost: false }, // Apoyo
+  brainwash: { stability: 0.12, similarity: 0.95, style: 0.02, use_speaker_boost: false }, // Hipnótico
+  fullattention: { stability: 0.25, similarity: 0.87, style: 0.10, use_speaker_boost: false } // Enfocado pero suave
 };
 
 const VIBE_STARTERS = [
@@ -264,7 +243,6 @@ const Index = () => {
   const [loopEnabled, setLoopEnabled] = useState(false);
   const [loopCount, setLoopCount] = useState(0);
   const [voiceGender, setVoiceGender] = useState<"female" | "male">("female");
-  const [voiceVibe, setVoiceVibe] = useState<"whisper" | "calm" | "deep">("whisper");
   
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const timerRef = useRef<NodeJS.Timeout | null>(null);
@@ -733,7 +711,7 @@ const Index = () => {
       console.log("Step 2: Converting to speech...");
       const journey = VOICE_JOURNEYS.find(j => j.value === selectedJourney);
       const selectedVoiceId = journey?.voices[voiceGender];
-      const vibeSettings = VOICE_VIBES[voiceVibe].settings;
+      const voiceSettings = JOURNEY_VOICE_SETTINGS[selectedJourney];
       
       const { data: audioData, error: audioError } = await supabase.functions.invoke(
         "whisper-text",
@@ -741,7 +719,7 @@ const Index = () => {
           body: { 
             text: scriptData.text,
             voiceId: selectedVoiceId,
-            ...vibeSettings
+            ...voiceSettings
           }
         }
       );
@@ -1378,26 +1356,6 @@ const Index = () => {
                   >
                     👨 male
                   </Button>
-                </div>
-              </div>
-
-              {/* Vibe Selection */}
-              <div className="space-y-2">
-                <label className="text-sm font-medium lowercase tracking-wide">voice vibe</label>
-                <div className="flex flex-col gap-2">
-                  {Object.entries(VOICE_VIBES).map(([key, vibe]) => (
-                    <Button
-                      key={key}
-                      variant={voiceVibe === key ? "default" : "outline"}
-                      onClick={() => setVoiceVibe(key as "whisper" | "calm" | "deep")}
-                      className="justify-start lowercase tracking-wide"
-                      type="button"
-                    >
-                      <span className="mr-2">{vibe.emoji}</span>
-                      <span className="flex-1 text-left">{vibe.label}</span>
-                      <span className="text-xs text-muted-foreground">({vibe.description})</span>
-                    </Button>
-                  ))}
                 </div>
               </div>
             </div>

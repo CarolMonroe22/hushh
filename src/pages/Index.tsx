@@ -167,45 +167,45 @@ const JOURNEY_VOICE_SETTINGS: Record<VoiceJourney, {
   use_speaker_boost: boolean;
 }> = {
   story: { 
-    stability: 0.10,  // Más bajo para naturalidad ASMR
-    similarity: 0.95, // Muy alto para consistencia de whisper
-    style: 0.02,      // Mínimo para evitar dramatismo
+    stability: 0.15,  // Bajo para emoción natural
+    similarity: 0.93, // Alto para consistencia
+    style: 0.05,      // Muy bajo para naturalidad
     use_speaker_boost: false 
   },
   prayer: { 
-    stability: 0.12, 
-    similarity: 0.93, 
+    stability: 0.12,  // Muy bajo para reverencia natural
+    similarity: 0.95, 
     style: 0.03, 
     use_speaker_boost: false 
   },
   stoic: { 
-    stability: 0.18, 
-    similarity: 0.90, 
-    style: 0.05, 
+    stability: 0.20,  // Poco más alto para sabiduría estable
+    similarity: 0.91, 
+    style: 0.08, 
     use_speaker_boost: false 
   },
   manifestation: { 
-    stability: 0.15, 
+    stability: 0.18,  
     similarity: 0.92, 
     style: 0.06, 
     use_speaker_boost: false 
   },
   motivational: { 
-    stability: 0.16, 
+    stability: 0.18, 
     similarity: 0.91, 
     style: 0.07, 
     use_speaker_boost: false 
   },
   brainwash: { 
-    stability: 0.08,  // Muy bajo para hipnosis
-    similarity: 0.97, // Muy alto para consistencia extrema
-    style: 0.01,      // Mínimo absoluto
+    stability: 0.10,  // Muy bajo para hipnosis ultra-natural
+    similarity: 0.96, // Muy alto para trance consistente
+    style: 0.02,      // Casi nulo
     use_speaker_boost: false 
   },
   fullattention: { 
-    stability: 0.20, 
-    similarity: 0.89, 
-    style: 0.08, 
+    stability: 0.22,  // Poco más alto para claridad enfocada
+    similarity: 0.90, 
+    style: 0.09, 
     use_speaker_boost: false 
   }
 };

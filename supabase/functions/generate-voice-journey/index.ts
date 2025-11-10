@@ -9,164 +9,47 @@ const corsHeaders = {
 const LOVABLE_API_KEY = Deno.env.get('LOVABLE_API_KEY');
 
 const JOURNEY_PROMPTS = {
-  story: `Create an intimate, whispered bedtime story in English (2-3 minutes spoken softly).
+  story: `You are a gentle ASMR storyteller. Write a 2-3 minute whispered bedtime story that flows naturally when spoken aloud. Use simple, poetic language with sensory details. Include natural pauses by writing "..." where the voice should pause gently. Write in a dreamy, flowing style as if whispering directly to someone falling asleep.
 
-🎙️ ASMR Voice Direction:
-- Speak as if whispering directly into someone's ear
-- Use a slow, gentle pace with natural pauses
-- Let your voice be soft, warm, and comforting
-- Imagine tucking someone in and telling them a dreamy tale
+Begin with a peaceful opening that sets a calming scene, develop it with soft imagery, and end with a gentle resolution that invites sleep. Use short sentences and phrases. Focus on moonlight, soft textures, gentle sounds, and peaceful feelings.
 
-Structure:
-- Opening: Set a magical scene with sensory details (moonlight, soft sounds, gentle textures)
-- Body: A simple journey with poetic imagery, flowing like a lullaby
-- Closing: Drift into peaceful resolution, like falling asleep
+Write ONLY the story text that will be read aloud - no instructions, no labels, just the whispered story itself.`,
 
-Emotional Tone: Tender, nurturing, dreamlike, safe
-Language: Simple, poetic, sensory (sight, sound, touch, smell)
-Rhythm: Like waves - slow, repetitive, hypnotic
+  prayer: `You are leading a gentle 90-second whispered prayer meditation. Write a tender, inclusive prayer using "we" and "us" language. Include natural pauses with "..." and focus on gratitude, peace, and presence. Use simple, heartfelt phrases that feel sacred and intimate.
 
-Example opening: "Close your eyes... and let me take you somewhere peaceful... Can you feel the soft grass beneath you?... The moonlight dancing on your skin?..."
+The prayer should acknowledge this moment, express gratitude, release worry, and affirm inner peace. Write in a soft, reverent tone as if whispering in a sacred space.
 
-Return ONLY the whispered story text.`,
+Write ONLY the prayer text that will be read aloud - no instructions, just the whispered prayer itself.`,
 
-  prayer: `Create an intimate, whispered prayer in English (90 seconds spoken softly).
+  stoic: `You are a compassionate stoic guide. Write a gentle 2-minute reflection that offers ancient wisdom with warmth. Use "you" language and address the listener directly. Include natural pauses with "..." Focus on control, acceptance, impermanence, and inner peace.
 
-🎙️ ASMR Voice Direction:
-- Speak with reverence and tenderness
-- Whisper as if in a sacred, quiet space
-- Use long, calming pauses
-- Let emotion flow through gentle tone
+Acknowledge struggle with compassion, offer simple stoic wisdom gently, and end with quiet empowerment. Write as if a wise friend is sitting beside you under the stars, speaking softly.
 
-Structure:
-- Opening: Gentle invitation to presence ("Let us breathe together...")
-- Body: Soft expressions of gratitude, peace, and connection
-- Closing: Whispered affirmation of love and calm
+Write ONLY the reflection text that will be read aloud - no instructions, just the whispered guidance itself.`,
 
-Emotional Tone: Sacred, tender, peaceful, intimate
-Language: Inclusive "we/us", poetic, heartfelt
-Rhythm: Like a gentle heartbeat - steady, comforting
+  manifestation: `You are guiding intimate manifestation affirmations. Write 2 minutes of gentle "I am" statements using present tense. Repeat key affirmations for hypnotic effect. Include natural pauses with "..." Focus on abundance, worthiness, alignment, and receiving.
 
-Focus on: Gratitude for this moment, releasing worry, feeling held, inner peace
+Use sensory language and let affirmations build gently like waves. Write with quiet confidence, as if whispering powerful truths. End with gratitude for what already is.
 
-Example: "We breathe in... this gift of now... We release... what we cannot hold... We are grateful... for this quiet space..."
+Write ONLY the manifestation text that will be read aloud - no instructions, just the whispered affirmations themselves.`,
 
-Return ONLY the whispered prayer text.`,
+  motivational: `You are a gentle motivational guide. Write 2 minutes of soft encouragement that motivates through tenderness, not intensity. Address the listener with "you" language. Include natural pauses with "..." Acknowledge tiredness and struggle while affirming capability and strength.
 
-  stoic: `Create a gentle stoic reflection whispered in English (2 minutes spoken softly).
+Write as if you're beside someone who's tired but trying, offering a hand on their shoulder. Focus on: you're capable, rest is okay, small steps matter, you're not alone.
 
-🎙️ ASMR Voice Direction:
-- Speak like a wise friend whispering guidance
-- Slow, thoughtful pace with contemplative pauses
-- Balance strength with softness
-- Imagine sitting beside someone under the stars
+Write ONLY the motivation text that will be read aloud - no instructions, just the gentle encouragement itself.`,
 
-Structure:
-- Opening: Acknowledge the present struggle with compassion
-- Body: Ancient wisdom delivered gently (not forcefully)
-- Closing: Quiet empowerment and acceptance
+  brainwash: `You are guiding a hypnotic 3-minute mind-cleansing meditation. Write with extreme repetition and slowness. Use simple phrases like "Let it go...", "Washing away...", "Release...", "Breathe..." Include long pauses with "..." 
 
-Emotional Tone: Wise, compassionate, grounding, peaceful strength
-Language: Second person ("you"), poetic yet clear
-Rhythm: Meditative, like walking slowly through a garden
+Use water and cleansing imagery. Repeat key phrases multiple times. The rhythm should be trance-like and meditative, inviting the listener to release everything.
 
-Core wisdom: Control what you can... accept what you cannot... find peace in virtue... everything passes...
+Write ONLY the meditation text that will be read aloud - no instructions, just the hypnotic whispered meditation itself.`,
 
-Example: "You've been carrying so much... and that's okay... What if... you only held... what you can truly control?... Your thoughts... your response... your next breath..."
+  fullattention: `You are guiding a gentle 90-second focus meditation. Write soft instructions using words like "Notice...", "Let...", "Choose...", "This moment..." Include natural pauses with "..."
 
-Return ONLY the whispered reflection text.`,
+Guide attention back to breath and body. Help release distractions gently. End with an affirmation of clear, calm focus. Write as a calm meditation guide preparing someone to focus.
 
-  manifestation: `Create intimate manifestation whispers in English (2 minutes spoken softly).
-
-🎙️ ASMR Voice Direction:
-- Whisper affirmations like secrets of truth
-- Speak with quiet confidence and warmth
-- Use present tense "I am" statements
-- Let conviction flow through gentleness
-
-Structure:
-- Opening: Acknowledge current transformation
-- Body: Vivid "I am" affirmations with sensory details, repeated for hypnotic effect
-- Closing: Whispered gratitude for what already is
-
-Emotional Tone: Confident yet soft, powerful yet gentle, certain yet calm
-Language: "I am", sensory, emotional, present tense
-Rhythm: Repetitive, building, like gentle waves
-
-Focus on: Abundance, worthiness, alignment, clarity, receiving
-
-Example: "I am worthy... I am worthy of all that I desire... Can you feel it?... That truth settling into your bones?... I am aligned... with my highest path... I am receiving... all that is meant for me..."
-
-Return ONLY the whispered manifestation text.`,
-
-  motivational: `Create gentle motivational whispers in English (2 minutes spoken softly).
-
-🎙️ ASMR Voice Direction:
-- Motivate through soft encouragement, not loud energy
-- Whisper like a supportive friend beside you
-- Balance strength with tenderness
-- Imagine encouraging someone who's tired but trying
-
-Structure:
-- Opening: Acknowledge the struggle with compassion
-- Body: Gentle reminders of strength and capability
-- Closing: Quiet belief in the listener
-
-Emotional Tone: Encouraging but gentle, strong but soft, empowering but calm
-Language: "You" language, supportive, compassionate
-Rhythm: Steady, reassuring, like a hand on your shoulder
-
-Focus on: You're capable... it's okay to rest... small steps matter... you're not alone...
-
-Example: "I know you're tired... and that's completely okay... But listen... you've made it this far... Every single step... even when it felt impossible... That's your strength... that's your power..."
-
-Return ONLY the whispered motivation text.`,
-
-  brainwash: `Create a hypnotic mind-cleansing whisper meditation in English (3 minutes spoken very slowly).
-
-🎙️ ASMR Voice Direction:
-- Speak with trance-like slowness
-- Use repetitive, soothing phrases
-- Long pauses between phrases
-- Almost hypnotic, like guided sleep
-
-Structure:
-- Opening: Invitation to release (30s)
-- Body: Repetitive cleansing visualizations (2min)
-- Closing: Fresh mental clarity (30s)
-
-Emotional Tone: Hypnotic, calming, meditative, deeply relaxing
-Language: Simple, repetitive, water/cleansing imagery
-Rhythm: Extremely slow, like meditation
-
-Techniques: "Let it go...", "Washing away...", "Release...", "Clear...", "Empty...", "Breathe..."
-
-Example: "Let it wash away... [pause] ... all of it... [pause] ... washing away... [pause] ... like water... [pause] ... flowing... [pause] ... carrying it all... [pause] ... away..."
-
-Return ONLY the whispered cleansing meditation.`,
-
-  fullattention: `Create gentle focus whispers in English (90 seconds spoken softly).
-
-🎙️ ASMR Voice Direction:
-- Guide attention through soft clarity
-- Calm but purposeful tone
-- Use breath awareness and gentle cues
-- Like a meditation guide preparing you
-
-Structure:
-- Opening: Notice where attention is now (20s)
-- Body: Gentle techniques to center focus (50s)
-- Closing: Affirmation of clear, calm focus (20s)
-
-Emotional Tone: Calm, clear, purposeful yet gentle
-Language: "Notice...", "Let...", "Choose...", "This moment..."
-Rhythm: Steady, centering, grounding
-
-Techniques: Anchor to breath, body awareness, gentle release of distractions
-
-Example: "Notice... where your mind is right now... [pause] ... It's okay... [pause] ... Now... gently... bring it back... [pause] ... to this breath... [pause] ... this moment... [pause] ... only this..."
-
-Return ONLY the whispered focus guide.`
+Write ONLY the focus guide text that will be read aloud - no instructions, just the whispered guidance itself.`
 };
 
 serve(async (req) => {
@@ -197,7 +80,7 @@ serve(async (req) => {
         messages: [
           {
             role: 'system',
-            content: 'You are a expert writer of contemplative, spoken-word content. Write natural, flowing text meant to be spoken aloud and listened to. Use conversational rhythm and include natural pauses.'
+            content: 'You are creating spoken-word content for ASMR/meditation. Write ONLY the exact text to be spoken - no meta-commentary, no labels, no structure descriptions. Use "..." for natural pauses. Write as if you are the voice whispering directly to the listener. Be conversational, gentle, and flowing.'
           },
           {
             role: 'user',
@@ -215,7 +98,16 @@ serve(async (req) => {
     }
 
     const data = await response.json();
-    const generatedText = data.choices[0].message.content;
+    let generatedText = data.choices[0].message.content;
+
+    // Limpiar cualquier meta-texto que la IA pueda haber incluido
+    generatedText = generatedText
+      .replace(/^(Here's|Here is).*?:\s*/i, '') // Quitar "Here's the story:"
+      .replace(/\*\*.*?\*\*/g, '') // Quitar negritas markdown
+      .replace(/^#+\s+.*$/gm, '') // Quitar headers markdown
+      .replace(/\[.*?\]/g, '') // Quitar [instrucciones en brackets]
+      .replace(/\(.*?pause.*?\)/gi, '') // Quitar (pause) explícitos
+      .trim();
 
     console.log(`Generated ${category} journey successfully`);
 

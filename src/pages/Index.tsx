@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
+import { Switch } from "@/components/ui/switch";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { supabase } from "@/integrations/supabase/client";
@@ -200,6 +201,8 @@ const Index = () => {
   const [selectedJourney, setSelectedJourney] = useState<VoiceJourney | null>(null);
   const [withAmbient, setWithAmbient] = useState(false);
   const [ambientForJourney, setAmbientForJourney] = useState<Ambient | null>(null);
+  const [loopEnabled, setLoopEnabled] = useState(false);
+  const [loopCount, setLoopCount] = useState(0);
   
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const timerRef = useRef<NodeJS.Timeout | null>(null);
@@ -379,9 +382,20 @@ const Index = () => {
 
         if (audioRef.current) {
           audioRef.current.onended = () => {
-            if (timerRef.current) clearInterval(timerRef.current);
-            setIsPlaying(false);
-            setIsComplete(true);
+            if (loopEnabled) {
+              // Restart audio for loop
+              if (audioRef.current) {
+                audioRef.current.currentTime = 0;
+                audioRef.current.play();
+                setTimeLeft(60);
+                setLoopCount(prev => prev + 1);
+              }
+            } else {
+              // Normal completion
+              if (timerRef.current) clearInterval(timerRef.current);
+              setIsPlaying(false);
+              setIsComplete(true);
+            }
           };
         }
       }
@@ -493,9 +507,20 @@ const Index = () => {
 
         if (audioRef.current) {
           audioRef.current.onended = () => {
-            if (timerRef.current) clearInterval(timerRef.current);
-            setIsPlaying(false);
-            setIsComplete(true);
+            if (loopEnabled) {
+              // Restart audio for loop
+              if (audioRef.current) {
+                audioRef.current.currentTime = 0;
+                audioRef.current.play();
+                setTimeLeft(60);
+                setLoopCount(prev => prev + 1);
+              }
+            } else {
+              // Normal completion
+              if (timerRef.current) clearInterval(timerRef.current);
+              setIsPlaying(false);
+              setIsComplete(true);
+            }
           };
         }
       }
@@ -581,9 +606,20 @@ const Index = () => {
 
         if (audioRef.current) {
           audioRef.current.onended = () => {
-            if (timerRef.current) clearInterval(timerRef.current);
-            setIsPlaying(false);
-            setIsComplete(true);
+            if (loopEnabled) {
+              // Restart audio for loop
+              if (audioRef.current) {
+                audioRef.current.currentTime = 0;
+                audioRef.current.play();
+                setTimeLeft(60);
+                setLoopCount(prev => prev + 1);
+              }
+            } else {
+              // Normal completion
+              if (timerRef.current) clearInterval(timerRef.current);
+              setIsPlaying(false);
+              setIsComplete(true);
+            }
           };
         }
       }
@@ -691,9 +727,20 @@ const Index = () => {
 
       if (audioRef.current) {
         audioRef.current.onended = () => {
-          if (timerRef.current) clearInterval(timerRef.current);
-          setIsPlaying(false);
-          setIsComplete(true);
+          if (loopEnabled) {
+            // Restart audio for loop
+            if (audioRef.current) {
+              audioRef.current.currentTime = 0;
+              audioRef.current.play();
+              setTimeLeft(120); // 2 minutes for voice journeys
+              setLoopCount(prev => prev + 1);
+            }
+          } else {
+            // Normal completion
+            if (timerRef.current) clearInterval(timerRef.current);
+            setIsPlaying(false);
+            setIsComplete(true);
+          }
         };
       }
     } catch (error) {
@@ -769,6 +816,7 @@ const Index = () => {
     setSessionFeedback(null);
     setWaitlistEmail("");
     setEmailSubmitted(false);
+    setLoopCount(0);
   };
 
   if (isPlaying || needsManualPlay) {
@@ -776,9 +824,16 @@ const Index = () => {
       <div className="min-h-screen bg-background flex items-center justify-center p-4 relative">
         <AmbientBackground isPlaying={true} />
         <div className="text-center space-y-8">
-          <h2 className="text-3xl md:text-4xl font-light lowercase tracking-wider text-foreground">
-            {generatedTitle || `${selectedMood} + ${selectedAmbient}`}
-          </h2>
+          <div className="text-center space-y-2">
+            <h2 className="text-3xl md:text-4xl font-light lowercase tracking-wider text-foreground">
+              {generatedTitle || `${selectedMood} + ${selectedAmbient}`}
+            </h2>
+            {loopEnabled && loopCount > 0 && (
+              <p className="text-sm text-primary/80 flex items-center justify-center gap-2">
+                <span>🔁</span> Loop #{loopCount}
+              </p>
+            )}
+          </div>
 
           <div className="relative w-48 h-48 mx-auto">
             <div className="absolute inset-0 rounded-full border-4 border-primary/30" />
@@ -1014,6 +1069,23 @@ const Index = () => {
             </div>
           </div>
 
+          {/* Loop Mode Toggle */}
+          <div className="flex items-center justify-between p-4 rounded-lg bg-card/50 border border-border/50">
+            <div className="flex items-center gap-2">
+              <Switch 
+                checked={loopEnabled} 
+                onCheckedChange={setLoopEnabled}
+                id="loop-creator"
+              />
+              <label htmlFor="loop-creator" className="text-sm lowercase tracking-wide cursor-pointer">
+                🔁 loop mode
+              </label>
+            </div>
+            <span className="text-xs text-muted-foreground">
+              {loopEnabled ? "will repeat continuously" : "play once"}
+            </span>
+          </div>
+
           {/* Generate Button - Prominent */}
           <Button
             onClick={startCreatorSession}
@@ -1103,6 +1175,23 @@ const Index = () => {
                   </div>
                 </div>
 
+                {/* Loop Mode Toggle */}
+                <div className="flex items-center justify-between p-4 rounded-lg bg-card/50 border border-border/50">
+                  <div className="flex items-center gap-2">
+                    <Switch 
+                      checked={loopEnabled} 
+                      onCheckedChange={setLoopEnabled}
+                      id="loop-preset"
+                    />
+                    <label htmlFor="loop-preset" className="text-sm lowercase tracking-wide cursor-pointer">
+                      🔁 loop mode
+                    </label>
+                  </div>
+                  <span className="text-xs text-muted-foreground">
+                    {loopEnabled ? "will repeat continuously" : "play once"}
+                  </span>
+                </div>
+
                 {/* Generate Preset Button */}
                 <Button
                   onClick={startSession}
@@ -1148,6 +1237,25 @@ const Index = () => {
                   </div>
                 </button>
               ))}
+            </div>
+
+            {/* Loop Mode Toggle */}
+            <div className="px-4">
+              <div className="flex items-center justify-between p-4 rounded-lg bg-card/50 border border-border/50 mb-3">
+                <div className="flex items-center gap-2">
+                  <Switch 
+                    checked={loopEnabled} 
+                    onCheckedChange={setLoopEnabled}
+                    id="loop-binaural"
+                  />
+                  <label htmlFor="loop-binaural" className="text-sm lowercase tracking-wide cursor-pointer">
+                    🔁 loop mode
+                  </label>
+                </div>
+                <span className="text-xs text-muted-foreground">
+                  {loopEnabled ? "will repeat continuously" : "play once"}
+                </span>
+              </div>
             </div>
 
             {/* Generate Button */}
@@ -1240,6 +1348,25 @@ const Index = () => {
                   ))}
                 </div>
               )}
+            </div>
+
+            {/* Loop Mode Toggle */}
+            <div className="px-4">
+              <div className="flex items-center justify-between p-4 rounded-lg bg-card/50 border border-border/50 mb-3">
+                <div className="flex items-center gap-2">
+                  <Switch 
+                    checked={loopEnabled} 
+                    onCheckedChange={setLoopEnabled}
+                    id="loop-voice"
+                  />
+                  <label htmlFor="loop-voice" className="text-sm lowercase tracking-wide cursor-pointer">
+                    🔁 loop mode
+                  </label>
+                </div>
+                <span className="text-xs text-muted-foreground">
+                  {loopEnabled ? "will repeat continuously" : "play once"}
+                </span>
+              </div>
             </div>
 
             {/* Generate Button */}

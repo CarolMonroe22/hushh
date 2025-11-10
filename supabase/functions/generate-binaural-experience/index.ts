@@ -47,9 +47,8 @@ serve(async (req) => {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        text: prompt,
-        duration: 60,
-        prompt_influence: 0.6,
+        prompt: prompt,
+        music_length_ms: 60000,
       }),
     });
 

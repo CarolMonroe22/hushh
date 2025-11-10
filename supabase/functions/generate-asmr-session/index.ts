@@ -8,22 +8,15 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
-function getUserIdFromAuth(req: Request): string | null {
-  const authHeader = req.headers.get('Authorization');
-  if (!authHeader?.startsWith('Bearer ')) return null;
-  
-  try {
-    const token = authHeader.substring(7);
-    const payload = JSON.parse(atob(token.split('.')[1]));
-    return payload.sub || null;
-  } catch {
-    return null;
-  }
+function getClientId(req: Request): string {
+  const forwarded = req.headers.get('x-forwarded-for');
+  const ip = forwarded ? forwarded.split(',')[0].trim() : 'unknown';
+  return `ip_${ip}`;
 }
 
 async function checkPersistentRateLimit(
   supabase: any,
-  userId: string,
+  clientId: string,
   endpoint: string,
   maxRequests: number
 ): Promise<{ allowed: boolean; remaining: number }> {
@@ -32,7 +25,7 @@ async function checkPersistentRateLimit(
   windowStart.setSeconds(0, 0);
 
   await supabase.rpc('increment_rate_limit', {
-    p_user_id: userId,
+    p_user_id: clientId,
     p_endpoint: endpoint,
     p_window_start: windowStart.toISOString(),
   });
@@ -40,7 +33,7 @@ async function checkPersistentRateLimit(
   const { data } = await supabase
     .from('rate_limits')
     .select('request_count')
-    .eq('user_id', userId)
+    .eq('user_id', clientId)
     .eq('endpoint', endpoint)
     .eq('window_start', windowStart.toISOString())
     .single();
@@ -146,17 +139,10 @@ serve(async (req) => {
     return new Response(null, { headers: corsHeaders });
   }
 
-  const userId = getUserIdFromAuth(req);
-  if (!userId) {
-    return new Response(
-      JSON.stringify({ error: 'Authentication required' }),
-      { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-    );
-  }
-
+  const clientId = getClientId(req);
   const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
 
-  const rateLimit = await checkPersistentRateLimit(supabase, userId, 'generate-asmr-session', 10);
+  const rateLimit = await checkPersistentRateLimit(supabase, clientId, 'generate-asmr-session', 10);
   if (!rateLimit.allowed) {
     return new Response(
       JSON.stringify({ 
@@ -167,7 +153,7 @@ serve(async (req) => {
     );
   }
 
-  console.log(`[generate-asmr-session] User: ${userId}, Rate limit: ${rateLimit.remaining}/10`);
+  console.log(`[generate-asmr-session] Client: ${clientId}, Rate limit: ${10 - rateLimit.remaining}/10`);
 
   try {
     const { mood, ambient } = await req.json();

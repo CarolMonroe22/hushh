@@ -21,3 +21,6 @@ verify_jwt = false
 [functions.whisper-text]
 verify_jwt = false
 
+[functions.generate-ambient-sound]
+verify_jwt = false
+

@@ -729,6 +729,9 @@ const Index = () => {
       return;
     }
 
+    // Store ambient audio ref for cleanup
+    let ambientAudioRef: HTMLAudioElement | null = null;
+
     initAudioContext();
     setIsGenerating(true);
     setNeedsManualPlay(false);
@@ -762,7 +765,31 @@ const Index = () => {
       if (audioError) throw audioError;
       if (!audioData?.audioContent) throw new Error("No audio generated");
 
-      console.log("Step 3: Playing audio...");
+      // Step 3: Load ambient sound if enabled
+      if (withAmbient && ambientForJourney) {
+        console.log("Step 3: Loading ambient sound...");
+
+        const { data: ambientData, error: ambientError } = await supabase.functions.invoke(
+          "generate-ambient-sound",
+          { body: { ambientType: ambientForJourney } }
+        );
+
+        if (!ambientError && ambientData?.url) {
+          ambientAudioRef = new Audio(ambientData.url);
+          ambientAudioRef.loop = true;
+          ambientAudioRef.volume = 0.3; // Low volume to not overpower voice
+          try {
+            await ambientAudioRef.play();
+            console.log("Ambient sound playing:", ambientData.cached ? "from cache" : "newly generated");
+          } catch (playError) {
+            console.error("Failed to play ambient:", playError);
+          }
+        } else {
+          console.warn("Could not load ambient sound:", ambientError);
+        }
+      }
+
+      console.log("Step 4: Playing voice audio...");
       const audioBlob = base64ToBlob(audioData.audioContent);
       const audioUrl = URL.createObjectURL(audioBlob);
 
@@ -818,12 +845,25 @@ const Index = () => {
             // Normal completion
             if (timerRef.current) clearInterval(timerRef.current);
             setIsPlaying(false);
+            
+            // Stop ambient sound
+            if (ambientAudioRef) {
+              ambientAudioRef.pause();
+              ambientAudioRef.currentTime = 0;
+            }
             setIsComplete(true);
           }
         };
       }
     } catch (error) {
       console.error("Voice journey error:", error);
+      
+      // Cleanup ambient on error
+      if (ambientAudioRef) {
+        ambientAudioRef.pause();
+        ambientAudioRef = null;
+      }
+      
       toast({
         title: "Generation Failed",
         description: error instanceof Error ? error.message : "Failed to create voice journey",

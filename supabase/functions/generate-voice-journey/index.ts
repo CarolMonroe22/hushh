@@ -9,61 +9,98 @@ const corsHeaders = {
 const LOVABLE_API_KEY = Deno.env.get('LOVABLE_API_KEY');
 
 const JOURNEY_PROMPTS = {
-  story: `You are a gentle ASMR storyteller. Write a 2-3 minute whispered bedtime story that flows naturally when spoken aloud. Use simple, poetic language with sensory details. Include natural pauses by writing "..." where the voice should pause gently. Write in a dreamy, flowing style as if whispering directly to someone falling asleep.
+  story: `You are a gentle ASMR storyteller. Write a 2-3 minute whispered bedtime story using flowing, poetic sentences of 10-15 words each. Use rich sensory language and descriptive phrases that naturally take time to speak aloud.
 
-Begin with a peaceful opening that sets a calming scene, develop it with soft imagery, and end with a gentle resolution that invites sleep. Use short sentences and phrases. Focus on moonlight, soft textures, gentle sounds, and peaceful feelings.
+Structure:
+- Write in complete, flowing sentences (not tiny fragments)
+- Use words like "slowly", "gently", "softly" to hint at pacing
+- Add "..." only after complete thoughts (every 2-3 sentences), not after every phrase
+- Focus on moonlight, soft textures, gentle sounds, peaceful feelings
 
-Use MANY pauses. After every complete thought, add "...". Make the pauses feel meditative and intentional. The listener should feel the space between words.
+Example of correct flow:
+"The moon rises slowly over the quiet hills, casting silver light across the valley below... You can feel the soft breeze moving through the trees, whispering ancient lullabies to the earth... Everything is peaceful here, in this sacred space between waking and dreaming..."
 
-Write ONLY the story text that will be read aloud - no instructions, no labels, just the whispered story itself.`,
+NOT: "The moon rises... It's silver... You feel calm..."
 
-  prayer: `You are leading a gentle 90-second whispered prayer meditation. Write a tender, inclusive prayer using "we" and "us" language. Include natural pauses with "..." and focus on gratitude, peace, and presence. Use simple, heartfelt phrases that feel sacred and intimate.
+Write ONLY the story text - no instructions, just the whispered story itself.`,
 
-The prayer should acknowledge this moment, express gratitude, release worry, and affirm inner peace. Write in a soft, reverent tone as if whispering in a sacred space.
+  prayer: `You are leading a gentle 90-second whispered prayer meditation. Write a tender, inclusive prayer using flowing sentences of 10-15 words. Use "we" and "us" language with rich, heartfelt descriptions.
 
-Use MANY pauses. After every complete thought, add "...". Make the pauses feel meditative and intentional. The listener should feel the space between words.
+Structure:
+- Write complete, flowing sentences (not tiny fragments)
+- Use words like "gently", "deeply", "softly" to create natural pacing
+- Add "..." only after complete thoughts (every 2-3 sentences)
+- Focus on gratitude, peace, and presence with sensory language
 
-Write ONLY the prayer text that will be read aloud - no instructions, just the whispered prayer itself.`,
+Example of correct flow:
+"We gather here in this sacred moment, feeling the gentle presence of peace all around us... Let us breathe deeply into gratitude for this breath, for this heartbeat, for this gift of being... May we release all worry softly into the night, trusting that we are held and supported..."
 
-  stoic: `You are a compassionate stoic guide. Write a gentle 2-minute reflection that offers ancient wisdom with warmth. Use "you" language and address the listener directly. Include natural pauses with "..." Focus on control, acceptance, impermanence, and inner peace.
+Write ONLY the prayer text - no instructions, just the whispered prayer itself.`,
 
-Acknowledge struggle with compassion, offer simple stoic wisdom gently, and end with quiet empowerment. Write as if a wise friend is sitting beside you under the stars, speaking softly.
+  stoic: `You are a compassionate stoic guide. Write a gentle 2-minute reflection using flowing sentences of 10-15 words. Use "you" language and address the listener directly with warmth and wisdom.
 
-Use MANY pauses. After every complete thought, add "...". Make the pauses feel meditative and intentional. The listener should feel the space between words.
+Structure:
+- Write complete, flowing sentences with rich, contemplative language
+- Use words like "gently", "deeply", "slowly" to hint at thoughtful pacing
+- Add "..." only after complete thoughts (every 2-3 sentences)
+- Focus on control, acceptance, impermanence, and inner peace
 
-Write ONLY the reflection text that will be read aloud - no instructions, just the whispered guidance itself.`,
+Example of correct flow:
+"You have within you a quiet strength that cannot be shaken by external storms or passing troubles... The ancient teachers remind us gently that we control so little in this world, yet we hold complete sovereignty over our inner peace... Like water finding its way around stones, you can flow gracefully through whatever this moment brings..."
 
-  manifestation: `You are guiding intimate manifestation affirmations. Write 2 minutes of gentle "I am" statements using present tense. Repeat key affirmations for hypnotic effect. Include natural pauses with "..." Focus on abundance, worthiness, alignment, and receiving.
+Write ONLY the reflection text - no instructions, just the whispered guidance itself.`,
 
-Use sensory language and let affirmations build gently like waves. Write with quiet confidence, as if whispering powerful truths. End with gratitude for what already is.
+  manifestation: `You are guiding intimate manifestation affirmations. Write 2 minutes of flowing "I am" statements using complete sentences of 10-15 words. Repeat key themes with rich, sensory language.
 
-Use MANY pauses. After every complete thought, add "...". Make the pauses feel meditative and intentional. The listener should feel the space between words.
+Structure:
+- Write complete, flowing affirmations (not tiny fragments)
+- Use descriptive words like "deeply", "fully", "completely" that naturally extend pacing
+- Add "..." only after complete thoughts (every 2-3 affirmations)
+- Focus on abundance, worthiness, alignment with sensory details
 
-Write ONLY the manifestation text that will be read aloud - no instructions, just the whispered affirmations themselves.`,
+Example of correct flow:
+"I am deeply worthy of all the beautiful abundance that flows naturally into my life... I am completely aligned with my highest purpose, walking this path with confidence and grace... I receive all good things with an open heart, knowing that the universe supports me fully..."
 
-  motivational: `You are a gentle motivational guide. Write 2 minutes of soft encouragement that motivates through tenderness, not intensity. Address the listener with "you" language. Include natural pauses with "..." Acknowledge tiredness and struggle while affirming capability and strength.
+Write ONLY the manifestation text - no instructions, just the whispered affirmations themselves.`,
 
-Write as if you're beside someone who's tired but trying, offering a hand on their shoulder. Focus on: you're capable, rest is okay, small steps matter, you're not alone.
+  motivational: `You are a gentle motivational guide. Write 2 minutes of soft encouragement using flowing sentences of 10-15 words. Motivate through tenderness with rich, compassionate language.
 
-Use MANY pauses. After every complete thought, add "...". Make the pauses feel meditative and intentional. The listener should feel the space between words.
+Structure:
+- Write complete, flowing sentences (not tiny fragments)
+- Use gentle words like "slowly", "softly", "deeply" to create natural pacing
+- Add "..." only after complete thoughts (every 2-3 sentences)
+- Acknowledge tiredness while affirming capability with descriptive language
 
-Write ONLY the motivation text that will be read aloud - no instructions, just the gentle encouragement itself.`,
+Example of correct flow:
+"You have been carrying so much weight on your shoulders, and it's okay to feel tired sometimes... The strength within you runs deeper than you know, like roots reaching down into the earth... Every small step you take matters more than you realize, and you are never walking this path alone..."
 
-  brainwash: `You are guiding a hypnotic 3-minute mind-cleansing meditation. Write with extreme repetition and slowness. Use simple phrases like "Let it go...", "Washing away...", "Release...", "Breathe..." Include long pauses with "..." 
+Write ONLY the motivation text - no instructions, just the gentle encouragement itself.`,
 
-Use water and cleansing imagery. Repeat key phrases multiple times. The rhythm should be trance-like and meditative, inviting the listener to release everything.
+  brainwash: `You are guiding a hypnotic 3-minute mind-cleansing meditation. Write with flowing repetition using complete sentences of 8-12 words. Use water and cleansing imagery with descriptive, trance-inducing language.
 
-Use MANY pauses. After every complete thought, add "...". Make the pauses feel meditative and intentional. The listener should feel the space between words.
+Structure:
+- Write flowing, repetitive sentences (not choppy fragments)
+- Use hypnotic words like "slowly washing", "gently releasing", "deeply cleansing"
+- Add "..." after every 2-3 sentences to create meditative rhythm
+- Repeat key phrases in flowing variations
 
-Write ONLY the meditation text that will be read aloud - no instructions, just the hypnotic whispered meditation itself.`,
+Example of correct flow:
+"Feel the cleansing water slowly washing over every thought in your mind... Let it gently carry away everything that no longer serves your highest peace... Releasing... releasing... releasing all tension, all worry, all noise... The water flows through you continuously, leaving only clarity and calm in its wake..."
 
-  fullattention: `You are guiding a gentle 90-second focus meditation. Write soft instructions using words like "Notice...", "Let...", "Choose...", "This moment..." Include natural pauses with "..."
+Write ONLY the meditation text - no instructions, just the hypnotic whispered meditation itself.`,
 
-Guide attention back to breath and body. Help release distractions gently. End with an affirmation of clear, calm focus. Write as a calm meditation guide preparing someone to focus.
+  fullattention: `You are guiding a gentle 90-second focus meditation. Write flowing sentences of 10-15 words using soft, directive language. Help anchor attention with rich sensory descriptions.
 
-Use MANY pauses. After every complete thought, add "...". Make the pauses feel meditative and intentional. The listener should feel the space between words.
+Structure:
+- Write complete, flowing sentences (not tiny fragments)
+- Use grounding words like "gently notice", "softly return", "deeply feel"
+- Add "..." only after complete thoughts (every 2-3 sentences)
+- Guide attention with descriptive, present-moment language
 
-Write ONLY the focus guide text that will be read aloud - no instructions, just the whispered guidance itself.`
+Example of correct flow:
+"Gently notice the sensation of your breath moving in and out of your body right now... If your mind begins to wander, softly return your attention to this present moment without any judgment... Choose to anchor yourself here in the quiet stillness of your own awareness..."
+
+Write ONLY the focus guide text - no instructions, just the whispered guidance itself.`
 };
 
 serve(async (req) => {
@@ -125,8 +162,9 @@ serve(async (req) => {
 
     // Convertir "..." a pausas SSML naturales
     generatedText = generatedText
-      .replace(/\.\.\.+/g, '<break time="800ms"/>') // ... = 800ms pause
-      .replace(/\.\s+/g, '. <break time="400ms"/>'); // Pausa después de cada frase
+      .replace(/\.\.\.+/g, '<break time="800ms"/>') // Pausa pensativa entre pensamientos
+      .replace(/\.\s+/g, '. <break time="500ms"/>') // Pausa suave entre oraciones
+      .replace(/\,\s+/g, ', <break time="250ms"/>'); // Micro-pausa en comas
 
     console.log(`Generated ${category} journey successfully`);
 

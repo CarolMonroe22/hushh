@@ -78,7 +78,42 @@ Style: Use "you" language. Be direct. Include powerful short sentences. Build mo
 
 Focus on: taking action despite fear, owning your power, the next step, resilience, potential, proving doubt wrong
 
-Return ONLY the motivational message, no titles or metadata.`
+Return ONLY the motivational message, no titles or metadata.`,
+
+  brainwash: `Generate a mind-cleansing meditation script in English (2-3 minutes when spoken aloud, approximately 300-400 words).
+
+Structure:
+- Opening: Invitation to let go and release mental clutter (30s)
+- Body: Progressive mental cleansing with repetitive, calming phrases and visualizations (90s)
+- Closing: Sense of mental clarity and freshness (30s)
+
+Tone: Hypnotic, soothing, slow, meditative, almost trance-like
+Style: Use simple, repetitive language. Include long pauses. Speak slowly. Use "you" language.
+Techniques: Mental imagery (washing away thoughts, water flowing, clean slate), breath awareness, progressive relaxation
+
+Focus on: letting go, releasing, emptying, cleansing, renewal, mental space, clarity
+
+Example phrases: "Let it wash away...", "Release that thought...", "Your mind is becoming clear...", "Like water flowing..."
+
+Return ONLY the meditation script, no titles or metadata.`,
+
+  fullattention: `Generate a focus-inducing attention training script in English (90 seconds when spoken aloud, approximately 180-220 words).
+
+Structure:
+- Opening: Acknowledge distractions and intention to focus (20s)
+- Body: Practical techniques to center attention and enter flow state (50s)
+- Closing: Affirmation of clear, focused awareness ready for action (20s)
+
+Tone: Clear, direct, calm but energized, purposeful
+Style: Use concise sentences. Strategic pauses. Action-oriented language. Second person ("you").
+
+Techniques: Anchor attention to breath, body scan for alertness, mental prioritization, distraction release
+
+Focus on: presence, clarity, single-pointed focus, flow state, mental sharpness, readiness
+
+Example phrases: "Notice where your attention is right now...", "Choose to focus...", "Let everything else fade...", "This moment, this task..."
+
+Return ONLY the focus script, no titles or metadata.`
 };
 
 serve(async (req) => {

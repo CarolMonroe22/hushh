@@ -13,7 +13,7 @@ import AmbientBackground from "@/components/AmbientBackground";
 type Mood = "relax" | "sleep" | "focus" | "gratitude" | "boost" | "stoic";
 type Ambient = "rain" | "ocean" | "forest" | "fireplace" | "whitenoise" | "city";
 type BinauralExperience = "barbershop" | "spa" | "ear-cleaning" | "bedtime" | "art-studio" | "yoga";
-type VoiceJourney = "story" | "prayer" | "stoic" | "manifestation" | "motivational";
+type VoiceJourney = "story" | "prayer" | "stoic" | "manifestation" | "motivational" | "brainwash" | "fullattention";
 
 const MOODS: { value: Mood; label: string; emoji: string }[] = [
   { value: "relax", label: "relax", emoji: "🌙" },
@@ -118,6 +118,20 @@ const VOICE_JOURNEYS: {
     emoji: "🔥",
     voiceId: "nPczCjzI2devNBz1zQrb", // Brian
     shortDesc: "energizing pep talk"
+  },
+  {
+    value: "brainwash",
+    label: "Brain Wash",
+    emoji: "🧠",
+    voiceId: "FGY2WhTYpPnrIDTdsKH5", // Laura
+    shortDesc: "mental cleanse & reset"
+  },
+  {
+    value: "fullattention",
+    label: "Full Attention",
+    emoji: "🎯",
+    voiceId: "onwK4e9ZLuTAKqWW03F9", // Daniel
+    shortDesc: "deep focus activation"
   },
 ];
 

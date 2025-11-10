@@ -562,34 +562,37 @@ const Index = () => {
     <div className="min-h-screen bg-background text-foreground">
       <div className="container mx-auto px-4 py-12 md:py-20 max-w-4xl">
         {/* Logo Header */}
-        <div className="flex items-center justify-center mb-16">
-          <h1 className="text-4xl md:text-5xl font-light lowercase tracking-wide">
+        <header className="flex items-center justify-center mb-16">
+          <div className="text-4xl md:text-5xl font-light lowercase tracking-wide" role="banner">
             🌙 hushh
-          </h1>
-        </div>
+          </div>
+        </header>
 
         {/* Hero Section */}
-        <div className="text-center space-y-6 mb-16">
-          <h1 className="text-5xl md:text-7xl font-light tracking-wider text-foreground">
-            <span>1-Minute </span>
-            <span 
-              className={`inline-block transition-all duration-600 ease-in-out ${
-                titleFade 
-                  ? 'opacity-100 translate-y-0' 
-                  : 'opacity-0 -translate-y-2'
-              }`}
-              style={{ transitionTimingFunction: 'cubic-bezier(0.4, 0.0, 0.2, 1)' }}
-            >
-              {TITLE_ROTATIONS[currentTitleIndex]}
-            </span>
-          </h1>
-          <p className="text-lg md:text-xl text-muted-foreground tracking-wide">
-            build beautiful feelings, in sound
-          </p>
-        </div>
+        <main>
+          <section className="text-center space-y-6 mb-16" aria-labelledby="hero-title">
+            <h1 id="hero-title" className="text-5xl md:text-7xl font-light tracking-wider text-foreground">
+              <span>AI-Generated Personalized </span>
+              <span 
+                className={`inline-block transition-all duration-600 ease-in-out ${
+                  titleFade 
+                    ? 'opacity-100 translate-y-0' 
+                    : 'opacity-0 -translate-y-2'
+                }`}
+                style={{ transitionTimingFunction: 'cubic-bezier(0.4, 0.0, 0.2, 1)' }}
+                aria-live="polite"
+              >
+                {TITLE_ROTATIONS[currentTitleIndex]}
+              </span>
+            </h1>
+            <p className="text-lg md:text-xl text-muted-foreground tracking-wide">
+              Describe your mood and get custom ASMR, ambient sounds, and guided meditation for sleep, focus, and relaxation
+            </p>
+          </section>
 
-        {/* Main Input Area - Creator Mode */}
-        <div className="max-w-2xl mx-auto space-y-6 mb-12">
+          {/* Main Input Area - Creator Mode */}
+          <section className="max-w-2xl mx-auto space-y-6 mb-12" aria-labelledby="create-vibe-heading">
+            <h2 id="create-vibe-heading" className="sr-only">Create Your Custom Soundscape</h2>
           {/* Large Textarea - Main Focus */}
           <div className="space-y-3">
             {/* Formula hint */}
@@ -653,10 +656,11 @@ const Index = () => {
           >
             {isGenerating ? "creating your vibe..." : "✨ create my vibe"}
           </Button>
-        </div>
+          </section>
 
-        {/* Vibe Starters - Quick Inspiration */}
-        <div className="max-w-2xl mx-auto space-y-4 mb-12">
+          {/* Vibe Starters - Quick Inspiration */}
+          <section className="max-w-2xl mx-auto space-y-4 mb-12" aria-labelledby="vibe-starters-heading">
+            <h2 id="vibe-starters-heading" className="sr-only">Vibe Starters</h2>
           <p className="text-sm text-muted-foreground text-center">
             or start from these →
           </p>
@@ -673,10 +677,11 @@ const Index = () => {
               </button>
             ))}
           </div>
-        </div>
+          </section>
 
-        {/* Quick Presets - Accordion */}
-        <div className="max-w-2xl mx-auto">
+          {/* Quick Presets - Accordion */}
+          <section className="max-w-2xl mx-auto" aria-labelledby="quick-presets-heading">
+            <h2 id="quick-presets-heading" className="sr-only">Quick Presets</h2>
           <Accordion type="single" collapsible className="border-t border-border/50">
             <AccordionItem value="presets" className="border-b-0">
               <AccordionTrigger className="py-6 hover:no-underline">
@@ -743,9 +748,10 @@ const Index = () => {
               </AccordionContent>
             </AccordionItem>
           </Accordion>
+          </section>
 
           {/* Story Section - Bottom */}
-          <div className="max-w-2xl mx-auto mt-16 mb-12 px-4">
+          <footer className="max-w-2xl mx-auto mt-16 mb-12 px-4">
             <div className="text-center space-y-6 py-12 border-t border-border/30">
               {/* Credit with link */}
               <p className="text-sm text-muted-foreground">
@@ -829,8 +835,8 @@ const Index = () => {
                 </Dialog>
               </div>
             </div>
-          </div>
-        </div>
+          </footer>
+        </main>
       </div>
 
       {/* Loading Overlay */}

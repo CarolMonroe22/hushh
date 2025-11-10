@@ -1,0 +1,19 @@
+{
+  "name": "hushh — vibe-coded soundscapes",
+  "short_name": "hushh",
+  "description": "AI-generated ASMR, rain, and whispers for sleep & focus",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#1a1a2e",
+  "theme_color": "#8B5CF6",
+  "orientation": "portrait",
+  "icons": [
+    {
+      "src": "/moon-favicon.png",
+      "sizes": "any",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "categories": ["health", "lifestyle", "music"]
+}

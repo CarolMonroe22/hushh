@@ -125,7 +125,7 @@ serve(async (req) => {
       },
       body: JSON.stringify({
         text: processedText,
-        model_id: 'eleven_turbo_v2_5',
+        model_id: 'eleven_v3_alpha',
         voice_settings: {
           stability: stability,
           similarity_boost: similarityBoost,

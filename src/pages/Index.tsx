@@ -1113,7 +1113,7 @@ const Index = () => {
         <main>
           <section className="text-center space-y-6 mb-16" aria-labelledby="hero-title">
             <h1 id="hero-title" className="text-5xl md:text-7xl font-light tracking-wider text-foreground">
-              <span>AI-Generated Personalized </span>
+              <span>1-Minute </span>
               <span 
                 className={`inline-block transition-all duration-600 ease-in-out ${
                   titleFade 
@@ -1127,7 +1127,7 @@ const Index = () => {
               </span>
             </h1>
             <p className="text-lg md:text-xl text-muted-foreground tracking-wide">
-              Describe your mood and get custom ASMR, ambient sounds, and guided meditation for sleep, focus, and relaxation
+              build beautiful feelings, in sound
             </p>
           </section>
 

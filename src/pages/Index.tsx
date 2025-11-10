@@ -198,6 +198,12 @@ const Index = () => {
     }
   };
 
+  const setupNormalAudio = (audioUrl: string) => {
+    const audio = new Audio(audioUrl);
+    audioRef.current = audio;
+    return audio;
+  };
+
   const setup3DAudio = (audioUrl: string) => {
     if (!audioContextRef.current) return null;
 
@@ -272,10 +278,7 @@ const Index = () => {
         const audioBlob = base64ToBlob(data.audioContent);
         const audioUrl = URL.createObjectURL(audioBlob);
 
-        const audio = setup3DAudio(audioUrl);
-        if (!audio) {
-          throw new Error('Failed to setup 3D audio');
-        }
+        const audio = setupNormalAudio(audioUrl);
         
         const playPromise = audio.play();
         
@@ -389,10 +392,7 @@ const Index = () => {
         const audioBlob = base64ToBlob(asmrData.audioContent);
         const audioUrl = URL.createObjectURL(audioBlob);
 
-        const audio = setup3DAudio(audioUrl);
-        if (!audio) {
-          throw new Error('Failed to setup 3D audio');
-        }
+        const audio = setupNormalAudio(audioUrl);
         
         const playPromise = audio.play();
         

@@ -22,7 +22,7 @@ Example of correct flow:
 
 NOT: "The moon rises... It's silver... You feel calm..."
 
-Write ONLY the story text - no instructions, just the whispered story itself.`,
+Write ONLY the story text - no instructions, no labels. The text will be spoken with [slowly] [whispered] tags, so write naturally flowing sentences without trying to control pacing through punctuation. Focus on poetic, descriptive language that feels intimate and calming when whispered slowly.`,
 
   prayer: `You are leading a gentle 90-second whispered prayer meditation. Write a tender, inclusive prayer using flowing sentences of 10-15 words. Use "we" and "us" language with rich, heartfelt descriptions.
 
@@ -35,7 +35,7 @@ Structure:
 Example of correct flow:
 "We gather here in this sacred moment, feeling the gentle presence of peace all around us... Let us breathe deeply into gratitude for this breath, for this heartbeat, for this gift of being... May we release all worry softly into the night, trusting that we are held and supported..."
 
-Write ONLY the prayer text - no instructions, just the whispered prayer itself.`,
+Write ONLY the prayer text - no instructions, no labels. The text will be spoken with [slowly] [whispered] tags, so write naturally flowing sentences without trying to control pacing through punctuation. Focus on poetic, descriptive language that feels intimate and calming when whispered slowly.`,
 
   stoic: `You are a compassionate stoic guide. Write a gentle 2-minute reflection using flowing sentences of 10-15 words. Use "you" language and address the listener directly with warmth and wisdom.
 
@@ -48,7 +48,7 @@ Structure:
 Example of correct flow:
 "You have within you a quiet strength that cannot be shaken by external storms or passing troubles... The ancient teachers remind us gently that we control so little in this world, yet we hold complete sovereignty over our inner peace... Like water finding its way around stones, you can flow gracefully through whatever this moment brings..."
 
-Write ONLY the reflection text - no instructions, just the whispered guidance itself.`,
+Write ONLY the reflection text - no instructions, no labels. The text will be spoken with [slowly] [whispered] tags, so write naturally flowing sentences without trying to control pacing through punctuation. Focus on poetic, descriptive language that feels intimate and calming when whispered slowly.`,
 
   manifestation: `You are guiding intimate manifestation affirmations. Write 2 minutes of flowing "I am" statements using complete sentences of 10-15 words. Repeat key themes with rich, sensory language.
 
@@ -61,7 +61,7 @@ Structure:
 Example of correct flow:
 "I am deeply worthy of all the beautiful abundance that flows naturally into my life... I am completely aligned with my highest purpose, walking this path with confidence and grace... I receive all good things with an open heart, knowing that the universe supports me fully..."
 
-Write ONLY the manifestation text - no instructions, just the whispered affirmations themselves.`,
+Write ONLY the manifestation text - no instructions, no labels. The text will be spoken with [slowly] [whispered] tags, so write naturally flowing sentences without trying to control pacing through punctuation. Focus on poetic, descriptive language that feels intimate and calming when whispered slowly.`,
 
   motivational: `You are a gentle motivational guide. Write 2 minutes of soft encouragement using flowing sentences of 10-15 words. Motivate through tenderness with rich, compassionate language.
 
@@ -74,7 +74,7 @@ Structure:
 Example of correct flow:
 "You have been carrying so much weight on your shoulders, and it's okay to feel tired sometimes... The strength within you runs deeper than you know, like roots reaching down into the earth... Every small step you take matters more than you realize, and you are never walking this path alone..."
 
-Write ONLY the motivation text - no instructions, just the gentle encouragement itself.`,
+Write ONLY the motivation text - no instructions, no labels. The text will be spoken with [slowly] [whispered] tags, so write naturally flowing sentences without trying to control pacing through punctuation. Focus on poetic, descriptive language that feels intimate and calming when whispered slowly.`,
 
   brainwash: `You are guiding a hypnotic 3-minute mind-cleansing meditation. Write with flowing repetition using complete sentences of 8-12 words. Use water and cleansing imagery with descriptive, trance-inducing language.
 
@@ -87,7 +87,7 @@ Structure:
 Example of correct flow:
 "Feel the cleansing water slowly washing over every thought in your mind... Let it gently carry away everything that no longer serves your highest peace... Releasing... releasing... releasing all tension, all worry, all noise... The water flows through you continuously, leaving only clarity and calm in its wake..."
 
-Write ONLY the meditation text - no instructions, just the hypnotic whispered meditation itself.`,
+Write ONLY the meditation text - no instructions, no labels. The text will be spoken with [slowly] [whispered] tags, so write naturally flowing sentences without trying to control pacing through punctuation. Focus on poetic, descriptive language that feels intimate and calming when whispered slowly.`,
 
   fullattention: `You are guiding a gentle 90-second focus meditation. Write flowing sentences of 10-15 words using soft, directive language. Help anchor attention with rich sensory descriptions.
 
@@ -100,7 +100,7 @@ Structure:
 Example of correct flow:
 "Gently notice the sensation of your breath moving in and out of your body right now... If your mind begins to wander, softly return your attention to this present moment without any judgment... Choose to anchor yourself here in the quiet stillness of your own awareness..."
 
-Write ONLY the focus guide text - no instructions, just the whispered guidance itself.`
+Write ONLY the focus guide text - no instructions, no labels. The text will be spoken with [slowly] [whispered] tags, so write naturally flowing sentences without trying to control pacing through punctuation. Focus on poetic, descriptive language that feels intimate and calming when whispered slowly.`
 };
 
 serve(async (req) => {
@@ -159,6 +159,9 @@ serve(async (req) => {
       .replace(/\[.*?\]/g, '') // Quitar [instrucciones en brackets]
       .replace(/\(.*?pause.*?\)/gi, '') // Quitar (pause) explícitos
       .trim();
+
+    // NUEVO: Envolver todo el texto en tags de control de ritmo y estilo
+    generatedText = `[slowly] [whispered] ${generatedText}`;
 
     // Convertir "..." a pausas SSML naturales
     generatedText = generatedText

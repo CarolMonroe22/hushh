@@ -93,8 +93,8 @@ const VOICE_JOURNEYS: {
     label: "Story",
     emoji: "📖",
     voices: {
-      female: "zA6D7RyKdc2EClouEMkP", // AImee - ASMR
-      male: "KH1SQLVulwP6uG4O3nmT"    // Hey Its Brad - ASMR
+      female: "pjcYQlDFKMbcOUp6F5GD", // Brittney - Meditation
+      male: "Mu5jxyqZOLIGltFpfalg"    // Jameson - Meditation
     },
     shortDesc: "immersive bedtime tale"
   },
@@ -123,8 +123,8 @@ const VOICE_JOURNEYS: {
     label: "Manifest",
     emoji: "✨",
     voices: {
-      female: "zA6D7RyKdc2EClouEMkP", // AImee - ASMR
-      male: "KH1SQLVulwP6uG4O3nmT"    // Hey Its Brad - ASMR
+      female: "pjcYQlDFKMbcOUp6F5GD", // Brittney - Meditation
+      male: "Mu5jxyqZOLIGltFpfalg"    // Jameson - Meditation
     },
     shortDesc: "abundance affirmations"
   },
@@ -143,8 +143,8 @@ const VOICE_JOURNEYS: {
     label: "Brain Wash",
     emoji: "🧠",
     voices: {
-      female: "zA6D7RyKdc2EClouEMkP", // AImee - ASMR
-      male: "KH1SQLVulwP6uG4O3nmT"    // Hey Its Brad - ASMR
+      female: "pjcYQlDFKMbcOUp6F5GD", // Brittney - Meditation
+      male: "Mu5jxyqZOLIGltFpfalg"    // Jameson - Meditation
     },
     shortDesc: "mental cleanse & reset"
   },
@@ -167,44 +167,44 @@ const JOURNEY_VOICE_SETTINGS: Record<VoiceJourney, {
   use_speaker_boost: boolean;
 }> = {
   story: { 
-    stability: 0.75,
-    similarity: 0.90,
+    stability: 0.80,
+    similarity: 0.85,
     style: 0.0,
     use_speaker_boost: true 
   },
   prayer: { 
-    stability: 0.75,
-    similarity: 0.90,
+    stability: 0.80,
+    similarity: 0.85,
     style: 0.0,
     use_speaker_boost: true 
   },
   stoic: { 
-    stability: 0.75,
-    similarity: 0.90,
+    stability: 0.80,
+    similarity: 0.85,
     style: 0.0,
     use_speaker_boost: true 
   },
   manifestation: { 
-    stability: 0.75,
-    similarity: 0.90,
+    stability: 0.80,
+    similarity: 0.85,
     style: 0.0,
     use_speaker_boost: true 
   },
   motivational: { 
-    stability: 0.75,
-    similarity: 0.90,
+    stability: 0.80,
+    similarity: 0.85,
     style: 0.0,
     use_speaker_boost: true 
   },
   brainwash: { 
-    stability: 0.75,
-    similarity: 0.90,
+    stability: 0.80,
+    similarity: 0.85,
     style: 0.0,
     use_speaker_boost: true 
   },
   fullattention: { 
-    stability: 0.75,
-    similarity: 0.90,
+    stability: 0.80,
+    similarity: 0.85,
     style: 0.0,
     use_speaker_boost: true 
   }

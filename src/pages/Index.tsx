@@ -167,43 +167,43 @@ const JOURNEY_VOICE_SETTINGS: Record<VoiceJourney, {
   use_speaker_boost: boolean;
 }> = {
   story: { 
-    stability: 0.80,
+    stability: 1.0,
     similarity: 0.85,
     style: 0.0,
     use_speaker_boost: true 
   },
   prayer: { 
-    stability: 0.80,
+    stability: 1.0,
     similarity: 0.85,
     style: 0.0,
     use_speaker_boost: true 
   },
   stoic: { 
-    stability: 0.80,
+    stability: 1.0,
     similarity: 0.85,
     style: 0.0,
     use_speaker_boost: true 
   },
   manifestation: { 
-    stability: 0.80,
+    stability: 1.0,
     similarity: 0.85,
     style: 0.0,
     use_speaker_boost: true 
   },
   motivational: { 
-    stability: 0.80,
+    stability: 1.0,
     similarity: 0.85,
     style: 0.0,
     use_speaker_boost: true 
   },
   brainwash: { 
-    stability: 0.80,
+    stability: 1.0,
     similarity: 0.85,
     style: 0.0,
     use_speaker_boost: true 
   },
   fullattention: { 
-    stability: 0.80,
+    stability: 1.0,
     similarity: 0.85,
     style: 0.0,
     use_speaker_boost: true 

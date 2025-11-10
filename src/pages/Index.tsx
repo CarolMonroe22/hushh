@@ -142,11 +142,14 @@ const Index = () => {
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const timerRef = useRef<NodeJS.Timeout | null>(null);
   const audioContextRef = useRef<AudioContext | null>(null);
+  const pannerRef = useRef<PannerNode | null>(null);
+  const animationRef = useRef<NodeJS.Timeout | null>(null);
   const { toast } = useToast();
 
   useEffect(() => {
     return () => {
       if (timerRef.current) clearInterval(timerRef.current);
+      if (animationRef.current) clearInterval(animationRef.current);
       if (audioRef.current) {
         audioRef.current.pause();
         audioRef.current = null;
@@ -195,6 +198,55 @@ const Index = () => {
     }
   };
 
+  const setup3DAudio = (audioUrl: string) => {
+    if (!audioContextRef.current) return null;
+
+    const audio = new Audio(audioUrl);
+    audioRef.current = audio;
+
+    // Create Web Audio API nodes
+    const source = audioContextRef.current.createMediaElementSource(audio);
+    const panner = audioContextRef.current.createPanner();
+    
+    // Configure panner for 3D binaural effect
+    panner.panningModel = 'HRTF';
+    panner.distanceModel = 'inverse';
+    panner.refDistance = 1;
+    panner.maxDistance = 10;
+    panner.rolloffFactor = 1;
+    panner.coneInnerAngle = 360;
+    panner.coneOuterAngle = 0;
+    panner.coneOuterGain = 0;
+    
+    // Connect: source -> panner -> destination
+    source.connect(panner);
+    panner.connect(audioContextRef.current.destination);
+    
+    pannerRef.current = panner;
+
+    // Start circular animation
+    let angle = 0;
+    const radius = 2; // Distance from listener
+    const speed = 0.02; // Rotation speed (radians per frame)
+    
+    animationRef.current = setInterval(() => {
+      if (pannerRef.current) {
+        const x = Math.cos(angle) * radius;
+        const z = Math.sin(angle) * radius;
+        const y = Math.sin(angle * 2) * 0.5; // Add vertical movement
+        
+        pannerRef.current.setPosition(x, y, z);
+        angle += speed;
+        
+        if (angle > Math.PI * 2) {
+          angle = 0;
+        }
+      }
+    }, 50); // Update every 50ms for smooth movement
+
+    return audio;
+  };
+
   const startSession = async () => {
     if (!selectedMood || !selectedAmbient) {
       toast({
@@ -220,9 +272,12 @@ const Index = () => {
         const audioBlob = base64ToBlob(data.audioContent);
         const audioUrl = URL.createObjectURL(audioBlob);
 
-        audioRef.current = new Audio(audioUrl);
+        const audio = setup3DAudio(audioUrl);
+        if (!audio) {
+          throw new Error('Failed to setup 3D audio');
+        }
         
-        const playPromise = audioRef.current.play();
+        const playPromise = audio.play();
         
         if (playPromise !== undefined) {
           playPromise
@@ -334,9 +389,12 @@ const Index = () => {
         const audioBlob = base64ToBlob(asmrData.audioContent);
         const audioUrl = URL.createObjectURL(audioBlob);
 
-        audioRef.current = new Audio(audioUrl);
+        const audio = setup3DAudio(audioUrl);
+        if (!audio) {
+          throw new Error('Failed to setup 3D audio');
+        }
         
-        const playPromise = audioRef.current.play();
+        const playPromise = audio.play();
         
         if (playPromise !== undefined) {
           playPromise
@@ -416,9 +474,12 @@ const Index = () => {
         const audioBlob = base64ToBlob(data.audioContent);
         const audioUrl = URL.createObjectURL(audioBlob);
 
-        audioRef.current = new Audio(audioUrl);
+        const audio = setup3DAudio(audioUrl);
+        if (!audio) {
+          throw new Error('Failed to setup 3D audio');
+        }
         
-        const playPromise = audioRef.current.play();
+        const playPromise = audio.play();
         
         if (playPromise !== undefined) {
           playPromise

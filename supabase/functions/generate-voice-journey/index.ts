@@ -13,11 +13,15 @@ const JOURNEY_PROMPTS = {
 
 Begin with a peaceful opening that sets a calming scene, develop it with soft imagery, and end with a gentle resolution that invites sleep. Use short sentences and phrases. Focus on moonlight, soft textures, gentle sounds, and peaceful feelings.
 
+Use MANY pauses. After every complete thought, add "...". Make the pauses feel meditative and intentional. The listener should feel the space between words.
+
 Write ONLY the story text that will be read aloud - no instructions, no labels, just the whispered story itself.`,
 
   prayer: `You are leading a gentle 90-second whispered prayer meditation. Write a tender, inclusive prayer using "we" and "us" language. Include natural pauses with "..." and focus on gratitude, peace, and presence. Use simple, heartfelt phrases that feel sacred and intimate.
 
 The prayer should acknowledge this moment, express gratitude, release worry, and affirm inner peace. Write in a soft, reverent tone as if whispering in a sacred space.
+
+Use MANY pauses. After every complete thought, add "...". Make the pauses feel meditative and intentional. The listener should feel the space between words.
 
 Write ONLY the prayer text that will be read aloud - no instructions, just the whispered prayer itself.`,
 
@@ -25,11 +29,15 @@ Write ONLY the prayer text that will be read aloud - no instructions, just the w
 
 Acknowledge struggle with compassion, offer simple stoic wisdom gently, and end with quiet empowerment. Write as if a wise friend is sitting beside you under the stars, speaking softly.
 
+Use MANY pauses. After every complete thought, add "...". Make the pauses feel meditative and intentional. The listener should feel the space between words.
+
 Write ONLY the reflection text that will be read aloud - no instructions, just the whispered guidance itself.`,
 
   manifestation: `You are guiding intimate manifestation affirmations. Write 2 minutes of gentle "I am" statements using present tense. Repeat key affirmations for hypnotic effect. Include natural pauses with "..." Focus on abundance, worthiness, alignment, and receiving.
 
 Use sensory language and let affirmations build gently like waves. Write with quiet confidence, as if whispering powerful truths. End with gratitude for what already is.
+
+Use MANY pauses. After every complete thought, add "...". Make the pauses feel meditative and intentional. The listener should feel the space between words.
 
 Write ONLY the manifestation text that will be read aloud - no instructions, just the whispered affirmations themselves.`,
 
@@ -37,17 +45,23 @@ Write ONLY the manifestation text that will be read aloud - no instructions, jus
 
 Write as if you're beside someone who's tired but trying, offering a hand on their shoulder. Focus on: you're capable, rest is okay, small steps matter, you're not alone.
 
+Use MANY pauses. After every complete thought, add "...". Make the pauses feel meditative and intentional. The listener should feel the space between words.
+
 Write ONLY the motivation text that will be read aloud - no instructions, just the gentle encouragement itself.`,
 
   brainwash: `You are guiding a hypnotic 3-minute mind-cleansing meditation. Write with extreme repetition and slowness. Use simple phrases like "Let it go...", "Washing away...", "Release...", "Breathe..." Include long pauses with "..." 
 
 Use water and cleansing imagery. Repeat key phrases multiple times. The rhythm should be trance-like and meditative, inviting the listener to release everything.
 
+Use MANY pauses. After every complete thought, add "...". Make the pauses feel meditative and intentional. The listener should feel the space between words.
+
 Write ONLY the meditation text that will be read aloud - no instructions, just the hypnotic whispered meditation itself.`,
 
   fullattention: `You are guiding a gentle 90-second focus meditation. Write soft instructions using words like "Notice...", "Let...", "Choose...", "This moment..." Include natural pauses with "..."
 
 Guide attention back to breath and body. Help release distractions gently. End with an affirmation of clear, calm focus. Write as a calm meditation guide preparing someone to focus.
+
+Use MANY pauses. After every complete thought, add "...". Make the pauses feel meditative and intentional. The listener should feel the space between words.
 
 Write ONLY the focus guide text that will be read aloud - no instructions, just the whispered guidance itself.`
 };
@@ -108,6 +122,11 @@ serve(async (req) => {
       .replace(/\[.*?\]/g, '') // Quitar [instrucciones en brackets]
       .replace(/\(.*?pause.*?\)/gi, '') // Quitar (pause) explícitos
       .trim();
+
+    // Convertir "..." a pausas SSML naturales
+    generatedText = generatedText
+      .replace(/\.\.\.+/g, '<break time="800ms"/>') // ... = 800ms pause
+      .replace(/\.\s+/g, '. <break time="400ms"/>'); // Pausa después de cada frase
 
     console.log(`Generated ${category} journey successfully`);
 

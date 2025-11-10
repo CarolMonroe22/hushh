@@ -12,6 +12,7 @@ import AmbientBackground from "@/components/AmbientBackground";
 
 type Mood = "relax" | "sleep" | "focus" | "gratitude" | "boost" | "stoic";
 type Ambient = "rain" | "ocean" | "forest" | "fireplace" | "whitenoise" | "city";
+type BinauralExperience = "barbershop" | "spa" | "ear-cleaning" | "bedtime" | "art-studio" | "yoga";
 
 const MOODS: { value: Mood; label: string; emoji: string }[] = [
   { value: "relax", label: "relax", emoji: "🌙" },
@@ -29,6 +30,50 @@ const AMBIENTS: { value: Ambient; label: string; emoji: string }[] = [
   { value: "fireplace", label: "fireplace", emoji: "🔥" },
   { value: "whitenoise", label: "white noise", emoji: "📻" },
   { value: "city", label: "city", emoji: "🏙️" },
+];
+
+const BINAURAL_EXPERIENCES: { 
+  value: BinauralExperience; 
+  label: string; 
+  emoji: string;
+  shortDesc: string;
+}[] = [
+  { 
+    value: "barbershop", 
+    label: "Barbershop Visit", 
+    emoji: "💈",
+    shortDesc: "scissors, clippers, personal attention"
+  },
+  { 
+    value: "spa", 
+    label: "Spa & Massage", 
+    emoji: "🧖",
+    shortDesc: "soft whispers, gentle touches, oils"
+  },
+  { 
+    value: "ear-cleaning", 
+    label: "Ear Cleaning", 
+    emoji: "👂",
+    shortDesc: "close proximity, gentle sounds"
+  },
+  { 
+    value: "bedtime", 
+    label: "Bedtime Attention", 
+    emoji: "🌙",
+    shortDesc: "tucking in, soft whispers, goodnight"
+  },
+  { 
+    value: "art-studio", 
+    label: "Art Studio", 
+    emoji: "🎨",
+    shortDesc: "sketching, painting, creative energy"
+  },
+  { 
+    value: "yoga", 
+    label: "Yoga Session", 
+    emoji: "🧘",
+    shortDesc: "guided breathing, gentle movement"
+  },
 ];
 
 const VIBE_STARTERS = [
@@ -92,6 +137,7 @@ const Index = () => {
   const [waitlistEmail, setWaitlistEmail] = useState("");
   const [emailSubmitted, setEmailSubmitted] = useState(false);
   const [needsManualPlay, setNeedsManualPlay] = useState(false);
+  const [selectedExperience, setSelectedExperience] = useState<BinauralExperience | null>(null);
   
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const timerRef = useRef<NodeJS.Timeout | null>(null);
@@ -345,6 +391,91 @@ const Index = () => {
     }
   };
 
+  const startBinauralExperience = async () => {
+    if (!selectedExperience) {
+      toast({
+        title: "Selection Required",
+        description: "Please select a 3D experience",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    initAudioContext();
+    setIsGenerating(true);
+    setNeedsManualPlay(false);
+
+    try {
+      const { data, error } = await supabase.functions.invoke("generate-binaural-experience", {
+        body: { experience: selectedExperience },
+      });
+
+      if (error) throw error;
+
+      if (data?.audioContent) {
+        const audioBlob = base64ToBlob(data.audioContent);
+        const audioUrl = URL.createObjectURL(audioBlob);
+
+        audioRef.current = new Audio(audioUrl);
+        
+        const playPromise = audioRef.current.play();
+        
+        if (playPromise !== undefined) {
+          playPromise
+            .then(() => {
+              console.log('3D Audio started playing');
+              setIsPlaying(true);
+              setNeedsManualPlay(false);
+            })
+            .catch((error) => {
+              console.error('Play prevented:', error);
+              setNeedsManualPlay(true);
+              toast({
+                title: "Tap to Play",
+                description: "Please tap the play button to start 3D audio",
+              });
+            });
+        } else {
+          setIsPlaying(true);
+        }
+
+        setGeneratedTitle(
+          BINAURAL_EXPERIENCES.find(exp => exp.value === selectedExperience)?.label || "3D Experience"
+        );
+        setTimeLeft(60);
+
+        timerRef.current = setInterval(() => {
+          setTimeLeft((prev) => {
+            if (prev <= 1) {
+              if (timerRef.current) clearInterval(timerRef.current);
+              setIsPlaying(false);
+              setIsComplete(true);
+              return 0;
+            }
+            return prev - 1;
+          });
+        }, 1000);
+
+        if (audioRef.current) {
+          audioRef.current.onended = () => {
+            if (timerRef.current) clearInterval(timerRef.current);
+            setIsPlaying(false);
+            setIsComplete(true);
+          };
+        }
+      }
+    } catch (error) {
+      console.error("Binaural experience error:", error);
+      toast({
+        title: "Generation Failed",
+        description: error instanceof Error ? error.message : "Failed to generate 3D experience",
+        variant: "destructive",
+      });
+    } finally {
+      setIsGenerating(false);
+    }
+  };
+
   const handleReplay = () => {
     if (audioRef.current) {
       audioRef.current.currentTime = 0;
@@ -397,6 +528,7 @@ const Index = () => {
     setTimeLeft(60);
     setSelectedMood(null);
     setSelectedAmbient(null);
+    setSelectedExperience(null);
     setGeneratedTitle("");
     setVibeDescription("");
     setSessionFeedback(null);
@@ -748,6 +880,59 @@ const Index = () => {
               </AccordionContent>
             </AccordionItem>
           </Accordion>
+          </section>
+
+          {/* 3D Binaural Experiences Section */}
+          <section className="max-w-2xl mx-auto mt-12 mb-8 space-y-6 py-8 border-y border-border/30" aria-labelledby="binaural-heading">
+            <div className="text-center space-y-2">
+              <h2 id="binaural-heading" className="text-2xl font-light lowercase tracking-wide flex items-center justify-center gap-2">
+                <span>🎧</span>
+                <span>3D Binaural Experiences</span>
+              </h2>
+              <p className="text-sm text-muted-foreground">
+                immersive spatial audio scenarios (best with headphones)
+              </p>
+            </div>
+
+            {/* Experience Grid */}
+            <div className="grid grid-cols-2 md:grid-cols-3 gap-3 px-4">
+              {BINAURAL_EXPERIENCES.map((exp) => (
+                <button
+                  key={exp.value}
+                  onClick={() => setSelectedExperience(exp.value)}
+                  className={`p-5 rounded-xl border transition-all text-left space-y-2 ${
+                    selectedExperience === exp.value
+                      ? "border-primary bg-primary/10 shadow-lg scale-105"
+                      : "border-border bg-card hover:bg-accent hover:border-primary/50"
+                  }`}
+                >
+                  <div className="text-3xl mb-2">{exp.emoji}</div>
+                  <div className="text-sm font-medium lowercase">{exp.label}</div>
+                  <div className="text-xs text-muted-foreground leading-tight">
+                    {exp.shortDesc}
+                  </div>
+                </button>
+              ))}
+            </div>
+
+            {/* Generate Button */}
+            <div className="px-4">
+              <Button
+                onClick={startBinauralExperience}
+                disabled={isGenerating || !selectedExperience}
+                className="w-full py-6 text-base lowercase tracking-wide bg-primary/90 hover:bg-primary transition-all"
+                size="lg"
+              >
+                {isGenerating ? "creating 3D experience..." : "🎧 start 3D experience"}
+              </Button>
+            </div>
+
+            {/* Headphones Tip */}
+            <div className="text-center">
+              <p className="text-xs text-muted-foreground/70 italic">
+                💡 tip: use quality headphones for best spatial effect
+              </p>
+            </div>
           </section>
 
           {/* Story Section - Bottom */}

@@ -12,3 +12,6 @@ verify_jwt = false
 [functions.generate-asmr-session]
 verify_jwt = false
 
+[functions.generate-binaural-experience]
+verify_jwt = false
+

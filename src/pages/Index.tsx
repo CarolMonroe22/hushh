@@ -13,6 +13,7 @@ import AmbientBackground from "@/components/AmbientBackground";
 type Mood = "relax" | "sleep" | "focus" | "gratitude" | "boost" | "stoic";
 type Ambient = "rain" | "ocean" | "forest" | "fireplace" | "whitenoise" | "city";
 type BinauralExperience = "barbershop" | "spa" | "ear-cleaning" | "bedtime" | "art-studio" | "yoga";
+type VoiceJourney = "story" | "prayer" | "stoic" | "manifestation" | "motivational";
 
 const MOODS: { value: Mood; label: string; emoji: string }[] = [
   { value: "relax", label: "relax", emoji: "🌙" },
@@ -73,6 +74,50 @@ const BINAURAL_EXPERIENCES: {
     label: "Yoga Session", 
     emoji: "🧘",
     shortDesc: "guided breathing, gentle movement"
+  },
+];
+
+const VOICE_JOURNEYS: {
+  value: VoiceJourney;
+  label: string;
+  emoji: string;
+  voiceId: string;
+  shortDesc: string;
+}[] = [
+  {
+    value: "story",
+    label: "Story",
+    emoji: "📖",
+    voiceId: "XB0fDUnXU5powFXDhCwa", // Charlotte
+    shortDesc: "contemplative short tale"
+  },
+  {
+    value: "prayer",
+    label: "Prayer",
+    emoji: "🙏",
+    voiceId: "EXAVITQu4vr4xnSDxMaL", // Sarah
+    shortDesc: "guided peaceful prayer"
+  },
+  {
+    value: "stoic",
+    label: "Stoic Reading",
+    emoji: "🏛️",
+    voiceId: "JBFqnCBsd6RMkjVDRZzb", // George
+    shortDesc: "ancient wisdom reflection"
+  },
+  {
+    value: "manifestation",
+    label: "Manifestation",
+    emoji: "✨",
+    voiceId: "9BWtsMINqrJLrRacOk9x", // Aria
+    shortDesc: "powerful affirmations"
+  },
+  {
+    value: "motivational",
+    label: "Motivational Coach",
+    emoji: "🔥",
+    voiceId: "nPczCjzI2devNBz1zQrb", // Brian
+    shortDesc: "energizing pep talk"
   },
 ];
 
@@ -138,6 +183,9 @@ const Index = () => {
   const [emailSubmitted, setEmailSubmitted] = useState(false);
   const [needsManualPlay, setNeedsManualPlay] = useState(false);
   const [selectedExperience, setSelectedExperience] = useState<BinauralExperience | null>(null);
+  const [selectedJourney, setSelectedJourney] = useState<VoiceJourney | null>(null);
+  const [withAmbient, setWithAmbient] = useState(false);
+  const [ambientForJourney, setAmbientForJourney] = useState<Ambient | null>(null);
   
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const timerRef = useRef<NodeJS.Timeout | null>(null);
@@ -537,6 +585,115 @@ const Index = () => {
     }
   };
 
+  const startVoiceJourney = async () => {
+    if (!selectedJourney) {
+      toast({
+        title: "Selection Required",
+        description: "Please select a voice journey",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    if (withAmbient && !ambientForJourney) {
+      toast({
+        title: "Ambient Sound Required",
+        description: "Please select an ambient sound or uncheck the option",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    initAudioContext();
+    setIsGenerating(true);
+    setNeedsManualPlay(false);
+
+    try {
+      console.log("Step 1: Generating voice journey script...");
+      const { data: scriptData, error: scriptError } = await supabase.functions.invoke(
+        "generate-voice-journey",
+        { body: { category: selectedJourney } }
+      );
+
+      if (scriptError) throw scriptError;
+      if (!scriptData?.text) throw new Error("No script generated");
+
+      console.log("Step 2: Converting to speech...");
+      const journey = VOICE_JOURNEYS.find(j => j.value === selectedJourney);
+      const { data: audioData, error: audioError } = await supabase.functions.invoke(
+        "whisper-text",
+        { 
+          body: { 
+            text: scriptData.text,
+            voiceId: journey?.voiceId
+          }
+        }
+      );
+
+      if (audioError) throw audioError;
+      if (!audioData?.audioContent) throw new Error("No audio generated");
+
+      console.log("Step 3: Playing audio...");
+      const audioBlob = base64ToBlob(audioData.audioContent);
+      const audioUrl = URL.createObjectURL(audioBlob);
+
+      const audio = setupNormalAudio(audioUrl);
+      
+      const playPromise = audio.play();
+      
+      if (playPromise !== undefined) {
+        playPromise
+          .then(() => {
+            console.log('Voice journey started playing');
+            setIsPlaying(true);
+            setNeedsManualPlay(false);
+          })
+          .catch((error) => {
+            console.error('Play prevented:', error);
+            setNeedsManualPlay(true);
+            toast({
+              title: "Tap to Play",
+              description: "Please tap the play button to start audio",
+            });
+          });
+      } else {
+        setIsPlaying(true);
+      }
+
+      setGeneratedTitle(journey?.label || "Voice Journey");
+      setTimeLeft(120); // 2 minutes for voice journeys
+
+      timerRef.current = setInterval(() => {
+        setTimeLeft((prev) => {
+          if (prev <= 1) {
+            if (timerRef.current) clearInterval(timerRef.current);
+            setIsPlaying(false);
+            setIsComplete(true);
+            return 0;
+          }
+          return prev - 1;
+        });
+      }, 1000);
+
+      if (audioRef.current) {
+        audioRef.current.onended = () => {
+          if (timerRef.current) clearInterval(timerRef.current);
+          setIsPlaying(false);
+          setIsComplete(true);
+        };
+      }
+    } catch (error) {
+      console.error("Voice journey error:", error);
+      toast({
+        title: "Generation Failed",
+        description: error instanceof Error ? error.message : "Failed to create voice journey",
+        variant: "destructive",
+      });
+    } finally {
+      setIsGenerating(false);
+    }
+  };
+
   const handleReplay = () => {
     if (audioRef.current) {
       audioRef.current.currentTime = 0;
@@ -590,6 +747,9 @@ const Index = () => {
     setSelectedMood(null);
     setSelectedAmbient(null);
     setSelectedExperience(null);
+    setSelectedJourney(null);
+    setWithAmbient(false);
+    setAmbientForJourney(null);
     setGeneratedTitle("");
     setVibeDescription("");
     setSessionFeedback(null);
@@ -992,6 +1152,98 @@ const Index = () => {
             <div className="text-center">
               <p className="text-xs text-muted-foreground/70 italic">
                 💡 tip: use quality headphones for best spatial effect
+              </p>
+            </div>
+          </section>
+
+          {/* Voice Journeys Section */}
+          <section className="max-w-2xl mx-auto mt-12 mb-8 space-y-6 py-8 border-y border-border/30" aria-labelledby="voice-journeys-heading">
+            <div className="text-center space-y-2">
+              <h2 id="voice-journeys-heading" className="text-2xl font-light lowercase tracking-wide flex items-center justify-center gap-2">
+                <span>🎙️</span>
+                <span>Voice Journeys</span>
+              </h2>
+              <p className="text-sm text-muted-foreground">
+                pure guided audio experiences focused on voice
+              </p>
+            </div>
+
+            {/* Journey Grid */}
+            <div className="grid grid-cols-2 md:grid-cols-3 gap-3 px-4">
+              {VOICE_JOURNEYS.map((journey) => (
+                <button
+                  key={journey.value}
+                  onClick={() => setSelectedJourney(journey.value)}
+                  className={`p-5 rounded-xl border transition-all text-left space-y-2 ${
+                    selectedJourney === journey.value
+                      ? "border-primary bg-primary/10 shadow-lg scale-105"
+                      : "border-border bg-card hover:bg-accent hover:border-primary/50"
+                  }`}
+                >
+                  <div className="text-3xl mb-2">{journey.emoji}</div>
+                  <div className="text-sm font-medium lowercase">{journey.label}</div>
+                  <div className="text-xs text-muted-foreground leading-tight">
+                    {journey.shortDesc}
+                  </div>
+                </button>
+              ))}
+            </div>
+
+            {/* Ambient Background Toggle */}
+            <div className="px-4 space-y-3">
+              <div className="flex items-center gap-3 p-4 rounded-lg bg-card/50 border border-border/50">
+                <input
+                  type="checkbox"
+                  id="ambient-toggle"
+                  checked={withAmbient}
+                  onChange={(e) => {
+                    setWithAmbient(e.target.checked);
+                    if (!e.target.checked) setAmbientForJourney(null);
+                  }}
+                  className="w-4 h-4 accent-primary"
+                />
+                <label htmlFor="ambient-toggle" className="text-sm lowercase tracking-wide cursor-pointer flex-1">
+                  add ambient background sound
+                </label>
+              </div>
+
+              {/* Ambient Selection (only if toggled) */}
+              {withAmbient && (
+                <div className="grid grid-cols-3 gap-2">
+                  {AMBIENTS.map((ambient) => (
+                    <button
+                      key={ambient.value}
+                      onClick={() => setAmbientForJourney(ambient.value)}
+                      className={`p-3 rounded-lg border transition-all text-left ${
+                        ambientForJourney === ambient.value
+                          ? "border-primary bg-primary/10"
+                          : "border-border bg-card hover:bg-accent"
+                      }`}
+                    >
+                      <div className="text-xl mb-1">{ambient.emoji}</div>
+                      <div className="text-xs lowercase">{ambient.label}</div>
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            {/* Generate Button */}
+            <div className="px-4">
+              <Button
+                onClick={startVoiceJourney}
+                disabled={isGenerating || !selectedJourney || (withAmbient && !ambientForJourney)}
+                className="w-full py-6 text-base lowercase tracking-wide bg-primary hover:bg-primary/90 transition-all"
+                size="lg"
+              >
+                {isGenerating ? "creating voice journey..." : "🎙️ start journey"}
+              </Button>
+            </div>
+
+            {/* Note */}
+            <div className="text-center">
+              <p className="text-xs text-muted-foreground/70 italic">
+                💡 voice journeys are 1-2 minutes of guided spoken content
               </p>
             </div>
           </section>

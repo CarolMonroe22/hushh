@@ -93,8 +93,8 @@ const VOICE_JOURNEYS: {
     label: "Story",
     emoji: "📖",
     voices: {
-      female: "FGY2WhTYpPnrIDTdsKH5", // Laura - perfecta para storytelling suave
-      male: "N2lVS1w4EtoT3dr4eOWO"    // Callum - cálido y envolvente
+      female: "zA6D7RyKdc2EClouEMkP", // AImee - ASMR and Meditation (whisper perfecto)
+      male: "KH1SQLVulwP6uG4O3nmT"    // Hey Its Brad (ASMR, guided sleep)
     },
     shortDesc: "immersive bedtime tale"
   },
@@ -103,8 +103,8 @@ const VOICE_JOURNEYS: {
     label: "Prayer",
     emoji: "🙏",
     voices: {
-      female: "pFZP5JQG7iQjIQuC4Bku", // Lily - dulce y reverente
-      male: "TX3LPaxmHKxFdv7VOQHJ"    // Liam - cálido y reconfortante
+      female: "Atp5cNFg1Wj5gyKD7HWV", // Natasha - Gentle Meditation (suave y reverente)
+      male: "Mu5jxyqZOLIGltFpfalg"    // Jameson - Guided Meditation (calmado)
     },
     shortDesc: "guided peaceful prayer"
   },
@@ -113,8 +113,8 @@ const VOICE_JOURNEYS: {
     label: "Stoic",
     emoji: "🏛️",
     voices: {
-      female: "FGY2WhTYpPnrIDTdsKH5", // Laura - sabia pero suave
-      male: "TX3LPaxmHKxFdv7VOQHJ"    // Liam - sabio y cálido
+      female: "pjcYQlDFKMbcOUp6F5GD", // Brittney (calm, meditation, self-reflection)
+      male: "Mu5jxyqZOLIGltFpfalg"    // Jameson - Guided Meditation (sabio pero suave)
     },
     shortDesc: "wisdom & inner strength"
   },
@@ -123,8 +123,8 @@ const VOICE_JOURNEYS: {
     label: "Manifest",
     emoji: "✨",
     voices: {
-      female: "pFZP5JQG7iQjIQuC4Bku", // Lily - afirmaciones dulces
-      male: "N2lVS1w4EtoT3dr4eOWO"    // Callum - confiado pero suave
+      female: "PB6BdkFkZLbI39GHdnbQ", // Natasha - Sensual Hypnosis (confiada, hipnótica)
+      male: "HgyIHe81F3nXywNwkraY"    // Natasha's Sultry Husband (whispery, intimate)
     },
     shortDesc: "abundance affirmations"
   },
@@ -133,8 +133,8 @@ const VOICE_JOURNEYS: {
     label: "Motivate",
     emoji: "🔥",
     voices: {
-      female: "FGY2WhTYpPnrIDTdsKH5", // Laura - motivación suave
-      male: "N2lVS1w4EtoT3dr4eOWO"    // Callum - apoyo cálido
+      female: "Atp5cNFg1Wj5gyKD7HWV", // Natasha - Gentle Meditation (apoyo suave)
+      male: "KH1SQLVulwP6uG4O3nmT"    // Hey Its Brad (motivación gentil)
     },
     shortDesc: "powerful encouragement"
   },
@@ -143,8 +143,8 @@ const VOICE_JOURNEYS: {
     label: "Brain Wash",
     emoji: "🧠",
     voices: {
-      female: "FGY2WhTYpPnrIDTdsKH5", // Laura - hipnótica
-      male: "N2lVS1w4EtoT3dr4eOWO"    // Callum - relajante
+      female: "zA6D7RyKdc2EClouEMkP", // AImee - ASMR (whisper hipnótico)
+      male: "HgyIHe81F3nXywNwkraY"    // Natasha's Sultry Husband (hipnosis profunda)
     },
     shortDesc: "mental cleanse & reset"
   },
@@ -153,8 +153,8 @@ const VOICE_JOURNEYS: {
     label: "Full Attention",
     emoji: "🎯",
     voices: {
-      female: "pFZP5JQG7iQjIQuC4Bku", // Lily - foco gentil
-      male: "TX3LPaxmHKxFdv7VOQHJ"    // Liam - guía cálida
+      female: "pjcYQlDFKMbcOUp6F5GD", // Brittney (meditation, focus claro)
+      male: "Mu5jxyqZOLIGltFpfalg"    // Jameson - Guided Meditation (guía enfocada)
     },
     shortDesc: "deep focus activation"
   },
@@ -166,13 +166,48 @@ const JOURNEY_VOICE_SETTINGS: Record<VoiceJourney, {
   style: number;
   use_speaker_boost: boolean;
 }> = {
-  story: { stability: 0.15, similarity: 0.92, style: 0.03, use_speaker_boost: false }, // Ultra suave
-  prayer: { stability: 0.18, similarity: 0.90, style: 0.05, use_speaker_boost: false }, // Reverente
-  stoic: { stability: 0.22, similarity: 0.88, style: 0.06, use_speaker_boost: false }, // Sabio pero suave
-  manifestation: { stability: 0.20, similarity: 0.90, style: 0.07, use_speaker_boost: false }, // Confiado
-  motivational: { stability: 0.20, similarity: 0.88, style: 0.08, use_speaker_boost: false }, // Apoyo
-  brainwash: { stability: 0.12, similarity: 0.95, style: 0.02, use_speaker_boost: false }, // Hipnótico
-  fullattention: { stability: 0.25, similarity: 0.87, style: 0.10, use_speaker_boost: false } // Enfocado pero suave
+  story: { 
+    stability: 0.10,  // Más bajo para naturalidad ASMR
+    similarity: 0.95, // Muy alto para consistencia de whisper
+    style: 0.02,      // Mínimo para evitar dramatismo
+    use_speaker_boost: false 
+  },
+  prayer: { 
+    stability: 0.12, 
+    similarity: 0.93, 
+    style: 0.03, 
+    use_speaker_boost: false 
+  },
+  stoic: { 
+    stability: 0.18, 
+    similarity: 0.90, 
+    style: 0.05, 
+    use_speaker_boost: false 
+  },
+  manifestation: { 
+    stability: 0.15, 
+    similarity: 0.92, 
+    style: 0.06, 
+    use_speaker_boost: false 
+  },
+  motivational: { 
+    stability: 0.16, 
+    similarity: 0.91, 
+    style: 0.07, 
+    use_speaker_boost: false 
+  },
+  brainwash: { 
+    stability: 0.08,  // Muy bajo para hipnosis
+    similarity: 0.97, // Muy alto para consistencia extrema
+    style: 0.01,      // Mínimo absoluto
+    use_speaker_boost: false 
+  },
+  fullattention: { 
+    stability: 0.20, 
+    similarity: 0.89, 
+    style: 0.08, 
+    use_speaker_boost: false 
+  }
 };
 
 const VIBE_STARTERS = [

@@ -63,40 +63,8 @@ serve(async (req) => {
   }
 
   try {
-    // Extract user_id from JWT
-    const userId = getUserIdFromAuth(req);
-    if (!userId) {
-      console.warn('[whisper-text] Missing or invalid JWT');
-      return new Response(
-        JSON.stringify({ error: 'Unauthorized' }),
-        { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-      );
-    }
-
-    console.log(`[whisper-text] User: ${userId}`);
-
-    // Create Supabase client with service role key
-    const supabaseUrl = Deno.env.get('SUPABASE_URL');
-    const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY');
-    
-    if (!supabaseUrl || !supabaseServiceKey) {
-      throw new Error('Supabase credentials not configured');
-    }
-
-    const supabase = createClient(supabaseUrl, supabaseServiceKey);
-
-    // Persistent rate limiting (20 requests/minute)
-    const rateLimit = await checkPersistentRateLimit(supabase, userId, 'whisper-text', 20);
-    
-    console.log(`[whisper-text] Rate limit: ${rateLimit.remaining}/20`);
-    
-    if (!rateLimit.allowed) {
-      console.warn(`[whisper-text] Rate limit exceeded for user: ${userId}`);
-      return new Response(
-        JSON.stringify({ error: 'Too many requests. Please try again in a minute.' }),
-        { status: 429, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-      );
-    }
+    // Note: This function is public (verify_jwt = false) for anonymous access
+    console.log('[whisper-text] Processing request');
 
     const body = await req.json();
     const text = body.text;

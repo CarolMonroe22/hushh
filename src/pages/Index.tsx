@@ -93,8 +93,8 @@ const VOICE_JOURNEYS: {
     label: "Story",
     emoji: "📖",
     voices: {
-      female: "zA6D7RyKdc2EClouEMkP", // AImee - ASMR and Meditation (whisper perfecto)
-      male: "KH1SQLVulwP6uG4O3nmT"    // Hey Its Brad (ASMR, guided sleep)
+      female: "zA6D7RyKdc2EClouEMkP", // AImee - ASMR
+      male: "KH1SQLVulwP6uG4O3nmT"    // Hey Its Brad - ASMR
     },
     shortDesc: "immersive bedtime tale"
   },
@@ -103,8 +103,8 @@ const VOICE_JOURNEYS: {
     label: "Prayer",
     emoji: "🙏",
     voices: {
-      female: "Atp5cNFg1Wj5gyKD7HWV", // Natasha - Gentle Meditation (suave y reverente)
-      male: "Mu5jxyqZOLIGltFpfalg"    // Jameson - Guided Meditation (calmado)
+      female: "pjcYQlDFKMbcOUp6F5GD", // Brittney - Meditation
+      male: "Mu5jxyqZOLIGltFpfalg"    // Jameson - Meditation
     },
     shortDesc: "guided peaceful prayer"
   },
@@ -113,8 +113,8 @@ const VOICE_JOURNEYS: {
     label: "Stoic",
     emoji: "🏛️",
     voices: {
-      female: "pjcYQlDFKMbcOUp6F5GD", // Brittney (calm, meditation, self-reflection)
-      male: "Mu5jxyqZOLIGltFpfalg"    // Jameson - Guided Meditation (sabio pero suave)
+      female: "pjcYQlDFKMbcOUp6F5GD", // Brittney - Meditation
+      male: "Mu5jxyqZOLIGltFpfalg"    // Jameson - Meditation
     },
     shortDesc: "wisdom & inner strength"
   },
@@ -123,8 +123,8 @@ const VOICE_JOURNEYS: {
     label: "Manifest",
     emoji: "✨",
     voices: {
-      female: "PB6BdkFkZLbI39GHdnbQ", // Natasha - Sensual Hypnosis (confiada, hipnótica)
-      male: "HgyIHe81F3nXywNwkraY"    // Natasha's Sultry Husband (whispery, intimate)
+      female: "zA6D7RyKdc2EClouEMkP", // AImee - ASMR
+      male: "KH1SQLVulwP6uG4O3nmT"    // Hey Its Brad - ASMR
     },
     shortDesc: "abundance affirmations"
   },
@@ -133,8 +133,8 @@ const VOICE_JOURNEYS: {
     label: "Motivate",
     emoji: "🔥",
     voices: {
-      female: "Atp5cNFg1Wj5gyKD7HWV", // Natasha - Gentle Meditation (apoyo suave)
-      male: "KH1SQLVulwP6uG4O3nmT"    // Hey Its Brad (motivación gentil)
+      female: "pjcYQlDFKMbcOUp6F5GD", // Brittney - Meditation
+      male: "Mu5jxyqZOLIGltFpfalg"    // Jameson - Meditation
     },
     shortDesc: "powerful encouragement"
   },
@@ -143,8 +143,8 @@ const VOICE_JOURNEYS: {
     label: "Brain Wash",
     emoji: "🧠",
     voices: {
-      female: "zA6D7RyKdc2EClouEMkP", // AImee - ASMR (whisper hipnótico)
-      male: "HgyIHe81F3nXywNwkraY"    // Natasha's Sultry Husband (hipnosis profunda)
+      female: "zA6D7RyKdc2EClouEMkP", // AImee - ASMR
+      male: "KH1SQLVulwP6uG4O3nmT"    // Hey Its Brad - ASMR
     },
     shortDesc: "mental cleanse & reset"
   },
@@ -153,8 +153,8 @@ const VOICE_JOURNEYS: {
     label: "Full Attention",
     emoji: "🎯",
     voices: {
-      female: "pjcYQlDFKMbcOUp6F5GD", // Brittney (meditation, focus claro)
-      male: "Mu5jxyqZOLIGltFpfalg"    // Jameson - Guided Meditation (guía enfocada)
+      female: "pjcYQlDFKMbcOUp6F5GD", // Brittney - Meditation
+      male: "Mu5jxyqZOLIGltFpfalg"    // Jameson - Meditation
     },
     shortDesc: "deep focus activation"
   },

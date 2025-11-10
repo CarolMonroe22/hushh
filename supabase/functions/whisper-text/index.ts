@@ -100,7 +100,8 @@ serve(async (req) => {
     console.log("[whisper-text] Generating whisper for text:", text.substring(0, 50));
 
     // Get voice settings from request or use defaults
-    const voiceId = body.voiceId || '9BWtsMINqrJLrRacOk9x';
+    const voiceId = body.voiceId || 'zA6D7RyKdc2EClouEMkP'; // Default to AImee (ASMR)
+    console.log("[whisper-text] Using voice ID:", voiceId);
     const stability = Math.min(Math.max(body.stability || 0.2, 0), 1);
     const similarityBoost = Math.min(Math.max(body.similarity || 0.85, 0), 1);
     const style = body.style !== undefined ? Math.min(Math.max(body.style, 0), 1) : 0.15;

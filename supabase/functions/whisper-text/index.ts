@@ -103,6 +103,8 @@ serve(async (req) => {
     const voiceId = body.voiceId || '9BWtsMINqrJLrRacOk9x';
     const stability = Math.min(Math.max(body.stability || 0.2, 0), 1);
     const similarityBoost = Math.min(Math.max(body.similarity || 0.85, 0), 1);
+    const style = body.style !== undefined ? Math.min(Math.max(body.style, 0), 1) : 0.15;
+    const useSpeakerBoost = body.use_speaker_boost !== undefined ? body.use_speaker_boost : false;
 
     // Convert custom pause tags to SSML
     const processedText = text
@@ -126,8 +128,8 @@ serve(async (req) => {
         voice_settings: {
           stability: stability,
           similarity_boost: similarityBoost,
-          style: 0.15,
-          use_speaker_boost: false,
+          style: style,
+          use_speaker_boost: useSpeakerBoost,
         },
       }),
     });

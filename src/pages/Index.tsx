@@ -82,59 +82,119 @@ const VOICE_JOURNEYS: {
   value: VoiceJourney;
   label: string;
   emoji: string;
-  voiceId: string;
+  voices: {
+    female: string;
+    male: string;
+  };
   shortDesc: string;
 }[] = [
   {
     value: "story",
     label: "Story",
     emoji: "📖",
-    voiceId: "XB0fDUnXU5powFXDhCwa", // Charlotte
-    shortDesc: "contemplative short tale"
+    voices: {
+      female: "FGY2WhTYpPnrIDTdsKH5", // Laura (ultra suave)
+      male: "N2lVS1w4EtoT3dr4eOWO"    // Callum (suave)
+    },
+    shortDesc: "immersive bedtime tale"
   },
   {
     value: "prayer",
     label: "Prayer",
     emoji: "🙏",
-    voiceId: "EXAVITQu4vr4xnSDxMaL", // Sarah
+    voices: {
+      female: "XB0fDUnXU5powFXDhCwa", // Charlotte (calmante)
+      male: "TX3LPaxmHKxFdv7VOQHJ"    // Liam (cálido)
+    },
     shortDesc: "guided peaceful prayer"
   },
   {
     value: "stoic",
     label: "Stoic Reading",
     emoji: "🏛️",
-    voiceId: "JBFqnCBsd6RMkjVDRZzb", // George
+    voices: {
+      female: "EXAVITQu4vr4xnSDxMaL", // Sarah (clara)
+      male: "JBFqnCBsd6RMkjVDRZzb"    // George (profundo)
+    },
     shortDesc: "ancient wisdom reflection"
   },
   {
     value: "manifestation",
     label: "Manifestation",
     emoji: "✨",
-    voiceId: "9BWtsMINqrJLrRacOk9x", // Aria
+    voices: {
+      female: "pFZP5JQG7iQjIQuC4Bku", // Lily (dulce)
+      male: "onwK4e9ZLuTAKqWW03F9"    // Daniel (enfocado)
+    },
     shortDesc: "powerful affirmations"
   },
   {
     value: "motivational",
     label: "Motivational Coach",
     emoji: "🔥",
-    voiceId: "nPczCjzI2devNBz1zQrb", // Brian
+    voices: {
+      female: "EXAVITQu4vr4xnSDxMaL", // Sarah (clara y energética)
+      male: "nPczCjzI2devNBz1zQrb"    // Brian (motivacional)
+    },
     shortDesc: "energizing pep talk"
   },
   {
     value: "brainwash",
     label: "Brain Wash",
     emoji: "🧠",
-    voiceId: "FGY2WhTYpPnrIDTdsKH5", // Laura
+    voices: {
+      female: "FGY2WhTYpPnrIDTdsKH5", // Laura (hipnótica)
+      male: "N2lVS1w4EtoT3dr4eOWO"    // Callum (relajante)
+    },
     shortDesc: "mental cleanse & reset"
   },
   {
     value: "fullattention",
     label: "Full Attention",
     emoji: "🎯",
-    voiceId: "onwK4e9ZLuTAKqWW03F9", // Daniel
+    voices: {
+      female: "EXAVITQu4vr4xnSDxMaL", // Sarah (clara)
+      male: "onwK4e9ZLuTAKqWW03F9"    // Daniel (enfocado)
+    },
     shortDesc: "deep focus activation"
   },
 ];
+
+const VOICE_VIBES = {
+  whisper: {
+    label: "Whisper ASMR",
+    emoji: "🤫",
+    description: "intimate & soft",
+    settings: {
+      stability: 0.15,
+      similarity: 0.90,
+      style: 0.05,
+      use_speaker_boost: false
+    }
+  },
+  calm: {
+    label: "Calm ASMR",
+    emoji: "😌",
+    description: "soothing & gentle",
+    settings: {
+      stability: 0.25,
+      similarity: 0.85,
+      style: 0.10,
+      use_speaker_boost: false
+    }
+  },
+  deep: {
+    label: "Deep ASMR",
+    emoji: "🌊",
+    description: "hypnotic & slow",
+    settings: {
+      stability: 0.30,
+      similarity: 0.88,
+      style: 0.08,
+      use_speaker_boost: false
+    }
+  }
+};
 
 const VIBE_STARTERS = [
   {
@@ -203,6 +263,8 @@ const Index = () => {
   const [ambientForJourney, setAmbientForJourney] = useState<Ambient | null>(null);
   const [loopEnabled, setLoopEnabled] = useState(false);
   const [loopCount, setLoopCount] = useState(0);
+  const [voiceGender, setVoiceGender] = useState<"female" | "male">("female");
+  const [voiceVibe, setVoiceVibe] = useState<"whisper" | "calm" | "deep">("whisper");
   
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const timerRef = useRef<NodeJS.Timeout | null>(null);
@@ -670,12 +732,16 @@ const Index = () => {
 
       console.log("Step 2: Converting to speech...");
       const journey = VOICE_JOURNEYS.find(j => j.value === selectedJourney);
+      const selectedVoiceId = journey?.voices[voiceGender];
+      const vibeSettings = VOICE_VIBES[voiceVibe].settings;
+      
       const { data: audioData, error: audioError } = await supabase.functions.invoke(
         "whisper-text",
         { 
           body: { 
             text: scriptData.text,
-            voiceId: journey?.voiceId
+            voiceId: selectedVoiceId,
+            ...vibeSettings
           }
         }
       );
@@ -1288,6 +1354,52 @@ const Index = () => {
               <p className="text-sm text-muted-foreground">
                 pure guided audio experiences focused on voice
               </p>
+            </div>
+
+            {/* Voice Preference Selection */}
+            <div className="px-4 space-y-4">
+              {/* Gender Selection */}
+              <div className="space-y-2">
+                <label className="text-sm font-medium lowercase tracking-wide">voice gender</label>
+                <div className="flex gap-2">
+                  <Button
+                    variant={voiceGender === "female" ? "default" : "outline"}
+                    onClick={() => setVoiceGender("female")}
+                    className="flex-1 lowercase tracking-wide"
+                    type="button"
+                  >
+                    👩 female
+                  </Button>
+                  <Button
+                    variant={voiceGender === "male" ? "default" : "outline"}
+                    onClick={() => setVoiceGender("male")}
+                    className="flex-1 lowercase tracking-wide"
+                    type="button"
+                  >
+                    👨 male
+                  </Button>
+                </div>
+              </div>
+
+              {/* Vibe Selection */}
+              <div className="space-y-2">
+                <label className="text-sm font-medium lowercase tracking-wide">voice vibe</label>
+                <div className="flex flex-col gap-2">
+                  {Object.entries(VOICE_VIBES).map(([key, vibe]) => (
+                    <Button
+                      key={key}
+                      variant={voiceVibe === key ? "default" : "outline"}
+                      onClick={() => setVoiceVibe(key as "whisper" | "calm" | "deep")}
+                      className="justify-start lowercase tracking-wide"
+                      type="button"
+                    >
+                      <span className="mr-2">{vibe.emoji}</span>
+                      <span className="flex-1 text-left">{vibe.label}</span>
+                      <span className="text-xs text-muted-foreground">({vibe.description})</span>
+                    </Button>
+                  ))}
+                </div>
+              </div>
             </div>
 
             {/* Journey Grid */}

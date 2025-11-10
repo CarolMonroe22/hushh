@@ -8,6 +8,7 @@ import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
+import AmbientBackground from "@/components/AmbientBackground";
 
 type Mood = "relax" | "sleep" | "focus" | "gratitude" | "boost" | "stoic";
 type Ambient = "rain" | "ocean" | "forest" | "fireplace" | "whitenoise" | "city";
@@ -405,7 +406,8 @@ const Index = () => {
 
   if (isPlaying || needsManualPlay) {
     return (
-      <div className="min-h-screen bg-background flex items-center justify-center p-4">
+      <div className="min-h-screen bg-background flex items-center justify-center p-4 relative">
+        <AmbientBackground isPlaying={true} />
         <div className="text-center space-y-8">
           <h2 className="text-3xl md:text-4xl font-light lowercase tracking-wider text-foreground">
             {generatedTitle || `${selectedMood} + ${selectedAmbient}`}

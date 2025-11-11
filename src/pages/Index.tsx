@@ -278,6 +278,7 @@ const Index = () => {
   const [loopEnabled, setLoopEnabled] = useState(false);
   const [loopCount, setLoopCount] = useState(0);
   const [voiceGender, setVoiceGender] = useState<"female" | "male">("female");
+  const [isPaused, setIsPaused] = useState(false);
   
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const timerRef = useRef<NodeJS.Timeout | null>(null);
@@ -880,6 +881,7 @@ const Index = () => {
       audioRef.current.play();
       setIsComplete(false);
       setIsPlaying(true);
+      setIsPaused(false);
       setTimeLeft(60);
 
       timerRef.current = setInterval(() => {
@@ -894,6 +896,59 @@ const Index = () => {
         });
       }, 1000);
     }
+  };
+
+  const handlePauseResume = () => {
+    if (audioRef.current) {
+      if (isPaused) {
+        audioRef.current.play();
+        setIsPaused(false);
+        timerRef.current = setInterval(() => {
+          setTimeLeft((prev) => {
+            if (prev <= 1) {
+              if (timerRef.current) clearInterval(timerRef.current);
+              return 0;
+            }
+            return prev - 1;
+          });
+        }, 1000);
+      } else {
+        audioRef.current.pause();
+        setIsPaused(true);
+        if (timerRef.current) {
+          clearInterval(timerRef.current);
+          timerRef.current = null;
+        }
+      }
+    }
+  };
+
+  const handleStop = () => {
+    if (audioRef.current) {
+      audioRef.current.pause();
+      audioRef.current.currentTime = 0;
+      audioRef.current = null;
+    }
+    
+    if (timerRef.current) {
+      clearInterval(timerRef.current);
+      timerRef.current = null;
+    }
+    
+    if (animationRef.current) {
+      clearInterval(animationRef.current);
+      animationRef.current = null;
+    }
+    
+    setIsPlaying(false);
+    setIsPaused(false);
+    setLoopCount(0);
+    setTimeLeft(60);
+    
+    toast({
+      title: "Session Stopped",
+      description: "Your session has been ended",
+    });
   };
 
   const handleWaitlistSubmit = async () => {
@@ -923,6 +978,7 @@ const Index = () => {
     }
     setIsComplete(false);
     setIsPlaying(false);
+    setIsPaused(false);
     setTimeLeft(60);
     setSelectedMood(null);
     setSelectedAmbient(null);
@@ -947,10 +1003,17 @@ const Index = () => {
             <h2 className="text-3xl md:text-4xl font-light lowercase tracking-wider text-foreground">
               {generatedTitle || `${selectedMood} + ${selectedAmbient}`}
             </h2>
-            {loopEnabled && loopCount > 0 && (
-              <p className="text-sm text-primary/80 flex items-center justify-center gap-2">
-                <span>🔁</span> Loop #{loopCount}
-              </p>
+            {loopEnabled && (
+              <div className="flex items-center justify-center gap-4 text-sm">
+                <p className="text-primary/80 flex items-center gap-2">
+                  <span>🔁</span> loop mode active
+                </p>
+                {loopCount > 0 && (
+                  <p className="text-muted-foreground">
+                    completed: {loopCount}
+                  </p>
+                )}
+              </div>
             )}
           </div>
 
@@ -986,6 +1049,47 @@ const Index = () => {
             >
               ▶️ tap to play audio
             </Button>
+          )}
+
+          {!needsManualPlay && (
+            <div className="space-y-4">
+              {isPaused && (
+                <p className="text-sm text-yellow-500 flex items-center justify-center gap-2">
+                  <span>⏸️</span> paused
+                </p>
+              )}
+              
+              <div className="flex gap-3 justify-center items-center">
+                <Button
+                  onClick={handlePauseResume}
+                  variant="outline"
+                  size="lg"
+                  className="lowercase tracking-wide"
+                >
+                  {isPaused ? (
+                    <>
+                      <span className="mr-2">▶️</span>
+                      resume
+                    </>
+                  ) : (
+                    <>
+                      <span className="mr-2">⏸️</span>
+                      pause
+                    </>
+                  )}
+                </Button>
+
+                <Button
+                  onClick={handleStop}
+                  variant="destructive"
+                  size="lg"
+                  className="lowercase tracking-wide"
+                >
+                  <span className="mr-2">⏹️</span>
+                  stop
+                </Button>
+              </div>
+            </div>
           )}
 
           <p className="text-sm text-muted-foreground lowercase tracking-wide">

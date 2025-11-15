@@ -139,11 +139,31 @@ serve(async (req) => {
       console.error('ElevenLabs API error:', response.status, errorText);
       
       if (response.status === 401) {
-        throw new Error('ElevenLabs authentication failed - check API key');
+        return new Response(
+          JSON.stringify({ 
+            error: 'Authentication error occurred. Please contact support.',
+            code: 'AUTH_FAILED',
+            type: 'auth'
+          }),
+          { 
+            status: 401,
+            headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+          }
+        );
       } else if (response.status === 429 || errorText.includes('quota_exceeded')) {
-        throw new Error('ElevenLabs quota exceeded - please add credits to your account');
+        return new Response(
+          JSON.stringify({ 
+            error: 'Free session tokens not available. Please try again later.',
+            code: 'NO_TOKENS_AVAILABLE',
+            type: 'quota'
+          }),
+          { 
+            status: 402,
+            headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+          }
+        );
       }
-      throw new Error(`ElevenLabs error: ${response.status}`);
+      throw new Error(`Audio generation failed: ${response.status}`);
     }
 
     const audioArrayBuffer = await response.arrayBuffer();

@@ -230,7 +230,33 @@ serve(async (req) => {
     if (!elevenLabsResponse.ok) {
       const errorText = await elevenLabsResponse.text();
       console.error('ElevenLabs API error:', elevenLabsResponse.status, errorText);
-      throw new Error(`ElevenLabs API error: ${elevenLabsResponse.status}`);
+      
+      if (elevenLabsResponse.status === 401) {
+        return new Response(
+          JSON.stringify({ 
+            error: 'Authentication error occurred. Please contact support.',
+            code: 'AUTH_FAILED',
+            type: 'auth'
+          }),
+          { 
+            status: 401,
+            headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+          }
+        );
+      } else if (elevenLabsResponse.status === 429 || errorText.includes('quota_exceeded')) {
+        return new Response(
+          JSON.stringify({ 
+            error: 'Free session tokens not available. Please try again later.',
+            code: 'NO_TOKENS_AVAILABLE',
+            type: 'quota'
+          }),
+          { 
+            status: 402,
+            headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+          }
+        );
+      }
+      throw new Error(`Audio generation failed: ${elevenLabsResponse.status}`);
     }
 
     const audioBuffer = await elevenLabsResponse.arrayBuffer();

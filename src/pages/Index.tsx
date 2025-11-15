@@ -1020,7 +1020,6 @@ const Index = () => {
     if (audioRef.current) {
       audioRef.current.pause();
       audioRef.current.currentTime = 0;
-      audioRef.current = null;
     }
     
     if (timerRef.current) {
@@ -1040,8 +1039,30 @@ const Index = () => {
     
     toast({
       title: "Session Stopped",
-      description: "Your session has been ended",
+      description: "Audio ready to play again",
     });
+  };
+
+  const handlePlay = () => {
+    if (audioRef.current) {
+      audioRef.current.currentTime = 0;
+      audioRef.current.play();
+      setIsPlaying(true);
+      setIsPaused(false);
+      setTimeLeft(60);
+
+      timerRef.current = setInterval(() => {
+        setTimeLeft((prev) => {
+          if (prev <= 1) {
+            if (timerRef.current) clearInterval(timerRef.current);
+            setIsPlaying(false);
+            setIsComplete(true);
+            return 0;
+          }
+          return prev - 1;
+        });
+      }, 1000);
+    }
   };
 
   const handleWaitlistSubmit = async () => {
@@ -1144,7 +1165,21 @@ const Index = () => {
             </Button>
           )}
 
-          {!needsManualPlay && (
+          {/* Play button when audio is stopped but still available */}
+          {!isPlaying && !isComplete && !needsManualPlay && audioRef.current && (
+            <Button
+              onClick={handlePlay}
+              variant="default"
+              size="lg"
+              className="lowercase tracking-wide"
+            >
+              <span className="mr-2">▶️</span>
+              play
+            </Button>
+          )}
+
+          {/* Control buttons when audio is playing */}
+          {isPlaying && !needsManualPlay && (
             <div className="space-y-4">
               {isPaused && (
                 <p className="text-sm text-yellow-500 flex items-center justify-center gap-2">

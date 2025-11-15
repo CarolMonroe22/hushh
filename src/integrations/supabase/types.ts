@@ -208,10 +208,23 @@ export type Database = {
     }
     Functions: {
       cleanup_old_rate_limits: { Args: never; Returns: undefined }
-      increment_rate_limit: {
-        Args: { p_endpoint: string; p_user_id: string; p_window_start: string }
-        Returns: undefined
-      }
+      increment_rate_limit:
+        | {
+            Args: {
+              p_endpoint: string
+              p_user_id: string
+              p_window_start: string
+            }
+            Returns: undefined
+          }
+        | {
+            Args: {
+              p_endpoint: string
+              p_user_id: string
+              p_window_start: string
+            }
+            Returns: undefined
+          }
     }
     Enums: {
       [_ in never]: never

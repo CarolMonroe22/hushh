@@ -408,6 +408,12 @@ const Index = () => {
     setIsGenerating(true);
     setNeedsManualPlay(false);
 
+    toast({
+      title: "🎵 starting your asmr experience",
+      description: `generating ${selectedMood} with ${selectedAmbient} sounds...`,
+      duration: 3000,
+    });
+
     try {
       const { data, error } = await supabase.functions.invoke("generate-asmr-session", {
         body: { mood: selectedMood, ambient: selectedAmbient },
@@ -477,11 +483,27 @@ const Index = () => {
       }
     } catch (error) {
       console.error("Session generation error:", error);
-      toast({
-        title: "Generation Failed",
-        description: error instanceof Error ? error.message : "Failed to generate ASMR session",
-        variant: "destructive",
-      });
+      
+      if (error?.message?.includes('tokens') || error?.message?.includes('NO_TOKENS_AVAILABLE')) {
+        toast({
+          title: "⚠️ No Tokens Available",
+          description: "Free session tokens are currently not available. Please try again later.",
+          variant: "destructive",
+          duration: 6000,
+        });
+      } else if (error?.message?.includes('AUTH_FAILED') || error?.message?.includes('Authentication')) {
+        toast({
+          title: "🔑 Authentication Error",
+          description: "There was an authentication error. Please contact support.",
+          variant: "destructive",
+        });
+      } else {
+        toast({
+          title: "❌ Generation Error",
+          description: error instanceof Error ? error.message : "Could not generate audio. Please try again.",
+          variant: "destructive",
+        });
+      }
     } finally {
       setIsGenerating(false);
     }
@@ -500,6 +522,12 @@ const Index = () => {
     initAudioContext();
     setIsGenerating(true);
     setNeedsManualPlay(false);
+
+    toast({
+      title: "🎨 creating your custom vibe",
+      description: "step 1: interpreting your description...",
+      duration: 3000,
+    });
 
     try {
       console.log("Step 1: Interpreting vibe prompt...");
@@ -523,6 +551,12 @@ const Index = () => {
 
       console.log("Step 2: Generating ASMR audio...");
       setGeneratedTitle(interpretData.title || "your vibe");
+      
+      toast({
+        title: "🎵 generating audio",
+        description: `step 2: crafting "${interpretData.title || 'your vibe'}"...`,
+        duration: 3000,
+      });
       
       const { data: asmrData, error: asmrError } = await supabase.functions.invoke(
         "generate-custom-asmr",
@@ -602,11 +636,27 @@ const Index = () => {
       }
     } catch (error) {
       console.error("Creator session error:", error);
-      toast({
-        title: "Generation Failed",
-        description: error instanceof Error ? error.message : "Failed to create your vibe",
-        variant: "destructive",
-      });
+      
+      if (error?.message?.includes('tokens') || error?.message?.includes('NO_TOKENS_AVAILABLE')) {
+        toast({
+          title: "⚠️ No Tokens Available",
+          description: "Free session tokens are currently not available. Please try again later.",
+          variant: "destructive",
+          duration: 6000,
+        });
+      } else if (error?.message?.includes('AUTH_FAILED') || error?.message?.includes('Authentication')) {
+        toast({
+          title: "🔑 Authentication Error",
+          description: "There was an authentication error. Please contact support.",
+          variant: "destructive",
+        });
+      } else {
+        toast({
+          title: "❌ Generation Error",
+          description: error instanceof Error ? error.message : "Could not create your vibe. Please try again.",
+          variant: "destructive",
+        });
+      }
     } finally {
       setIsGenerating(false);
     }
@@ -625,6 +675,12 @@ const Index = () => {
     initAudioContext();
     setIsGenerating(true);
     setNeedsManualPlay(false);
+
+    toast({
+      title: "🎧 creating 3d experience",
+      description: "generating immersive binaural audio...",
+      duration: 3000,
+    });
 
     try {
       const { data, error } = await supabase.functions.invoke("generate-binaural-experience", {
@@ -701,11 +757,27 @@ const Index = () => {
       }
     } catch (error) {
       console.error("Binaural experience error:", error);
-      toast({
-        title: "Generation Failed",
-        description: error instanceof Error ? error.message : "Failed to generate 3D experience",
-        variant: "destructive",
-      });
+      
+      if (error?.message?.includes('tokens') || error?.message?.includes('NO_TOKENS_AVAILABLE')) {
+        toast({
+          title: "⚠️ No Tokens Available",
+          description: "Free session tokens are currently not available. Please try again later.",
+          variant: "destructive",
+          duration: 6000,
+        });
+      } else if (error?.message?.includes('AUTH_FAILED') || error?.message?.includes('Authentication')) {
+        toast({
+          title: "🔑 Authentication Error",
+          description: "There was an authentication error. Please contact support.",
+          variant: "destructive",
+        });
+      } else {
+        toast({
+          title: "❌ Generation Error",
+          description: error instanceof Error ? error.message : "Could not generate 3D experience. Please try again.",
+          variant: "destructive",
+        });
+      }
     } finally {
       setIsGenerating(false);
     }
@@ -736,6 +808,12 @@ const Index = () => {
     initAudioContext();
     setIsGenerating(true);
     setNeedsManualPlay(false);
+
+    toast({
+      title: "🗣️ preparing your voice journey",
+      description: `generating guided ${selectedJourney} meditation...`,
+      duration: 3000,
+    });
 
     try {
       console.log("Step 1: Generating voice journey script...");
@@ -865,11 +943,26 @@ const Index = () => {
         ambientAudioRef = null;
       }
       
-      toast({
-        title: "Generation Failed",
-        description: error instanceof Error ? error.message : "Failed to create voice journey",
-        variant: "destructive",
-      });
+      if (error?.message?.includes('tokens') || error?.message?.includes('NO_TOKENS_AVAILABLE')) {
+        toast({
+          title: "⚠️ No Tokens Available",
+          description: "Free session tokens are currently not available. Please try again later.",
+          variant: "destructive",
+          duration: 6000,
+        });
+      } else if (error?.message?.includes('AUTH_FAILED') || error?.message?.includes('Authentication')) {
+        toast({
+          title: "🔑 Authentication Error",
+          description: "There was an authentication error. Please contact support.",
+          variant: "destructive",
+        });
+      } else {
+        toast({
+          title: "❌ Generation Error",
+          description: error instanceof Error ? error.message : "Could not generate voice journey. Please try again.",
+          variant: "destructive",
+        });
+      }
     } finally {
       setIsGenerating(false);
     }

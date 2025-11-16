@@ -293,21 +293,32 @@ const Index = () => {
   const animationRef = useRef<NodeJS.Timeout | null>(null);
   const { toast } = useToast();
 
-  // Auth protection
-  if (loading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-background">
-        <div className="text-center space-y-4">
-          <div className="animate-pulse text-4xl">🌙</div>
-          <p className="text-muted-foreground lowercase">loading hushh...</p>
-        </div>
-      </div>
-    );
-  }
+  // Cleanup effect - MUST be before any conditional returns
+  useEffect(() => {
+    return () => {
+      if (timerRef.current) clearInterval(timerRef.current);
+      if (animationRef.current) clearInterval(animationRef.current);
+      if (audioRef.current) {
+        audioRef.current.pause();
+        audioRef.current = null;
+      }
+    };
+  }, []);
 
-  if (!user) {
-    return <Navigate to="/auth" replace />;
-  }
+  // Title rotation effect - MUST be before any conditional returns
+  useEffect(() => {
+    const titleInterval = setInterval(() => {
+      setTitleFade(false);
+      setTimeout(() => {
+        setCurrentTitleIndex((prevIndex) => 
+          (prevIndex + 1) % TITLE_ROTATIONS.length
+        );
+        setTitleFade(true);
+      }, 600);
+    }, 5000);
+
+    return () => clearInterval(titleInterval);
+  }, []);
 
   const handleSignOut = async () => {
     const { error } = await signOut();
@@ -387,36 +398,6 @@ const Index = () => {
       });
     });
   };
-
-  useEffect(() => {
-    return () => {
-      if (timerRef.current) clearInterval(timerRef.current);
-      if (animationRef.current) clearInterval(animationRef.current);
-      if (audioRef.current) {
-        audioRef.current.pause();
-        audioRef.current = null;
-      }
-    };
-  }, []);
-
-  // Title rotation effect
-  useEffect(() => {
-    const titleInterval = setInterval(() => {
-      // Fade out
-      setTitleFade(false);
-      
-      // Change word after fade out
-      setTimeout(() => {
-        setCurrentTitleIndex((prevIndex) => 
-          (prevIndex + 1) % TITLE_ROTATIONS.length
-        );
-        // Fade in
-        setTitleFade(true);
-      }, 600); // 600ms for smooth fade out
-    }, 5000); // Change every 5 seconds for more contemplative feel
-
-    return () => clearInterval(titleInterval);
-  }, []);
 
   const base64ToBlob = (base64: string, type: string = "audio/mpeg") => {
     const byteCharacters = atob(base64);
@@ -1519,6 +1500,22 @@ const Index = () => {
         </div>
       </div>
     );
+  }
+
+  // Auth protection - moved to the end after all hooks
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-background">
+        <div className="text-center space-y-4">
+          <div className="animate-pulse text-4xl">🌙</div>
+          <p className="text-muted-foreground lowercase">loading hushh...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (!user) {
+    return <Navigate to="/auth" replace />;
   }
 
   return (

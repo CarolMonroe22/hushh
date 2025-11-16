@@ -12,6 +12,7 @@ import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/useAuth";
 import AmbientBackground from "@/components/AmbientBackground";
 import { SessionHistory } from "@/components/SessionHistory";
+import { AuthModal } from "@/components/AuthModal";
 import { type UserSession } from "@/hooks/useUserSessions";
 import { History, LogOut } from "lucide-react";
 
@@ -285,6 +286,7 @@ const Index = () => {
   const [isPaused, setIsPaused] = useState(false);
   const [saveSession, setSaveSession] = useState(true);
   const [showHistory, setShowHistory] = useState(false);
+  const [showAuthModal, setShowAuthModal] = useState(false);
   
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const timerRef = useRef<NodeJS.Timeout | null>(null);
@@ -332,6 +334,18 @@ const Index = () => {
     } else {
       navigate('/auth');
     }
+  };
+
+  const requireAuth = (action: () => void) => {
+    if (!user) {
+      setShowAuthModal(true);
+      toast({
+        title: "✨ Create Account",
+        description: "Sign up to generate your personalized audio experience",
+      });
+      return;
+    }
+    action();
   };
 
   const handlePlaySession = (session: UserSession) => {
@@ -1505,7 +1519,7 @@ const Index = () => {
     );
   }
 
-  // Auth protection - moved to the end after all hooks
+  // Loading state
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-background">
@@ -1517,49 +1531,83 @@ const Index = () => {
     );
   }
 
-  if (!user) {
-    return <Navigate to="/auth" replace />;
-  }
-
   return (
     <div className="min-h-screen bg-background text-foreground">
-      {/* Auth Header */}
+      {/* Dynamic Header */}
       <header className="fixed top-0 right-0 p-4 z-50 flex items-center gap-2">
-        <Button
-          variant="ghost"
-          size="sm"
-          onClick={() => navigate('/account')}
-          className="lowercase"
-        >
-          👤 my account
-        </Button>
-        
-        <Button
-          variant="ghost"
-          size="sm"
-          onClick={() => setShowHistory(true)}
-          className="lowercase"
-        >
-          <History className="h-4 w-4 mr-2" />
-          library
-        </Button>
-        
-        <Button
-          variant="ghost"
-          size="sm"
-          onClick={handleSignOut}
-          className="lowercase"
-        >
-          <LogOut className="h-4 w-4 mr-2" />
-          logout
-        </Button>
+        {user ? (
+          <>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => navigate('/account')}
+              className="lowercase"
+            >
+              👤 my account
+            </Button>
+            
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => setShowHistory(true)}
+              className="lowercase"
+            >
+              <History className="h-4 w-4 mr-2" />
+              library
+            </Button>
+            
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={handleSignOut}
+              className="lowercase"
+            >
+              <LogOut className="h-4 w-4 mr-2" />
+              logout
+            </Button>
+          </>
+        ) : (
+          <>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => setShowAuthModal(true)}
+              className="lowercase"
+            >
+              🔐 login
+            </Button>
+            
+            <Button
+              size="sm"
+              onClick={() => setShowAuthModal(true)}
+              className="lowercase"
+            >
+              ✨ sign up
+            </Button>
+          </>
+        )}
       </header>
 
       {/* Session History Modal */}
-      <SessionHistory 
-        open={showHistory}
-        onOpenChange={setShowHistory}
-        onPlaySession={handlePlaySession}
+      {user && (
+        <SessionHistory 
+          open={showHistory}
+          onOpenChange={setShowHistory}
+          onPlaySession={handlePlaySession}
+        />
+      )}
+
+      {/* Auth Modal */}
+      <AuthModal 
+        open={showAuthModal} 
+        onOpenChange={setShowAuthModal}
+        onSuccess={() => {
+          setShowAuthModal(false);
+          toast({
+            title: "Welcome! 🎉",
+            description: "You can now generate your personalized audio",
+          });
+        }}
       />
 
       <div className="container mx-auto px-4 py-12 md:py-20 max-w-4xl">
@@ -1667,26 +1715,28 @@ const Index = () => {
               </span>
             </div>
             
-            <div className="flex items-center justify-between p-4 rounded-lg bg-card/50 border border-border/50">
-              <div className="flex items-center gap-2">
-                <Switch 
-                  checked={saveSession} 
-                  onCheckedChange={setSaveSession}
-                  id="save-session-creator"
-                />
-                <label htmlFor="save-session-creator" className="text-sm lowercase tracking-wide cursor-pointer">
-                  💾 save to library
-                </label>
+            {user && (
+              <div className="flex items-center justify-between p-4 rounded-lg bg-card/50 border border-border/50">
+                <div className="flex items-center gap-2">
+                  <Switch 
+                    checked={saveSession} 
+                    onCheckedChange={setSaveSession}
+                    id="save-session-creator"
+                  />
+                  <label htmlFor="save-session-creator" className="text-sm lowercase tracking-wide cursor-pointer">
+                    💾 save to library
+                  </label>
+                </div>
+                <span className="text-xs text-muted-foreground">
+                  {saveSession ? "will be saved" : "temporary only"}
+                </span>
               </div>
-              <span className="text-xs text-muted-foreground">
-                {saveSession ? "will be saved" : "temporary only"}
-              </span>
-            </div>
+            )}
           </div>
 
           {/* Generate Button - Prominent */}
           <Button
-            onClick={startCreatorSession}
+            onClick={() => requireAuth(startCreatorSession)}
             disabled={isGenerating || !vibeDescription.trim() || vibeDescription.trim().length < 20}
             className="w-full py-6 text-lg lowercase tracking-wide bg-primary hover:bg-primary/90 transition-all"
             size="lg"
@@ -1791,26 +1841,28 @@ const Index = () => {
                     </span>
                   </div>
                   
-                  <div className="flex items-center justify-between p-4 rounded-lg bg-card/50 border border-border/50">
-                    <div className="flex items-center gap-2">
-                      <Switch 
-                        checked={saveSession} 
-                        onCheckedChange={setSaveSession}
-                        id="save-session-preset"
-                      />
-                      <label htmlFor="save-session-preset" className="text-sm lowercase tracking-wide cursor-pointer">
-                        💾 save to library
-                      </label>
+                  {user && (
+                    <div className="flex items-center justify-between p-4 rounded-lg bg-card/50 border border-border/50">
+                      <div className="flex items-center gap-2">
+                        <Switch 
+                          checked={saveSession} 
+                          onCheckedChange={setSaveSession}
+                          id="save-session-preset"
+                        />
+                        <label htmlFor="save-session-preset" className="text-sm lowercase tracking-wide cursor-pointer">
+                          💾 save to library
+                        </label>
+                      </div>
+                      <span className="text-xs text-muted-foreground">
+                        {saveSession ? "will be saved" : "temporary only"}
+                      </span>
                     </div>
-                    <span className="text-xs text-muted-foreground">
-                      {saveSession ? "will be saved" : "temporary only"}
-                    </span>
-                  </div>
+                  )}
                 </div>
 
                 {/* Generate Preset Button */}
                 <Button
-                  onClick={startSession}
+                  onClick={() => requireAuth(startSession)}
                   disabled={isGenerating || !selectedMood || !selectedAmbient}
                   className="w-full py-6 text-base lowercase tracking-wide"
                   size="lg"
@@ -1873,27 +1925,29 @@ const Index = () => {
                 </span>
               </div>
               
-              <div className="flex items-center justify-between p-4 rounded-lg bg-card/50 border border-border/50">
-                <div className="flex items-center gap-2">
-                  <Switch 
-                    checked={saveSession} 
-                    onCheckedChange={setSaveSession}
-                    id="save-session-binaural"
-                  />
-                  <label htmlFor="save-session-binaural" className="text-sm lowercase tracking-wide cursor-pointer">
-                    💾 save to library
-                  </label>
+              {user && (
+                <div className="flex items-center justify-between p-4 rounded-lg bg-card/50 border border-border/50">
+                  <div className="flex items-center gap-2">
+                    <Switch 
+                      checked={saveSession} 
+                      onCheckedChange={setSaveSession}
+                      id="save-session-binaural"
+                    />
+                    <label htmlFor="save-session-binaural" className="text-sm lowercase tracking-wide cursor-pointer">
+                      💾 save to library
+                    </label>
+                  </div>
+                  <span className="text-xs text-muted-foreground">
+                    {saveSession ? "will be saved" : "temporary only"}
+                  </span>
                 </div>
-                <span className="text-xs text-muted-foreground">
-                  {saveSession ? "will be saved" : "temporary only"}
-                </span>
-              </div>
+              )}
             </div>
 
             {/* Generate Button */}
             <div className="px-4">
               <Button
-                onClick={startBinauralExperience}
+                onClick={() => requireAuth(startBinauralExperience)}
                 disabled={isGenerating || !selectedExperience}
                 className="w-full py-6 text-base lowercase tracking-wide bg-primary/90 hover:bg-primary transition-all"
                 size="lg"
@@ -2026,27 +2080,29 @@ const Index = () => {
                 </span>
               </div>
               
-              <div className="flex items-center justify-between p-4 rounded-lg bg-card/50 border border-border/50">
-                <div className="flex items-center gap-2">
-                  <Switch 
-                    checked={saveSession} 
-                    onCheckedChange={setSaveSession}
-                    id="save-session-voice"
-                  />
-                  <label htmlFor="save-session-voice" className="text-sm lowercase tracking-wide cursor-pointer">
-                    💾 save to library
-                  </label>
+              {user && (
+                <div className="flex items-center justify-between p-4 rounded-lg bg-card/50 border border-border/50">
+                  <div className="flex items-center gap-2">
+                    <Switch 
+                      checked={saveSession} 
+                      onCheckedChange={setSaveSession}
+                      id="save-session-voice"
+                    />
+                    <label htmlFor="save-session-voice" className="text-sm lowercase tracking-wide cursor-pointer">
+                      💾 save to library
+                    </label>
+                  </div>
+                  <span className="text-xs text-muted-foreground">
+                    {saveSession ? "will be saved" : "temporary only"}
+                  </span>
                 </div>
-                <span className="text-xs text-muted-foreground">
-                  {saveSession ? "will be saved" : "temporary only"}
-                </span>
-              </div>
+              )}
             </div>
 
             {/* Generate Button */}
             <div className="px-4">
               <Button
-                onClick={startVoiceJourney}
+                onClick={() => requireAuth(startVoiceJourney)}
                 disabled={isGenerating || !selectedJourney || (withAmbient && !ambientForJourney)}
                 className="w-full py-6 text-base lowercase tracking-wide bg-primary hover:bg-primary/90 transition-all"
                 size="lg"

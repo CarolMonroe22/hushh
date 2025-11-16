@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from "react";
-import { Navigate } from "react-router-dom";
+import { Navigate, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -292,6 +292,7 @@ const Index = () => {
   const pannerRef = useRef<PannerNode | null>(null);
   const animationRef = useRef<NodeJS.Timeout | null>(null);
   const { toast } = useToast();
+  const navigate = useNavigate();
 
   // Cleanup effect - MUST be before any conditional returns
   useEffect(() => {
@@ -328,6 +329,8 @@ const Index = () => {
         description: "Could not sign out",
         variant: "destructive",
       });
+    } else {
+      navigate('/auth');
     }
   };
 
@@ -1522,6 +1525,15 @@ const Index = () => {
     <div className="min-h-screen bg-background text-foreground">
       {/* Auth Header */}
       <header className="fixed top-0 right-0 p-4 z-50 flex items-center gap-2">
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={() => navigate('/account')}
+          className="lowercase"
+        >
+          👤 my account
+        </Button>
+        
         <Button
           variant="ghost"
           size="sm"

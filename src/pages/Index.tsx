@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { Navigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -9,7 +9,11 @@ import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
+import { useAuth } from "@/hooks/useAuth";
 import AmbientBackground from "@/components/AmbientBackground";
+import { SessionHistory } from "@/components/SessionHistory";
+import { type UserSession } from "@/hooks/useUserSessions";
+import { History, LogOut } from "lucide-react";
 
 type Mood = "relax" | "sleep" | "focus" | "gratitude" | "boost" | "stoic";
 type Ambient = "rain" | "ocean" | "forest" | "fireplace" | "whitenoise" | "city";
@@ -256,7 +260,7 @@ const TITLE_ROTATIONS = [
 ];
 
 const Index = () => {
-  const navigate = useNavigate();
+  const { user, loading, signOut } = useAuth();
   const [selectedMood, setSelectedMood] = useState<Mood | null>(null);
   const [selectedAmbient, setSelectedAmbient] = useState<Ambient | null>(null);
   const [isGenerating, setIsGenerating] = useState(false);
@@ -279,6 +283,8 @@ const Index = () => {
   const [loopCount, setLoopCount] = useState(0);
   const [voiceGender, setVoiceGender] = useState<"female" | "male">("female");
   const [isPaused, setIsPaused] = useState(false);
+  const [saveSession, setSaveSession] = useState(true);
+  const [showHistory, setShowHistory] = useState(false);
   
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const timerRef = useRef<NodeJS.Timeout | null>(null);
@@ -286,6 +292,101 @@ const Index = () => {
   const pannerRef = useRef<PannerNode | null>(null);
   const animationRef = useRef<NodeJS.Timeout | null>(null);
   const { toast } = useToast();
+
+  // Auth protection
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-background">
+        <div className="text-center space-y-4">
+          <div className="animate-pulse text-4xl">🌙</div>
+          <p className="text-muted-foreground lowercase">loading hushh...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (!user) {
+    return <Navigate to="/auth" replace />;
+  }
+
+  const handleSignOut = async () => {
+    const { error } = await signOut();
+    if (error) {
+      toast({
+        title: "❌ Error",
+        description: "Could not sign out",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const handlePlaySession = (session: UserSession) => {
+    console.log('Playing session from history:', session);
+    
+    // Stop current audio if any
+    if (audioRef.current) {
+      audioRef.current.pause();
+      audioRef.current = null;
+    }
+    
+    // Clear timers
+    if (timerRef.current) clearInterval(timerRef.current);
+    if (animationRef.current) clearInterval(animationRef.current);
+    
+    // Set up new audio
+    audioRef.current = new Audio(session.audio_url);
+    audioRef.current.loop = loopEnabled;
+    
+    audioRef.current.play().then(() => {
+      setIsPlaying(true);
+      setIsPaused(false);
+      setTimeLeft(session.duration_seconds);
+      setIsComplete(false);
+      
+      // Set session type specific states
+      switch (session.session_type) {
+        case 'preset':
+          setSelectedMood(session.mood as Mood);
+          setSelectedAmbient(session.ambient as Ambient);
+          break;
+        case 'creator':
+          setVibeDescription(session.vibe_description || '');
+          break;
+        case 'binaural':
+          setSelectedExperience(session.binaural_experience as BinauralExperience);
+          break;
+        case 'voice':
+          setSelectedJourney(session.voice_journey as VoiceJourney);
+          setVoiceGender(session.voice_gender as "female" | "male");
+          break;
+      }
+      
+      // Start timer
+      timerRef.current = setInterval(() => {
+        setTimeLeft((prev) => {
+          if (prev <= 1) {
+            if (timerRef.current) clearInterval(timerRef.current);
+            setIsPlaying(false);
+            setIsComplete(true);
+            return 0;
+          }
+          return prev - 1;
+        });
+      }, 1000);
+      
+      toast({
+        title: "▶️ Playing from library",
+        duration: 2000,
+      });
+    }).catch((error) => {
+      console.error('Error playing session:', error);
+      toast({
+        title: "❌ Playback Error",
+        description: "Could not play session",
+        variant: "destructive",
+      });
+    });
+  };
 
   useEffect(() => {
     return () => {
@@ -416,7 +517,12 @@ const Index = () => {
 
     try {
       const { data, error } = await supabase.functions.invoke("generate-asmr-session", {
-        body: { mood: selectedMood, ambient: selectedAmbient },
+        body: { 
+          mood: selectedMood, 
+          ambient: selectedAmbient,
+          saveSession: saveSession,
+          userId: user?.id
+        },
       });
 
       if (error) throw error;
@@ -564,6 +670,9 @@ const Index = () => {
           body: {
             prompt: interpretData.prompt,
             title: interpretData.title || "your vibe",
+            saveSession: saveSession,
+            userId: user?.id,
+            vibeDescription: vibeDescription
           },
         }
       );
@@ -684,7 +793,11 @@ const Index = () => {
 
     try {
       const { data, error } = await supabase.functions.invoke("generate-binaural-experience", {
-        body: { experience: selectedExperience },
+        body: { 
+          experience: selectedExperience,
+          saveSession: saveSession,
+          userId: user?.id
+        },
       });
 
       if (error) throw error;
@@ -836,7 +949,11 @@ const Index = () => {
           body: { 
             text: scriptData.text,
             voiceId: selectedVoiceId,
-            ...voiceSettings
+            ...voiceSettings,
+            saveSession: saveSession,
+            userId: user?.id,
+            journey: selectedJourney,
+            voiceGender: voiceGender
           }
         }
       );
@@ -1406,6 +1523,36 @@ const Index = () => {
 
   return (
     <div className="min-h-screen bg-background text-foreground">
+      {/* Auth Header */}
+      <header className="fixed top-0 right-0 p-4 z-50 flex items-center gap-2">
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={() => setShowHistory(true)}
+          className="lowercase"
+        >
+          <History className="h-4 w-4 mr-2" />
+          library
+        </Button>
+        
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={handleSignOut}
+          className="lowercase"
+        >
+          <LogOut className="h-4 w-4 mr-2" />
+          logout
+        </Button>
+      </header>
+
+      {/* Session History Modal */}
+      <SessionHistory 
+        open={showHistory}
+        onOpenChange={setShowHistory}
+        onPlaySession={handlePlaySession}
+      />
+
       <div className="container mx-auto px-4 py-12 md:py-20 max-w-4xl">
         {/* Logo Header */}
         <header className="flex items-center justify-center mb-16">
@@ -1493,21 +1640,39 @@ const Index = () => {
             </div>
           </div>
 
-          {/* Loop Mode Toggle */}
-          <div className="flex items-center justify-between p-4 rounded-lg bg-card/50 border border-border/50">
-            <div className="flex items-center gap-2">
-              <Switch 
-                checked={loopEnabled} 
-                onCheckedChange={setLoopEnabled}
-                id="loop-creator"
-              />
-              <label htmlFor="loop-creator" className="text-sm lowercase tracking-wide cursor-pointer">
-                🔁 loop mode
-              </label>
+          {/* Loop Mode Toggle and Save Session */}
+          <div className="space-y-3">
+            <div className="flex items-center justify-between p-4 rounded-lg bg-card/50 border border-border/50">
+              <div className="flex items-center gap-2">
+                <Switch 
+                  checked={loopEnabled} 
+                  onCheckedChange={setLoopEnabled}
+                  id="loop-creator"
+                />
+                <label htmlFor="loop-creator" className="text-sm lowercase tracking-wide cursor-pointer">
+                  🔁 loop mode
+                </label>
+              </div>
+              <span className="text-xs text-muted-foreground">
+                {loopEnabled ? "will repeat continuously" : "play once"}
+              </span>
             </div>
-            <span className="text-xs text-muted-foreground">
-              {loopEnabled ? "will repeat continuously" : "play once"}
-            </span>
+            
+            <div className="flex items-center justify-between p-4 rounded-lg bg-card/50 border border-border/50">
+              <div className="flex items-center gap-2">
+                <Switch 
+                  checked={saveSession} 
+                  onCheckedChange={setSaveSession}
+                  id="save-session-creator"
+                />
+                <label htmlFor="save-session-creator" className="text-sm lowercase tracking-wide cursor-pointer">
+                  💾 save to library
+                </label>
+              </div>
+              <span className="text-xs text-muted-foreground">
+                {saveSession ? "will be saved" : "temporary only"}
+              </span>
+            </div>
           </div>
 
           {/* Generate Button - Prominent */}
@@ -1599,21 +1764,39 @@ const Index = () => {
                   </div>
                 </div>
 
-                {/* Loop Mode Toggle */}
-                <div className="flex items-center justify-between p-4 rounded-lg bg-card/50 border border-border/50">
-                  <div className="flex items-center gap-2">
-                    <Switch 
-                      checked={loopEnabled} 
-                      onCheckedChange={setLoopEnabled}
-                      id="loop-preset"
-                    />
-                    <label htmlFor="loop-preset" className="text-sm lowercase tracking-wide cursor-pointer">
-                      🔁 loop mode
-                    </label>
+                {/* Loop Mode Toggle and Save Session */}
+                <div className="space-y-3">
+                  <div className="flex items-center justify-between p-4 rounded-lg bg-card/50 border border-border/50">
+                    <div className="flex items-center gap-2">
+                      <Switch 
+                        checked={loopEnabled} 
+                        onCheckedChange={setLoopEnabled}
+                        id="loop-preset"
+                      />
+                      <label htmlFor="loop-preset" className="text-sm lowercase tracking-wide cursor-pointer">
+                        🔁 loop mode
+                      </label>
+                    </div>
+                    <span className="text-xs text-muted-foreground">
+                      {loopEnabled ? "will repeat continuously" : "play once"}
+                    </span>
                   </div>
-                  <span className="text-xs text-muted-foreground">
-                    {loopEnabled ? "will repeat continuously" : "play once"}
-                  </span>
+                  
+                  <div className="flex items-center justify-between p-4 rounded-lg bg-card/50 border border-border/50">
+                    <div className="flex items-center gap-2">
+                      <Switch 
+                        checked={saveSession} 
+                        onCheckedChange={setSaveSession}
+                        id="save-session-preset"
+                      />
+                      <label htmlFor="save-session-preset" className="text-sm lowercase tracking-wide cursor-pointer">
+                        💾 save to library
+                      </label>
+                    </div>
+                    <span className="text-xs text-muted-foreground">
+                      {saveSession ? "will be saved" : "temporary only"}
+                    </span>
+                  </div>
                 </div>
 
                 {/* Generate Preset Button */}
@@ -1663,9 +1846,9 @@ const Index = () => {
               ))}
             </div>
 
-            {/* Loop Mode Toggle */}
-            <div className="px-4">
-              <div className="flex items-center justify-between p-4 rounded-lg bg-card/50 border border-border/50 mb-3">
+            {/* Loop Mode Toggle and Save Session */}
+            <div className="px-4 space-y-3">
+              <div className="flex items-center justify-between p-4 rounded-lg bg-card/50 border border-border/50">
                 <div className="flex items-center gap-2">
                   <Switch 
                     checked={loopEnabled} 
@@ -1678,6 +1861,22 @@ const Index = () => {
                 </div>
                 <span className="text-xs text-muted-foreground">
                   {loopEnabled ? "will repeat continuously" : "play once"}
+                </span>
+              </div>
+              
+              <div className="flex items-center justify-between p-4 rounded-lg bg-card/50 border border-border/50">
+                <div className="flex items-center gap-2">
+                  <Switch 
+                    checked={saveSession} 
+                    onCheckedChange={setSaveSession}
+                    id="save-session-binaural"
+                  />
+                  <label htmlFor="save-session-binaural" className="text-sm lowercase tracking-wide cursor-pointer">
+                    💾 save to library
+                  </label>
+                </div>
+                <span className="text-xs text-muted-foreground">
+                  {saveSession ? "will be saved" : "temporary only"}
                 </span>
               </div>
             </div>
@@ -1800,9 +1999,9 @@ const Index = () => {
               )}
             </div>
 
-            {/* Loop Mode Toggle */}
-            <div className="px-4">
-              <div className="flex items-center justify-between p-4 rounded-lg bg-card/50 border border-border/50 mb-3">
+            {/* Loop Mode Toggle and Save Session */}
+            <div className="px-4 space-y-3">
+              <div className="flex items-center justify-between p-4 rounded-lg bg-card/50 border border-border/50">
                 <div className="flex items-center gap-2">
                   <Switch 
                     checked={loopEnabled} 
@@ -1815,6 +2014,22 @@ const Index = () => {
                 </div>
                 <span className="text-xs text-muted-foreground">
                   {loopEnabled ? "will repeat continuously" : "play once"}
+                </span>
+              </div>
+              
+              <div className="flex items-center justify-between p-4 rounded-lg bg-card/50 border border-border/50">
+                <div className="flex items-center gap-2">
+                  <Switch 
+                    checked={saveSession} 
+                    onCheckedChange={setSaveSession}
+                    id="save-session-voice"
+                  />
+                  <label htmlFor="save-session-voice" className="text-sm lowercase tracking-wide cursor-pointer">
+                    💾 save to library
+                  </label>
+                </div>
+                <span className="text-xs text-muted-foreground">
+                  {saveSession ? "will be saved" : "temporary only"}
                 </span>
               </div>
             </div>

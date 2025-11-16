@@ -76,10 +76,12 @@ const Auth = () => {
           }
         } else {
           toast({
-            title: "Account Created!",
-            description: "Welcome to hushh! You can now start creating your sessions.",
+            title: "✅ Account Created!",
+            description: "Please check your email to confirm your account. You may need to check your spam folder.",
+            duration: 8000,
           });
-          navigate('/');
+          // Note: With email confirmation enabled, user won't be auto-logged in
+          // They need to confirm email first
         }
       }
     } catch (error) {

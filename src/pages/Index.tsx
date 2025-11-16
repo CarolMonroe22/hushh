@@ -991,11 +991,27 @@ const Index = () => {
     }
   };
 
-  const handlePauseResume = () => {
-    if (audioRef.current) {
+  const handlePauseResume = async () => {
+    console.log('handlePauseResume called - isPaused:', isPaused, 'audioRef exists:', !!audioRef.current);
+    
+    try {
+      if (!audioRef.current) {
+        console.error('No audio reference available');
+        toast({
+          title: "⚠️ Audio Error",
+          description: "Audio reference lost. Please start a new session.",
+          variant: "destructive",
+        });
+        return;
+      }
+
       if (isPaused) {
-        audioRef.current.play();
+        // Resume
+        console.log('Attempting to resume audio...');
+        await audioRef.current.play();
         setIsPaused(false);
+        console.log('Audio resumed successfully');
+        
         timerRef.current = setInterval(() => {
           setTimeLeft((prev) => {
             if (prev <= 1) {
@@ -1005,51 +1021,101 @@ const Index = () => {
             return prev - 1;
           });
         }, 1000);
+        
+        toast({
+          title: "▶️ Resumed",
+          description: "Playback resumed",
+          duration: 2000,
+        });
       } else {
+        // Pause
+        console.log('Attempting to pause audio...');
         audioRef.current.pause();
         setIsPaused(true);
+        console.log('Audio paused successfully');
+        
         if (timerRef.current) {
           clearInterval(timerRef.current);
           timerRef.current = null;
         }
+        
+        toast({
+          title: "⏸️ Paused",
+          description: "Playback paused",
+          duration: 2000,
+        });
       }
+    } catch (error) {
+      console.error('Error in handlePauseResume:', error);
+      toast({
+        title: "❌ Playback Error",
+        description: error instanceof Error ? error.message : "Could not pause/resume audio",
+        variant: "destructive",
+      });
     }
   };
 
   const handleStop = () => {
-    if (audioRef.current) {
-      audioRef.current.pause();
-      audioRef.current.currentTime = 0;
+    console.log('handleStop called - audioRef exists:', !!audioRef.current);
+    
+    try {
+      if (audioRef.current) {
+        audioRef.current.pause();
+        audioRef.current.currentTime = 0;
+        console.log('Audio stopped successfully');
+      }
+      
+      if (timerRef.current) {
+        clearInterval(timerRef.current);
+        timerRef.current = null;
+      }
+      
+      if (animationRef.current) {
+        clearInterval(animationRef.current);
+        animationRef.current = null;
+      }
+      
+      setIsPlaying(false);
+      setIsPaused(false);
+      setLoopCount(0);
+      setTimeLeft(60);
+      
+      toast({
+        title: "⏹️ Stopped",
+        description: "Audio ready to play again",
+        duration: 2000,
+      });
+    } catch (error) {
+      console.error('Error in handleStop:', error);
+      toast({
+        title: "⚠️ Stop Error", 
+        description: "Audio stopped but with errors",
+        variant: "destructive",
+      });
     }
-    
-    if (timerRef.current) {
-      clearInterval(timerRef.current);
-      timerRef.current = null;
-    }
-    
-    if (animationRef.current) {
-      clearInterval(animationRef.current);
-      animationRef.current = null;
-    }
-    
-    setIsPlaying(false);
-    setIsPaused(false);
-    setLoopCount(0);
-    setTimeLeft(60);
-    
-    toast({
-      title: "Session Stopped",
-      description: "Audio ready to play again",
-    });
   };
 
-  const handlePlay = () => {
-    if (audioRef.current) {
+  const handlePlay = async () => {
+    console.log('handlePlay called - audioRef exists:', !!audioRef.current);
+    
+    try {
+      if (!audioRef.current) {
+        console.error('No audio reference in handlePlay');
+        toast({
+          title: "⚠️ Audio Lost",
+          description: "Please generate a new session",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      console.log('Starting playback from beginning...');
       audioRef.current.currentTime = 0;
-      audioRef.current.play();
+      await audioRef.current.play();
       setIsPlaying(true);
       setIsPaused(false);
       setTimeLeft(60);
+      console.log('Playback started successfully');
 
       timerRef.current = setInterval(() => {
         setTimeLeft((prev) => {
@@ -1062,6 +1128,13 @@ const Index = () => {
           return prev - 1;
         });
       }, 1000);
+    } catch (error) {
+      console.error('Error in handlePlay:', error);
+      toast({
+        title: "❌ Playback Error",
+        description: error instanceof Error ? error.message : "Could not start playback",
+        variant: "destructive",
+      });
     }
   };
 

@@ -172,6 +172,63 @@ export type Database = {
         }
         Relationships: []
       }
+      user_sessions: {
+        Row: {
+          ambient: string | null
+          audio_url: string
+          binaural_experience: string | null
+          created_at: string | null
+          duration_seconds: number | null
+          id: string
+          is_favorite: boolean | null
+          last_played_at: string | null
+          mood: string | null
+          session_type: string
+          times_played: number | null
+          updated_at: string | null
+          user_id: string
+          vibe_description: string | null
+          voice_gender: string | null
+          voice_journey: string | null
+        }
+        Insert: {
+          ambient?: string | null
+          audio_url: string
+          binaural_experience?: string | null
+          created_at?: string | null
+          duration_seconds?: number | null
+          id?: string
+          is_favorite?: boolean | null
+          last_played_at?: string | null
+          mood?: string | null
+          session_type: string
+          times_played?: number | null
+          updated_at?: string | null
+          user_id: string
+          vibe_description?: string | null
+          voice_gender?: string | null
+          voice_journey?: string | null
+        }
+        Update: {
+          ambient?: string | null
+          audio_url?: string
+          binaural_experience?: string | null
+          created_at?: string | null
+          duration_seconds?: number | null
+          id?: string
+          is_favorite?: boolean | null
+          last_played_at?: string | null
+          mood?: string | null
+          session_type?: string
+          times_played?: number | null
+          updated_at?: string | null
+          user_id?: string
+          vibe_description?: string | null
+          voice_gender?: string | null
+          voice_journey?: string | null
+        }
+        Relationships: []
+      }
       votes: {
         Row: {
           created_at: string | null
@@ -225,6 +282,10 @@ export type Database = {
             }
             Returns: undefined
           }
+      increment_session_play_count: {
+        Args: { session_id: string }
+        Returns: undefined
+      }
     }
     Enums: {
       [_ in never]: never

@@ -14,7 +14,10 @@ import AmbientBackground from "@/components/AmbientBackground";
 import { SessionHistory } from "@/components/SessionHistory";
 import { AuthModal } from "@/components/AuthModal";
 import { type UserSession } from "@/hooks/useUserSessions";
-import { History, LogOut } from "lucide-react";
+import { History, LogOut, Archive, User, ChevronDown } from "lucide-react";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
 type Mood = "relax" | "sleep" | "focus" | "gratitude" | "boost" | "stoic";
 type Ambient = "rain" | "ocean" | "forest" | "fireplace" | "whitenoise" | "city";
@@ -1533,59 +1536,94 @@ const Index = () => {
 
   return (
     <div className="min-h-screen bg-background text-foreground">
-      {/* Dynamic Header */}
-      <header className="fixed top-0 right-0 p-4 z-50 flex items-center gap-2">
-        {user ? (
-          <>
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => navigate('/account')}
-              className="lowercase"
-            >
-              👤 my account
-            </Button>
-            
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => setShowHistory(true)}
-              className="lowercase"
-            >
-              <History className="h-4 w-4 mr-2" />
-              library
-            </Button>
-            
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={handleSignOut}
-              className="lowercase"
-            >
-              <LogOut className="h-4 w-4 mr-2" />
-              logout
-            </Button>
-          </>
-        ) : (
-          <>
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => setShowAuthModal(true)}
-              className="lowercase"
-            >
-              🔐 login
-            </Button>
-            
-            <Button
-              size="sm"
-              onClick={() => setShowAuthModal(true)}
-              className="lowercase"
-            >
-              ✨ sign up
-            </Button>
-          </>
-        )}
+      {/* Elegant Header */}
+      <header className="fixed top-0 w-full z-50 backdrop-blur-md bg-background/80 border-b border-border/50 shadow-sm animate-fade-in">
+        <div className="container mx-auto px-4 h-16 flex items-center justify-between">
+          <div className="flex items-center gap-4">
+            {/* Left side - could add logo here */}
+          </div>
+          
+          <div className="flex items-center gap-3">
+            {user ? (
+              <>
+                {/* Library Icon with Tooltip */}
+                <TooltipProvider>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        onClick={() => setShowHistory(true)}
+                        className="relative hover:scale-110 transition-transform"
+                      >
+                        <Archive className="h-5 w-5" />
+                      </Button>
+                    </TooltipTrigger>
+                    <TooltipContent>
+                      <p>Library</p>
+                    </TooltipContent>
+                  </Tooltip>
+                </TooltipProvider>
+                
+                {/* User Dropdown */}
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button variant="ghost" className="flex items-center gap-2 hover:bg-accent/50 transition-colors">
+                      <Avatar className="h-8 w-8">
+                        <AvatarFallback className="bg-primary/10 text-primary">
+                          {user.email?.charAt(0).toUpperCase()}
+                        </AvatarFallback>
+                      </Avatar>
+                      <ChevronDown className="h-4 w-4 text-muted-foreground" />
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end" className="w-56 bg-background/95 backdrop-blur-md">
+                    <DropdownMenuLabel>
+                      <div className="flex flex-col space-y-1">
+                        <p className="text-sm font-medium lowercase">
+                          {user.user_metadata?.full_name || 'user'}
+                        </p>
+                        <p className="text-xs text-muted-foreground truncate lowercase">
+                          {user.email}
+                        </p>
+                      </div>
+                    </DropdownMenuLabel>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem onClick={() => navigate('/account')} className="lowercase cursor-pointer">
+                      <User className="mr-2 h-4 w-4" />
+                      <span>my account</span>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => setShowHistory(true)} className="lowercase cursor-pointer">
+                      <Archive className="mr-2 h-4 w-4" />
+                      <span>library</span>
+                    </DropdownMenuItem>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem onClick={handleSignOut} className="text-destructive lowercase cursor-pointer">
+                      <LogOut className="mr-2 h-4 w-4" />
+                      <span>logout</span>
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              </>
+            ) : (
+              <div className="flex items-center gap-2">
+                <Button
+                  variant="ghost"
+                  onClick={() => setShowAuthModal(true)}
+                  className="text-sm lowercase hover:bg-accent/50 transition-colors"
+                >
+                  login
+                </Button>
+                <Button
+                  onClick={() => setShowAuthModal(true)}
+                  className="text-sm lowercase bg-gradient-to-r from-primary to-primary/80 hover:from-primary/90 hover:to-primary/70 transition-all"
+                >
+                  sign up
+                </Button>
+              </div>
+            )}
+          </div>
+        </div>
       </header>
 
       {/* Session History Modal */}

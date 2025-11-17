@@ -14,254 +14,23 @@ import AmbientBackground from "@/components/AmbientBackground";
 import { SessionHistory } from "@/components/SessionHistory";
 import { AuthModal } from "@/components/AuthModal";
 import { type UserSession } from "@/hooks/useUserSessions";
-import { History, LogOut, Archive, User, ChevronDown } from "lucide-react";
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import { RotatingHeroTitle } from "@/components/landing";
+import { AppHeader } from "@/components/header/AppHeader";
 
-type Mood = "relax" | "sleep" | "focus" | "gratitude" | "boost" | "stoic";
-type Ambient = "rain" | "ocean" | "forest" | "fireplace" | "whitenoise" | "city";
-type BinauralExperience = "barbershop" | "spa" | "ear-cleaning" | "bedtime" | "art-studio" | "yoga";
-type VoiceJourney = "story" | "prayer" | "stoic" | "manifestation" | "motivational" | "brainwash" | "fullattention";
-
-const MOODS: { value: Mood; label: string; emoji: string }[] = [
-  { value: "relax", label: "relax", emoji: "🌙" },
-  { value: "sleep", label: "sleep", emoji: "😴" },
-  { value: "focus", label: "focus", emoji: "🎯" },
-  { value: "gratitude", label: "gratitude", emoji: "🙏" },
-  { value: "boost", label: "boost", emoji: "⚡" },
-  { value: "stoic", label: "stoic", emoji: "🗿" },
-];
-
-const AMBIENTS: { value: Ambient; label: string; emoji: string }[] = [
-  { value: "rain", label: "rain", emoji: "🌧️" },
-  { value: "ocean", label: "ocean", emoji: "🌊" },
-  { value: "forest", label: "forest", emoji: "🌲" },
-  { value: "fireplace", label: "fireplace", emoji: "🔥" },
-  { value: "whitenoise", label: "white noise", emoji: "📻" },
-  { value: "city", label: "city", emoji: "🏙️" },
-];
-
-const BINAURAL_EXPERIENCES: { 
-  value: BinauralExperience; 
-  label: string; 
-  emoji: string;
-  shortDesc: string;
-}[] = [
-  { 
-    value: "barbershop", 
-    label: "Barbershop Visit", 
-    emoji: "💈",
-    shortDesc: "scissors, clippers, personal attention"
-  },
-  { 
-    value: "spa", 
-    label: "Spa & Massage", 
-    emoji: "🧖",
-    shortDesc: "soft whispers, gentle touches, oils"
-  },
-  { 
-    value: "ear-cleaning", 
-    label: "Ear Cleaning", 
-    emoji: "👂",
-    shortDesc: "close proximity, gentle sounds"
-  },
-  { 
-    value: "bedtime", 
-    label: "Bedtime Attention", 
-    emoji: "🌙",
-    shortDesc: "tucking in, soft whispers, goodnight"
-  },
-  { 
-    value: "art-studio", 
-    label: "Art Studio", 
-    emoji: "🎨",
-    shortDesc: "sketching, painting, creative energy"
-  },
-  { 
-    value: "yoga", 
-    label: "Yoga Session", 
-    emoji: "🧘",
-    shortDesc: "guided breathing, gentle movement"
-  },
-];
-
-const VOICE_JOURNEYS: {
-  value: VoiceJourney;
-  label: string;
-  emoji: string;
-  voices: {
-    female: string;
-    male: string;
-  };
-  shortDesc: string;
-}[] = [
-  {
-    value: "story",
-    label: "Story",
-    emoji: "📖",
-    voices: {
-      female: "pjcYQlDFKMbcOUp6F5GD", // Brittney - Meditation
-      male: "Mu5jxyqZOLIGltFpfalg"    // Jameson - Meditation
-    },
-    shortDesc: "immersive bedtime tale"
-  },
-  {
-    value: "prayer",
-    label: "Prayer",
-    emoji: "🙏",
-    voices: {
-      female: "pjcYQlDFKMbcOUp6F5GD", // Brittney - Meditation
-      male: "Mu5jxyqZOLIGltFpfalg"    // Jameson - Meditation
-    },
-    shortDesc: "guided peaceful prayer"
-  },
-  {
-    value: "stoic",
-    label: "Stoic",
-    emoji: "🏛️",
-    voices: {
-      female: "pjcYQlDFKMbcOUp6F5GD", // Brittney - Meditation
-      male: "Mu5jxyqZOLIGltFpfalg"    // Jameson - Meditation
-    },
-    shortDesc: "wisdom & inner strength"
-  },
-  {
-    value: "manifestation",
-    label: "Manifest",
-    emoji: "✨",
-    voices: {
-      female: "pjcYQlDFKMbcOUp6F5GD", // Brittney - Meditation
-      male: "Mu5jxyqZOLIGltFpfalg"    // Jameson - Meditation
-    },
-    shortDesc: "abundance affirmations"
-  },
-  {
-    value: "motivational",
-    label: "Motivate",
-    emoji: "🔥",
-    voices: {
-      female: "pjcYQlDFKMbcOUp6F5GD", // Brittney - Meditation
-      male: "Mu5jxyqZOLIGltFpfalg"    // Jameson - Meditation
-    },
-    shortDesc: "powerful encouragement"
-  },
-  {
-    value: "brainwash",
-    label: "Brain Wash",
-    emoji: "🧠",
-    voices: {
-      female: "pjcYQlDFKMbcOUp6F5GD", // Brittney - Meditation
-      male: "Mu5jxyqZOLIGltFpfalg"    // Jameson - Meditation
-    },
-    shortDesc: "mental cleanse & reset"
-  },
-  {
-    value: "fullattention",
-    label: "Full Attention",
-    emoji: "🎯",
-    voices: {
-      female: "pjcYQlDFKMbcOUp6F5GD", // Brittney - Meditation
-      male: "Mu5jxyqZOLIGltFpfalg"    // Jameson - Meditation
-    },
-    shortDesc: "deep focus activation"
-  },
-];
-
-const JOURNEY_VOICE_SETTINGS: Record<VoiceJourney, {
-  stability: number;
-  similarity: number;
-  style: number;
-  use_speaker_boost: boolean;
-}> = {
-  story: { 
-    stability: 0.5,
-    similarity: 0.85,
-    style: 0.0,
-    use_speaker_boost: true 
-  },
-  prayer: { 
-    stability: 0.5,
-    similarity: 0.85,
-    style: 0.0,
-    use_speaker_boost: true 
-  },
-  stoic: { 
-    stability: 0.5,
-    similarity: 0.85,
-    style: 0.0,
-    use_speaker_boost: true 
-  },
-  manifestation: { 
-    stability: 0.5,
-    similarity: 0.85,
-    style: 0.0,
-    use_speaker_boost: true 
-  },
-  motivational: { 
-    stability: 0.5,
-    similarity: 0.85,
-    style: 0.0,
-    use_speaker_boost: true 
-  },
-  brainwash: { 
-    stability: 0.5,
-    similarity: 0.85,
-    style: 0.0,
-    use_speaker_boost: true 
-  },
-  fullattention: { 
-    stability: 0.5,
-    similarity: 0.85,
-    style: 0.0,
-    use_speaker_boost: true 
-  }
-};
-
-const VIBE_STARTERS = [
-  {
-    title: "deep focus",
-    description: "I need to concentrate deeply on complex work. Create a focused atmosphere with subtle background sounds that help me stay in the zone without any distractions.",
-  },
-  {
-    title: "calm evening",
-    description: "Help me wind down after a long day. I want gentle, soothing sounds that ease my mind and help me transition into a peaceful evening routine.",
-  },
-  {
-    title: "creative flow",
-    description: "I'm working on something creative and need sounds that inspire without overwhelming. Something that keeps my energy up while letting my imagination flow.",
-  },
-  {
-    title: "peaceful sleep",
-    description: "Guide me into deep, restful sleep with calming sounds that quiet my racing thoughts and create a cocoon of tranquility around me.",
-  },
-  {
-    title: "manifestation",
-    description: "Help me manifest my goals and dreams. I want powerful, affirming whispers that strengthen my belief in what I'm creating and fill me with confidence and clarity about my vision.",
-  },
-  {
-    title: "prayer",
-    description: "Create a sacred space for prayer and spiritual connection. I want gentle, reverent whispers that help me feel grounded, connected to something greater, and at peace in this moment of reflection.",
-  },
-  {
-    title: "stoic",
-    description: "I need strength and clarity rooted in ancient wisdom. Create a grounded atmosphere that reminds me to focus on what I can control, accept what I cannot change, and act with virtue and reason regardless of external circumstances.",
-  },
-];
-
-const TITLE_ROTATIONS = [
-  "ASMR",
-  "Meditation", 
-  "Focus",
-  "Calm",
-  "Flow",
-  "Lullaby",
-  "Reset",
-  "Breathe",
-  "Pray",
-  "Pause",
-  "Dream",
-];
+// Constants
+import {
+  MOODS,
+  AMBIENTS,
+  BINAURAL_EXPERIENCES,
+  VOICE_JOURNEYS,
+  JOURNEY_VOICE_SETTINGS,
+  VIBE_STARTERS,
+  TITLE_ROTATIONS,
+  type Mood,
+  type Ambient,
+  type BinauralExperience,
+  type VoiceJourney,
+} from "@/lib/constants/session-constants";
 
 const Index = () => {
   const { user, loading, signOut } = useAuth();
@@ -273,8 +42,6 @@ const Index = () => {
   const [isComplete, setIsComplete] = useState(false);
   const [generatedTitle, setGeneratedTitle] = useState("");
   const [vibeDescription, setVibeDescription] = useState("");
-  const [currentTitleIndex, setCurrentTitleIndex] = useState(0);
-  const [titleFade, setTitleFade] = useState(true);
   const [sessionFeedback, setSessionFeedback] = useState<'loved' | 'liked' | null>(null);
   const [waitlistEmail, setWaitlistEmail] = useState("");
   const [emailSubmitted, setEmailSubmitted] = useState(false);
@@ -309,21 +76,6 @@ const Index = () => {
         audioRef.current = null;
       }
     };
-  }, []);
-
-  // Title rotation effect - MUST be before any conditional returns
-  useEffect(() => {
-    const titleInterval = setInterval(() => {
-      setTitleFade(false);
-      setTimeout(() => {
-        setCurrentTitleIndex((prevIndex) => 
-          (prevIndex + 1) % TITLE_ROTATIONS.length
-        );
-        setTitleFade(true);
-      }, 600);
-    }, 5000);
-
-    return () => clearInterval(titleInterval);
   }, []);
 
   const handleSignOut = async () => {
@@ -1536,95 +1288,13 @@ const Index = () => {
 
   return (
     <div className="min-h-screen bg-background text-foreground">
-      {/* Elegant Header */}
-      <header className="fixed top-0 w-full z-50 backdrop-blur-md bg-background/80 border-b border-border/50 shadow-sm animate-fade-in">
-        <div className="container mx-auto px-4 h-16 flex items-center justify-between">
-          <div className="flex items-center gap-4">
-            {/* Left side - could add logo here */}
-          </div>
-          
-          <div className="flex items-center gap-3">
-            {user ? (
-              <>
-                {/* Library Icon with Tooltip */}
-                <TooltipProvider>
-                  <Tooltip>
-                    <TooltipTrigger asChild>
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        onClick={() => setShowHistory(true)}
-                        className="relative hover:scale-110 transition-transform"
-                      >
-                        <Archive className="h-5 w-5" />
-                      </Button>
-                    </TooltipTrigger>
-                    <TooltipContent>
-                      <p>Library</p>
-                    </TooltipContent>
-                  </Tooltip>
-                </TooltipProvider>
-                
-                {/* User Dropdown */}
-                <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                    <Button variant="ghost" className="flex items-center gap-2 hover:bg-accent/50 transition-colors">
-                      <Avatar className="h-8 w-8">
-                        <AvatarFallback className="bg-primary/10 text-primary">
-                          {user.email?.charAt(0).toUpperCase()}
-                        </AvatarFallback>
-                      </Avatar>
-                      <ChevronDown className="h-4 w-4 text-muted-foreground" />
-                    </Button>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent align="end" className="w-56 bg-background/95 backdrop-blur-md">
-                    <DropdownMenuLabel>
-                      <div className="flex flex-col space-y-1">
-                        <p className="text-sm font-medium lowercase">
-                          {user.user_metadata?.full_name || 'user'}
-                        </p>
-                        <p className="text-xs text-muted-foreground truncate lowercase">
-                          {user.email}
-                        </p>
-                      </div>
-                    </DropdownMenuLabel>
-                    <DropdownMenuSeparator />
-                    <DropdownMenuItem onClick={() => navigate('/account')} className="lowercase cursor-pointer">
-                      <User className="mr-2 h-4 w-4" />
-                      <span>my account</span>
-                    </DropdownMenuItem>
-                    <DropdownMenuItem onClick={() => setShowHistory(true)} className="lowercase cursor-pointer">
-                      <Archive className="mr-2 h-4 w-4" />
-                      <span>library</span>
-                    </DropdownMenuItem>
-                    <DropdownMenuSeparator />
-                    <DropdownMenuItem onClick={handleSignOut} className="text-destructive lowercase cursor-pointer">
-                      <LogOut className="mr-2 h-4 w-4" />
-                      <span>logout</span>
-                    </DropdownMenuItem>
-                  </DropdownMenuContent>
-                </DropdownMenu>
-              </>
-            ) : (
-              <div className="flex items-center gap-2">
-                <Button
-                  variant="ghost"
-                  onClick={() => setShowAuthModal(true)}
-                  className="text-sm lowercase hover:bg-accent/50 transition-colors"
-                >
-                  login
-                </Button>
-                <Button
-                  onClick={() => setShowAuthModal(true)}
-                  className="text-sm lowercase bg-gradient-to-r from-primary to-primary/80 hover:from-primary/90 hover:to-primary/70 transition-all"
-                >
-                  sign up
-                </Button>
-              </div>
-            )}
-          </div>
-        </div>
-      </header>
+      <AppHeader
+        user={user}
+        onShowHistory={() => setShowHistory(true)}
+        onNavigateToAccount={() => navigate('/account')}
+        onSignOut={handleSignOut}
+        onSignUp={() => setShowAuthModal(true)}
+      />
 
       {/* Session History Modal */}
       {user && (
@@ -1658,25 +1328,7 @@ const Index = () => {
 
         {/* Hero Section */}
         <main>
-          <section className="text-center space-y-6 mb-16" aria-labelledby="hero-title">
-            <h1 id="hero-title" className="text-5xl md:text-7xl font-light tracking-wider text-foreground">
-              <span>1-Minute </span>
-              <span 
-                className={`inline-block transition-all duration-600 ease-in-out ${
-                  titleFade 
-                    ? 'opacity-100 translate-y-0' 
-                    : 'opacity-0 -translate-y-2'
-                }`}
-                style={{ transitionTimingFunction: 'cubic-bezier(0.4, 0.0, 0.2, 1)' }}
-                aria-live="polite"
-              >
-                {TITLE_ROTATIONS[currentTitleIndex]}
-              </span>
-            </h1>
-            <p className="text-lg md:text-xl text-muted-foreground tracking-wide">
-              build beautiful feelings, in sound
-            </p>
-          </section>
+          <RotatingHeroTitle />
 
           {/* Main Input Area - Creator Mode */}
           <section className="max-w-2xl mx-auto space-y-6 mb-12" aria-labelledby="create-vibe-heading">

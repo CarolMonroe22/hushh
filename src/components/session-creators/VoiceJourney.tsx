@@ -1,8 +1,6 @@
 import { Button } from "@/components/ui/button";
-import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { VOICE_JOURNEYS, AMBIENTS, type VoiceJourney as VoiceJourneyType, type Ambient } from "@/lib/constants/session-constants";
-import { Mic2 } from "lucide-react";
 
 interface VoiceJourneyProps {
   selectedJourney: VoiceJourneyType | null;
@@ -12,9 +10,14 @@ interface VoiceJourneyProps {
   onJourneyChange: (journey: VoiceJourneyType) => void;
   onVoiceGenderChange: (gender: "female" | "male") => void;
   onWithAmbientChange: (enabled: boolean) => void;
-  onAmbientChange: (ambient: Ambient) => void;
+  onAmbientChange: (ambient: Ambient | null) => void;
   onGenerate: () => void;
   isGenerating: boolean;
+  loopEnabled: boolean;
+  onLoopChange: (enabled: boolean) => void;
+  saveSession: boolean;
+  onSaveSessionChange: (save: boolean) => void;
+  user: any | null;
 }
 
 export const VoiceJourney = ({
@@ -28,119 +31,165 @@ export const VoiceJourney = ({
   onAmbientChange,
   onGenerate,
   isGenerating,
+  loopEnabled,
+  onLoopChange,
+  saveSession,
+  onSaveSessionChange,
+  user,
 }: VoiceJourneyProps) => {
   return (
     <div className="space-y-6">
-      <div className="space-y-4">
-        <Label className="text-white/80 text-sm font-light tracking-wide flex items-center gap-2">
-          <Mic2 className="w-4 h-4" />
-          Choose your journey
-        </Label>
-        <div className="grid grid-cols-2 gap-3">
-          {VOICE_JOURNEYS.map((journey) => (
+      <div className="text-center space-y-2">
+        <h2 className="text-2xl font-light lowercase tracking-wide flex items-center justify-center gap-2">
+          <span>🎙️</span>
+          <span>Voice Journeys</span>
+        </h2>
+        <p className="text-sm text-muted-foreground">
+          pure guided audio experiences focused on voice
+        </p>
+      </div>
+
+      {/* Voice Preference Selection */}
+      <div className="px-4 space-y-4">
+        {/* Gender Selection */}
+        <div className="space-y-2">
+          <label className="text-sm font-medium lowercase tracking-wide">voice gender</label>
+          <div className="flex gap-2">
             <Button
-              key={journey.value}
-              variant={selectedJourney === journey.value ? "default" : "outline"}
-              className={`h-auto py-4 px-4 flex flex-col items-start gap-2 transition-all ${
-                selectedJourney === journey.value
-                  ? "bg-white/20 border-white/40"
-                  : "bg-black/20 border-white/20 hover:bg-white/10"
-              }`}
-              onClick={() => onJourneyChange(journey.value)}
+              variant={voiceGender === "female" ? "default" : "outline"}
+              onClick={() => onVoiceGenderChange("female")}
+              className="flex-1 lowercase tracking-wide"
+              type="button"
             >
-              <div className="flex items-center gap-2 w-full">
-                <span className="text-2xl">{journey.emoji}</span>
-                <span className="text-sm text-white/90 font-light">
-                  {journey.label}
-                </span>
-              </div>
-              <span className="text-xs text-white/60 font-light text-left">
-                {journey.shortDesc}
-              </span>
+              👩 female
             </Button>
-          ))}
+            <Button
+              variant={voiceGender === "male" ? "default" : "outline"}
+              onClick={() => onVoiceGenderChange("male")}
+              className="flex-1 lowercase tracking-wide"
+              type="button"
+            >
+              👨 male
+            </Button>
+          </div>
         </div>
       </div>
 
-      <div className="space-y-4">
-        <Label className="text-white/80 text-sm font-light tracking-wide">
-          Voice preference
-        </Label>
-        <div className="flex gap-2">
-          <Button
-            variant={voiceGender === "female" ? "default" : "outline"}
-            className={`flex-1 ${
-              voiceGender === "female"
-                ? "bg-white/20 border-white/40"
-                : "bg-black/20 border-white/20 hover:bg-white/10"
+      {/* Journey Grid */}
+      <div className="grid grid-cols-2 md:grid-cols-3 gap-3 px-4">
+        {VOICE_JOURNEYS.map((journey) => (
+          <button
+            key={journey.value}
+            onClick={() => onJourneyChange(journey.value)}
+            className={`p-5 rounded-xl border transition-all text-left space-y-2 ${
+              selectedJourney === journey.value
+                ? "border-primary bg-primary/10 shadow-lg scale-105"
+                : "border-border bg-card hover:bg-accent hover:border-primary/50"
             }`}
-            onClick={() => onVoiceGenderChange("female")}
           >
-            Female Voice
-          </Button>
-          <Button
-            variant={voiceGender === "male" ? "default" : "outline"}
-            className={`flex-1 ${
-              voiceGender === "male"
-                ? "bg-white/20 border-white/40"
-                : "bg-black/20 border-white/20 hover:bg-white/10"
-            }`}
-            onClick={() => onVoiceGenderChange("male")}
-          >
-            Male Voice
-          </Button>
-        </div>
+            <div className="text-3xl mb-2">{journey.emoji}</div>
+            <div className="text-sm font-medium lowercase">{journey.label}</div>
+            <div className="text-xs text-muted-foreground leading-tight">
+              {journey.shortDesc}
+            </div>
+          </button>
+        ))}
       </div>
 
-      <div className="space-y-4">
-        <div className="flex items-center justify-between">
-          <Label className="text-white/80 text-sm font-light tracking-wide">
-            Add ambient background
-          </Label>
-          <Switch
+      {/* Ambient Background Toggle */}
+      <div className="px-4 space-y-3">
+        <div className="flex items-center gap-3 p-4 rounded-lg bg-card/50 border border-border/50">
+          <input
+            type="checkbox"
+            id="ambient-toggle"
             checked={withAmbient}
-            onCheckedChange={onWithAmbientChange}
-            className="data-[state=checked]:bg-white/40"
+            onChange={(e) => {
+              onWithAmbientChange(e.target.checked);
+              if (!e.target.checked) onAmbientChange(null);
+            }}
+            className="w-4 h-4 accent-primary"
           />
+          <label htmlFor="ambient-toggle" className="text-sm lowercase tracking-wide cursor-pointer flex-1">
+            add ambient background sound
+          </label>
         </div>
 
+        {/* Ambient Selection (only if toggled) */}
         {withAmbient && (
-          <div className="grid grid-cols-3 gap-2 pt-2">
+          <div className="grid grid-cols-3 gap-2">
             {AMBIENTS.map((ambient) => (
-              <Button
+              <button
                 key={ambient.value}
-                variant={ambientForJourney === ambient.value ? "default" : "outline"}
-                className={`h-auto py-3 px-4 flex flex-col items-center gap-1 transition-all ${
-                  ambientForJourney === ambient.value
-                    ? "bg-white/20 border-white/40"
-                    : "bg-black/20 border-white/20 hover:bg-white/10"
-                }`}
                 onClick={() => onAmbientChange(ambient.value)}
+                className={`p-3 rounded-lg border transition-all text-left ${
+                  ambientForJourney === ambient.value
+                    ? "border-primary bg-primary/10"
+                    : "border-border bg-card hover:bg-accent"
+                }`}
               >
-                <span className="text-2xl">{ambient.emoji}</span>
-                <span className="text-xs text-white/90 font-light">
-                  {ambient.label}
-                </span>
-              </Button>
+                <div className="text-xl mb-1">{ambient.emoji}</div>
+                <div className="text-xs lowercase">{ambient.label}</div>
+              </button>
             ))}
           </div>
         )}
       </div>
 
-      <Button
-        className="w-full bg-white/10 hover:bg-white/20 text-white border border-white/20 flex items-center gap-2"
-        onClick={onGenerate}
-        disabled={!selectedJourney || (withAmbient && !ambientForJourney) || isGenerating}
-      >
-        {isGenerating ? (
-          <>Generating Voice Journey...</>
-        ) : (
-          <>
-            <Mic2 className="w-4 h-4" />
-            Generate Voice Journey
-          </>
+      {/* Loop Mode Toggle and Save Session */}
+      <div className="px-4 space-y-3">
+        <div className="flex items-center justify-between p-4 rounded-lg bg-card/50 border border-border/50">
+          <div className="flex items-center gap-2">
+            <Switch
+              checked={loopEnabled}
+              onCheckedChange={onLoopChange}
+              id="loop-voice"
+            />
+            <label htmlFor="loop-voice" className="text-sm lowercase tracking-wide cursor-pointer">
+              🔁 loop mode
+            </label>
+          </div>
+          <span className="text-xs text-muted-foreground">
+            {loopEnabled ? "will repeat continuously" : "play once"}
+          </span>
+        </div>
+
+        {user && (
+          <div className="flex items-center justify-between p-4 rounded-lg bg-card/50 border border-border/50">
+            <div className="flex items-center gap-2">
+              <Switch
+                checked={saveSession}
+                onCheckedChange={onSaveSessionChange}
+                id="save-session-voice"
+              />
+              <label htmlFor="save-session-voice" className="text-sm lowercase tracking-wide cursor-pointer">
+                💾 save to library
+              </label>
+            </div>
+            <span className="text-xs text-muted-foreground">
+              {saveSession ? "will be saved" : "temporary only"}
+            </span>
+          </div>
         )}
-      </Button>
+      </div>
+
+      {/* Generate Button */}
+      <div className="px-4">
+        <Button
+          onClick={onGenerate}
+          disabled={isGenerating || !selectedJourney || (withAmbient && !ambientForJourney)}
+          className="w-full py-6 text-base lowercase tracking-wide bg-primary hover:bg-primary/90 transition-all"
+          size="lg"
+        >
+          {isGenerating ? "creating voice journey..." : "🎙️ start journey"}
+        </Button>
+      </div>
+
+      {/* Note */}
+      <div className="text-center">
+        <p className="text-xs text-muted-foreground/70 italic">
+          💡 voice journeys are 1-2 minutes of guided spoken content
+        </p>
+      </div>
     </div>
   );
 };

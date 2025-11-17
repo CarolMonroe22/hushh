@@ -1,13 +1,17 @@
 import { Button } from "@/components/ui/button";
-import { Label } from "@/components/ui/label";
+import { Switch } from "@/components/ui/switch";
 import { BINAURAL_EXPERIENCES, type BinauralExperience as BinauralExperienceType } from "@/lib/constants/session-constants";
-import { Headphones } from "lucide-react";
 
 interface BinauralExperienceProps {
   selectedExperience: BinauralExperienceType | null;
   onExperienceChange: (experience: BinauralExperienceType) => void;
   onGenerate: () => void;
   isGenerating: boolean;
+  loopEnabled: boolean;
+  onLoopChange: (enabled: boolean) => void;
+  saveSession: boolean;
+  onSaveSessionChange: (save: boolean) => void;
+  user: any | null;
 }
 
 export const BinauralExperience = ({
@@ -15,57 +19,93 @@ export const BinauralExperience = ({
   onExperienceChange,
   onGenerate,
   isGenerating,
+  loopEnabled,
+  onLoopChange,
+  saveSession,
+  onSaveSessionChange,
+  user,
 }: BinauralExperienceProps) => {
   return (
     <div className="space-y-6">
-      <div className="space-y-4">
-        <Label className="text-white/80 text-sm font-light tracking-wide flex items-center gap-2">
-          <Headphones className="w-4 h-4" />
-          Choose your 3D experience
-        </Label>
-        <div className="text-xs text-white/50 mb-4">
-          For the best experience, use headphones
-        </div>
-        <div className="grid grid-cols-2 gap-3">
-          {BINAURAL_EXPERIENCES.map((experience) => (
-            <Button
-              key={experience.value}
-              variant={selectedExperience === experience.value ? "default" : "outline"}
-              className={`h-auto py-4 px-4 flex flex-col items-start gap-2 transition-all ${
-                selectedExperience === experience.value
-                  ? "bg-white/20 border-white/40"
-                  : "bg-black/20 border-white/20 hover:bg-white/10"
-              }`}
-              onClick={() => onExperienceChange(experience.value)}
-            >
-              <div className="flex items-center gap-2 w-full">
-                <span className="text-2xl">{experience.emoji}</span>
-                <span className="text-sm text-white/90 font-light">
-                  {experience.label}
-                </span>
-              </div>
-              <span className="text-xs text-white/60 font-light text-left">
-                {experience.shortDesc}
-              </span>
-            </Button>
-          ))}
-        </div>
+      <div className="text-center space-y-2">
+        <h2 className="text-2xl font-light lowercase tracking-wide flex items-center justify-center gap-2">
+          <span>🎧</span>
+          <span>3D Binaural Experiences</span>
+        </h2>
+        <p className="text-sm text-muted-foreground">
+          immersive spatial audio scenarios (best with headphones)
+        </p>
       </div>
 
-      <Button
-        className="w-full bg-white/10 hover:bg-white/20 text-white border border-white/20 flex items-center gap-2"
-        onClick={onGenerate}
-        disabled={!selectedExperience || isGenerating}
-      >
-        {isGenerating ? (
-          <>Generating 3D Experience...</>
-        ) : (
-          <>
-            <Headphones className="w-4 h-4" />
-            Generate 3D Experience
-          </>
+      {/* Experience Grid */}
+      <div className="grid grid-cols-2 md:grid-cols-3 gap-3 px-4">
+        {BINAURAL_EXPERIENCES.map((exp) => (
+          <button
+            key={exp.value}
+            onClick={() => onExperienceChange(exp.value)}
+            className={`p-5 rounded-xl border transition-all text-left space-y-2 ${
+              selectedExperience === exp.value
+                ? "border-primary bg-primary/10 shadow-lg scale-105"
+                : "border-border bg-card hover:bg-accent hover:border-primary/50"
+            }`}
+          >
+            <div className="text-3xl mb-2">{exp.emoji}</div>
+            <div className="text-sm font-medium lowercase">{exp.label}</div>
+            <div className="text-xs text-muted-foreground leading-tight">
+              {exp.shortDesc}
+            </div>
+          </button>
+        ))}
+      </div>
+
+      {/* Loop Mode Toggle and Save Session */}
+      <div className="px-4 space-y-3">
+        <div className="flex items-center justify-between p-4 rounded-lg bg-card/50 border border-border/50">
+          <div className="flex items-center gap-2">
+            <Switch
+              checked={loopEnabled}
+              onCheckedChange={onLoopChange}
+              id="loop-binaural"
+            />
+            <label htmlFor="loop-binaural" className="text-sm lowercase tracking-wide cursor-pointer">
+              🔁 loop mode
+            </label>
+          </div>
+          <span className="text-xs text-muted-foreground">
+            {loopEnabled ? "will repeat continuously" : "play once"}
+          </span>
+        </div>
+
+        {user && (
+          <div className="flex items-center justify-between p-4 rounded-lg bg-card/50 border border-border/50">
+            <div className="flex items-center gap-2">
+              <Switch
+                checked={saveSession}
+                onCheckedChange={onSaveSessionChange}
+                id="save-session-binaural"
+              />
+              <label htmlFor="save-session-binaural" className="text-sm lowercase tracking-wide cursor-pointer">
+                💾 save to library
+              </label>
+            </div>
+            <span className="text-xs text-muted-foreground">
+              {saveSession ? "will be saved" : "temporary only"}
+            </span>
+          </div>
         )}
-      </Button>
+      </div>
+
+      {/* Generate Button */}
+      <div className="px-4">
+        <Button
+          onClick={onGenerate}
+          disabled={isGenerating || !selectedExperience}
+          className="w-full py-6 text-base lowercase tracking-wide bg-primary/90 hover:bg-primary transition-all"
+          size="lg"
+        >
+          {isGenerating ? "creating 3D experience..." : "🎧 start 3D experience"}
+        </Button>
+      </div>
     </div>
   );
 };

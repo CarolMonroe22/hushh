@@ -18,6 +18,8 @@ import { RotatingHeroTitle } from "@/components/landing";
 import { AppHeader } from "@/components/header/AppHeader";
 import { QuickPreset } from "@/components/session-creators/QuickPreset";
 import { CreatorMode } from "@/components/session-creators/CreatorMode";
+import { BinauralExperience } from "@/components/session-creators/BinauralExperience";
+import { VoiceJourney } from "@/components/session-creators/VoiceJourney";
 
 // Constants
 import {
@@ -1399,89 +1401,21 @@ const Index = () => {
           </section>
 
           {/* 3D Binaural Experiences Section */}
-          <section className="max-w-2xl mx-auto mt-12 mb-8 space-y-6 py-8 border-y border-border/30" aria-labelledby="binaural-heading">
-            <div className="text-center space-y-2">
-              <h2 id="binaural-heading" className="text-2xl font-light lowercase tracking-wide flex items-center justify-center gap-2">
-                <span>🎧</span>
-                <span>3D Binaural Experiences</span>
-              </h2>
-              <p className="text-sm text-muted-foreground">
-                immersive spatial audio scenarios (best with headphones)
-              </p>
-            </div>
-
-            {/* Experience Grid */}
-            <div className="grid grid-cols-2 md:grid-cols-3 gap-3 px-4">
-              {BINAURAL_EXPERIENCES.map((exp) => (
-                <button
-                  key={exp.value}
-                  onClick={() => setSelectedExperience(exp.value)}
-                  className={`p-5 rounded-xl border transition-all text-left space-y-2 ${
-                    selectedExperience === exp.value
-                      ? "border-primary bg-primary/10 shadow-lg scale-105"
-                      : "border-border bg-card hover:bg-accent hover:border-primary/50"
-                  }`}
-                >
-                  <div className="text-3xl mb-2">{exp.emoji}</div>
-                  <div className="text-sm font-medium lowercase">{exp.label}</div>
-                  <div className="text-xs text-muted-foreground leading-tight">
-                    {exp.shortDesc}
-                  </div>
-                </button>
-              ))}
-            </div>
-
-            {/* Loop Mode Toggle and Save Session */}
-            <div className="px-4 space-y-3">
-              <div className="flex items-center justify-between p-4 rounded-lg bg-card/50 border border-border/50">
-                <div className="flex items-center gap-2">
-                  <Switch 
-                    checked={loopEnabled} 
-                    onCheckedChange={setLoopEnabled}
-                    id="loop-binaural"
-                  />
-                  <label htmlFor="loop-binaural" className="text-sm lowercase tracking-wide cursor-pointer">
-                    🔁 loop mode
-                  </label>
-                </div>
-                <span className="text-xs text-muted-foreground">
-                  {loopEnabled ? "will repeat continuously" : "play once"}
-                </span>
-              </div>
-              
-              {user && (
-                <div className="flex items-center justify-between p-4 rounded-lg bg-card/50 border border-border/50">
-                  <div className="flex items-center gap-2">
-                    <Switch 
-                      checked={saveSession} 
-                      onCheckedChange={setSaveSession}
-                      id="save-session-binaural"
-                    />
-                    <label htmlFor="save-session-binaural" className="text-sm lowercase tracking-wide cursor-pointer">
-                      💾 save to library
-                    </label>
-                  </div>
-                  <span className="text-xs text-muted-foreground">
-                    {saveSession ? "will be saved" : "temporary only"}
-                  </span>
-                </div>
-              )}
-            </div>
-
-            {/* Generate Button */}
-            <div className="px-4">
-              <Button
-                onClick={() => requireAuth(startBinauralExperience)}
-                disabled={isGenerating || !selectedExperience}
-                className="w-full py-6 text-base lowercase tracking-wide bg-primary/90 hover:bg-primary transition-all"
-                size="lg"
-              >
-                {isGenerating ? "creating 3D experience..." : "🎧 start 3D experience"}
-              </Button>
-            </div>
+          <section className="max-w-2xl mx-auto mt-12 mb-8 py-8 border-y border-border/30" aria-labelledby="binaural-heading">
+            <BinauralExperience
+              selectedExperience={selectedExperience}
+              onExperienceChange={setSelectedExperience}
+              onGenerate={() => requireAuth(startBinauralExperience)}
+              isGenerating={isGenerating}
+              loopEnabled={loopEnabled}
+              onLoopChange={setLoopEnabled}
+              saveSession={saveSession}
+              onSaveSessionChange={setSaveSession}
+              user={user}
+            />
 
             {/* Headphones Tip */}
-            <div className="text-center">
+            <div className="text-center mt-6">
               <p className="text-xs text-muted-foreground/70 italic">
                 💡 tip: use quality headphones for best spatial effect
               </p>
@@ -1489,158 +1423,24 @@ const Index = () => {
           </section>
 
           {/* Voice Journeys Section */}
-          <section className="max-w-2xl mx-auto mt-12 mb-8 space-y-6 py-8 border-y border-border/30" aria-labelledby="voice-journeys-heading">
-            <div className="text-center space-y-2">
-              <h2 id="voice-journeys-heading" className="text-2xl font-light lowercase tracking-wide flex items-center justify-center gap-2">
-                <span>🎙️</span>
-                <span>Voice Journeys</span>
-              </h2>
-              <p className="text-sm text-muted-foreground">
-                pure guided audio experiences focused on voice
-              </p>
-            </div>
-
-            {/* Voice Preference Selection */}
-            <div className="px-4 space-y-4">
-              {/* Gender Selection */}
-              <div className="space-y-2">
-                <label className="text-sm font-medium lowercase tracking-wide">voice gender</label>
-                <div className="flex gap-2">
-                  <Button
-                    variant={voiceGender === "female" ? "default" : "outline"}
-                    onClick={() => setVoiceGender("female")}
-                    className="flex-1 lowercase tracking-wide"
-                    type="button"
-                  >
-                    👩 female
-                  </Button>
-                  <Button
-                    variant={voiceGender === "male" ? "default" : "outline"}
-                    onClick={() => setVoiceGender("male")}
-                    className="flex-1 lowercase tracking-wide"
-                    type="button"
-                  >
-                    👨 male
-                  </Button>
-                </div>
-              </div>
-            </div>
-
-            {/* Journey Grid */}
-            <div className="grid grid-cols-2 md:grid-cols-3 gap-3 px-4">
-              {VOICE_JOURNEYS.map((journey) => (
-                <button
-                  key={journey.value}
-                  onClick={() => setSelectedJourney(journey.value)}
-                  className={`p-5 rounded-xl border transition-all text-left space-y-2 ${
-                    selectedJourney === journey.value
-                      ? "border-primary bg-primary/10 shadow-lg scale-105"
-                      : "border-border bg-card hover:bg-accent hover:border-primary/50"
-                  }`}
-                >
-                  <div className="text-3xl mb-2">{journey.emoji}</div>
-                  <div className="text-sm font-medium lowercase">{journey.label}</div>
-                  <div className="text-xs text-muted-foreground leading-tight">
-                    {journey.shortDesc}
-                  </div>
-                </button>
-              ))}
-            </div>
-
-            {/* Ambient Background Toggle */}
-            <div className="px-4 space-y-3">
-              <div className="flex items-center gap-3 p-4 rounded-lg bg-card/50 border border-border/50">
-                <input
-                  type="checkbox"
-                  id="ambient-toggle"
-                  checked={withAmbient}
-                  onChange={(e) => {
-                    setWithAmbient(e.target.checked);
-                    if (!e.target.checked) setAmbientForJourney(null);
-                  }}
-                  className="w-4 h-4 accent-primary"
-                />
-                <label htmlFor="ambient-toggle" className="text-sm lowercase tracking-wide cursor-pointer flex-1">
-                  add ambient background sound
-                </label>
-              </div>
-
-              {/* Ambient Selection (only if toggled) */}
-              {withAmbient && (
-                <div className="grid grid-cols-3 gap-2">
-                  {AMBIENTS.map((ambient) => (
-                    <button
-                      key={ambient.value}
-                      onClick={() => setAmbientForJourney(ambient.value)}
-                      className={`p-3 rounded-lg border transition-all text-left ${
-                        ambientForJourney === ambient.value
-                          ? "border-primary bg-primary/10"
-                          : "border-border bg-card hover:bg-accent"
-                      }`}
-                    >
-                      <div className="text-xl mb-1">{ambient.emoji}</div>
-                      <div className="text-xs lowercase">{ambient.label}</div>
-                    </button>
-                  ))}
-                </div>
-              )}
-            </div>
-
-            {/* Loop Mode Toggle and Save Session */}
-            <div className="px-4 space-y-3">
-              <div className="flex items-center justify-between p-4 rounded-lg bg-card/50 border border-border/50">
-                <div className="flex items-center gap-2">
-                  <Switch 
-                    checked={loopEnabled} 
-                    onCheckedChange={setLoopEnabled}
-                    id="loop-voice"
-                  />
-                  <label htmlFor="loop-voice" className="text-sm lowercase tracking-wide cursor-pointer">
-                    🔁 loop mode
-                  </label>
-                </div>
-                <span className="text-xs text-muted-foreground">
-                  {loopEnabled ? "will repeat continuously" : "play once"}
-                </span>
-              </div>
-              
-              {user && (
-                <div className="flex items-center justify-between p-4 rounded-lg bg-card/50 border border-border/50">
-                  <div className="flex items-center gap-2">
-                    <Switch 
-                      checked={saveSession} 
-                      onCheckedChange={setSaveSession}
-                      id="save-session-voice"
-                    />
-                    <label htmlFor="save-session-voice" className="text-sm lowercase tracking-wide cursor-pointer">
-                      💾 save to library
-                    </label>
-                  </div>
-                  <span className="text-xs text-muted-foreground">
-                    {saveSession ? "will be saved" : "temporary only"}
-                  </span>
-                </div>
-              )}
-            </div>
-
-            {/* Generate Button */}
-            <div className="px-4">
-              <Button
-                onClick={() => requireAuth(startVoiceJourney)}
-                disabled={isGenerating || !selectedJourney || (withAmbient && !ambientForJourney)}
-                className="w-full py-6 text-base lowercase tracking-wide bg-primary hover:bg-primary/90 transition-all"
-                size="lg"
-              >
-                {isGenerating ? "creating voice journey..." : "🎙️ start journey"}
-              </Button>
-            </div>
-
-            {/* Note */}
-            <div className="text-center">
-              <p className="text-xs text-muted-foreground/70 italic">
-                💡 voice journeys are 1-2 minutes of guided spoken content
-              </p>
-            </div>
+          <section className="max-w-2xl mx-auto mt-12 mb-8 py-8 border-y border-border/30" aria-labelledby="voice-journeys-heading">
+            <VoiceJourney
+              selectedJourney={selectedJourney}
+              voiceGender={voiceGender}
+              withAmbient={withAmbient}
+              ambientForJourney={ambientForJourney}
+              onJourneyChange={setSelectedJourney}
+              onVoiceGenderChange={setVoiceGender}
+              onWithAmbientChange={setWithAmbient}
+              onAmbientChange={setAmbientForJourney}
+              onGenerate={() => requireAuth(startVoiceJourney)}
+              isGenerating={isGenerating}
+              loopEnabled={loopEnabled}
+              onLoopChange={setLoopEnabled}
+              saveSession={saveSession}
+              onSaveSessionChange={setSaveSession}
+              user={user}
+            />
           </section>
 
           {/* Story Section - Bottom */}

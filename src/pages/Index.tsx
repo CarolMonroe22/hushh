@@ -16,6 +16,8 @@ import { AuthModal } from "@/components/AuthModal";
 import { type UserSession } from "@/hooks/useUserSessions";
 import { RotatingHeroTitle } from "@/components/landing";
 import { AppHeader } from "@/components/header/AppHeader";
+import { QuickPreset } from "@/components/session-creators/QuickPreset";
+import { CreatorMode } from "@/components/session-creators/CreatorMode";
 
 // Constants
 import {
@@ -1333,127 +1335,38 @@ const Index = () => {
           {/* Main Input Area - Creator Mode */}
           <section className="max-w-2xl mx-auto space-y-6 mb-12" aria-labelledby="create-vibe-heading">
             <h2 id="create-vibe-heading" className="sr-only">Create Your Custom Soundscape</h2>
-          {/* Large Textarea - Main Focus */}
-          <div className="space-y-3">
-            {/* Formula hint */}
-            <div className="mb-2 px-1">
-              <p className="text-xs text-muted-foreground/60 font-mono">
-                formula: <span className="text-foreground/80">[goal/feeling]</span> + 
-                <span className="text-muted-foreground/40"> with [sound]</span> + 
-                <span className="text-muted-foreground/40"> [voice type]</span>
-              </p>
-            </div>
-            <Textarea
-              placeholder="describe how you want to feel... (e.g., 'I need deep focus for studying with calming rain')"
-              value={vibeDescription}
-              onChange={(e) => setVibeDescription(e.target.value)}
-              className="min-h-[140px] resize-none text-base py-4 bg-card/70 border-border/90 hover:bg-card/75 focus:bg-card/80 focus:border-border transition-all"
-              maxLength={300}
+            <CreatorMode
+              vibeDescription={vibeDescription}
+              onDescriptionChange={setVibeDescription}
+              onGenerate={() => requireAuth(startCreatorSession)}
+              isGenerating={isGenerating}
+              loopEnabled={loopEnabled}
+              onLoopChange={setLoopEnabled}
+              saveSession={saveSession}
+              onSaveSessionChange={setSaveSession}
+              user={user}
             />
-            <div className="flex justify-between items-center px-1">
-              <p className="text-xs text-muted-foreground/60">
-                ✨ we'll interpret your vibe into the perfect audio
-              </p>
-              <p className="text-xs text-muted-foreground/60">
-                {vibeDescription.length}/300
-              </p>
-            </div>
-          </div>
-
-          {/* Prompt Examples */}
-          <div className="space-y-2">
-            <p className="text-xs text-muted-foreground/70 px-1">
-              💡 try examples like:
-            </p>
-            <div className="flex flex-wrap gap-1.5">
-              {[
-                "I need deep focus with rain sounds",
-                "Can you help me sleep?",
-                "Confidence boost for my presentation",
-                "How can I calm my anxiety with ocean?",
-                "Morning energy, no background music",
-                "Help me meditate with singing bowls",
-                "Study session with male voice and rain",
-                "Can you create a peaceful lullaby?",
-              ].map((example) => (
-                <button
-                  key={example}
-                  onClick={() => setVibeDescription(example)}
-                  className="px-2.5 py-1 rounded-md text-xs bg-muted/40 hover:bg-muted/70 text-muted-foreground hover:text-foreground transition-all border border-transparent hover:border-border/50"
-                >
-                  {example}
-                </button>
-              ))}
-            </div>
-          </div>
-
-          {/* Loop Mode Toggle and Save Session */}
-          <div className="space-y-3">
-            <div className="flex items-center justify-between p-4 rounded-lg bg-card/50 border border-border/50">
-              <div className="flex items-center gap-2">
-                <Switch 
-                  checked={loopEnabled} 
-                  onCheckedChange={setLoopEnabled}
-                  id="loop-creator"
-                />
-                <label htmlFor="loop-creator" className="text-sm lowercase tracking-wide cursor-pointer">
-                  🔁 loop mode
-                </label>
-              </div>
-              <span className="text-xs text-muted-foreground">
-                {loopEnabled ? "will repeat continuously" : "play once"}
-              </span>
-            </div>
-            
-            {user && (
-              <div className="flex items-center justify-between p-4 rounded-lg bg-card/50 border border-border/50">
-                <div className="flex items-center gap-2">
-                  <Switch 
-                    checked={saveSession} 
-                    onCheckedChange={setSaveSession}
-                    id="save-session-creator"
-                  />
-                  <label htmlFor="save-session-creator" className="text-sm lowercase tracking-wide cursor-pointer">
-                    💾 save to library
-                  </label>
-                </div>
-                <span className="text-xs text-muted-foreground">
-                  {saveSession ? "will be saved" : "temporary only"}
-                </span>
-              </div>
-            )}
-          </div>
-
-          {/* Generate Button - Prominent */}
-          <Button
-            onClick={() => requireAuth(startCreatorSession)}
-            disabled={isGenerating || !vibeDescription.trim() || vibeDescription.trim().length < 20}
-            className="w-full py-6 text-lg lowercase tracking-wide bg-primary hover:bg-primary/90 transition-all"
-            size="lg"
-          >
-            {isGenerating ? "creating your vibe..." : "✨ create my vibe"}
-          </Button>
           </section>
 
           {/* Vibe Starters - Quick Inspiration */}
           <section className="max-w-2xl mx-auto space-y-4 mb-12" aria-labelledby="vibe-starters-heading">
             <h2 id="vibe-starters-heading" className="sr-only">Vibe Starters</h2>
-          <p className="text-sm text-muted-foreground text-center">
-            or start from these →
-          </p>
-          <div className="flex flex-wrap gap-2 justify-center">
-            {VIBE_STARTERS.map((starter) => (
-              <button
-                key={starter.title}
-                onClick={() => {
-                  setVibeDescription(starter.description);
-                }}
-                className="px-4 py-2 rounded-full border border-border bg-card hover:bg-accent transition-all text-sm lowercase"
-              >
-                {starter.title}
-              </button>
-            ))}
-          </div>
+            <p className="text-sm text-muted-foreground text-center">
+              or start from these →
+            </p>
+            <div className="flex flex-wrap gap-2 justify-center">
+              {VIBE_STARTERS.map((starter) => (
+                <button
+                  key={starter.title}
+                  onClick={() => {
+                    setVibeDescription(starter.description);
+                  }}
+                  className="px-4 py-2 rounded-full border border-border bg-card hover:bg-accent transition-all text-sm lowercase"
+                >
+                  {starter.title}
+                </button>
+              ))}
+            </div>
           </section>
 
           {/* Quick Presets - Accordion */}
@@ -1467,98 +1380,19 @@ const Index = () => {
                 </span>
               </AccordionTrigger>
               <AccordionContent className="pb-6 space-y-6">
-                {/* Mood Selection */}
-                <div className="space-y-3">
-                  <Label className="text-xs text-muted-foreground uppercase tracking-wider">
-                    mood
-                  </Label>
-                  <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
-                    {MOODS.map((mood) => (
-                      <button
-                        key={mood.value}
-                        onClick={() => setSelectedMood(mood.value)}
-                        className={`p-4 rounded-lg border transition-all text-left ${
-                          selectedMood === mood.value
-                            ? "border-primary bg-primary/10"
-                            : "border-border bg-card hover:bg-accent"
-                        }`}
-                      >
-                        <div className="text-2xl mb-1">{mood.emoji}</div>
-                        <div className="text-sm lowercase">{mood.label}</div>
-                      </button>
-                    ))}
-                  </div>
-                </div>
-
-                {/* Ambient Selection */}
-                <div className="space-y-3">
-                  <Label className="text-xs text-muted-foreground uppercase tracking-wider">
-                    ambient
-                  </Label>
-                  <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
-                    {AMBIENTS.map((ambient) => (
-                      <button
-                        key={ambient.value}
-                        onClick={() => setSelectedAmbient(ambient.value)}
-                        className={`p-4 rounded-lg border transition-all text-left ${
-                          selectedAmbient === ambient.value
-                            ? "border-primary bg-primary/10"
-                            : "border-border bg-card hover:bg-accent"
-                        }`}
-                      >
-                        <div className="text-2xl mb-1">{ambient.emoji}</div>
-                        <div className="text-sm lowercase">{ambient.label}</div>
-                      </button>
-                    ))}
-                  </div>
-                </div>
-
-                {/* Loop Mode Toggle and Save Session */}
-                <div className="space-y-3">
-                  <div className="flex items-center justify-between p-4 rounded-lg bg-card/50 border border-border/50">
-                    <div className="flex items-center gap-2">
-                      <Switch 
-                        checked={loopEnabled} 
-                        onCheckedChange={setLoopEnabled}
-                        id="loop-preset"
-                      />
-                      <label htmlFor="loop-preset" className="text-sm lowercase tracking-wide cursor-pointer">
-                        🔁 loop mode
-                      </label>
-                    </div>
-                    <span className="text-xs text-muted-foreground">
-                      {loopEnabled ? "will repeat continuously" : "play once"}
-                    </span>
-                  </div>
-                  
-                  {user && (
-                    <div className="flex items-center justify-between p-4 rounded-lg bg-card/50 border border-border/50">
-                      <div className="flex items-center gap-2">
-                        <Switch 
-                          checked={saveSession} 
-                          onCheckedChange={setSaveSession}
-                          id="save-session-preset"
-                        />
-                        <label htmlFor="save-session-preset" className="text-sm lowercase tracking-wide cursor-pointer">
-                          💾 save to library
-                        </label>
-                      </div>
-                      <span className="text-xs text-muted-foreground">
-                        {saveSession ? "will be saved" : "temporary only"}
-                      </span>
-                    </div>
-                  )}
-                </div>
-
-                {/* Generate Preset Button */}
-                <Button
-                  onClick={() => requireAuth(startSession)}
-                  disabled={isGenerating || !selectedMood || !selectedAmbient}
-                  className="w-full py-6 text-base lowercase tracking-wide"
-                  size="lg"
-                >
-                  {isGenerating ? "creating..." : "generate preset"}
-                </Button>
+                <QuickPreset
+                  selectedMood={selectedMood}
+                  selectedAmbient={selectedAmbient}
+                  onMoodChange={setSelectedMood}
+                  onAmbientChange={setSelectedAmbient}
+                  onGenerate={() => requireAuth(startSession)}
+                  isGenerating={isGenerating}
+                  loopEnabled={loopEnabled}
+                  onLoopChange={setLoopEnabled}
+                  saveSession={saveSession}
+                  onSaveSessionChange={setSaveSession}
+                  user={user}
+                />
               </AccordionContent>
             </AccordionItem>
           </Accordion>

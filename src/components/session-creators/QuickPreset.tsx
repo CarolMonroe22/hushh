@@ -1,5 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
+import { Switch } from "@/components/ui/switch";
 import { MOODS, AMBIENTS, type Mood, type Ambient } from "@/lib/constants/session-constants";
 
 interface QuickPresetProps {
@@ -9,6 +10,11 @@ interface QuickPresetProps {
   onAmbientChange: (ambient: Ambient) => void;
   onGenerate: () => void;
   isGenerating: boolean;
+  loopEnabled: boolean;
+  onLoopChange: (enabled: boolean) => void;
+  saveSession: boolean;
+  onSaveSessionChange: (save: boolean) => void;
+  user: any | null;
 }
 
 export const QuickPreset = ({
@@ -18,65 +24,105 @@ export const QuickPreset = ({
   onAmbientChange,
   onGenerate,
   isGenerating,
+  loopEnabled,
+  onLoopChange,
+  saveSession,
+  onSaveSessionChange,
+  user,
 }: QuickPresetProps) => {
   return (
     <div className="space-y-6">
-      <div className="space-y-4">
-        <Label className="text-white/80 text-sm font-light tracking-wide">
-          Choose your mood
+      {/* Mood Selection */}
+      <div className="space-y-3">
+        <Label className="text-xs text-muted-foreground uppercase tracking-wider">
+          mood
         </Label>
-        <div className="grid grid-cols-3 gap-2">
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
           {MOODS.map((mood) => (
-            <Button
+            <button
               key={mood.value}
-              variant={selectedMood === mood.value ? "default" : "outline"}
-              className={`h-auto py-3 px-4 flex flex-col items-center gap-1 transition-all ${
-                selectedMood === mood.value
-                  ? "bg-white/20 border-white/40"
-                  : "bg-black/20 border-white/20 hover:bg-white/10"
-              }`}
               onClick={() => onMoodChange(mood.value)}
-            >
-              <span className="text-2xl">{mood.emoji}</span>
-              <span className="text-xs text-white/90 font-light">
-                {mood.label}
-              </span>
-            </Button>
-          ))}
-        </div>
-      </div>
-
-      <div className="space-y-4">
-        <Label className="text-white/80 text-sm font-light tracking-wide">
-          Choose your ambient
-        </Label>
-        <div className="grid grid-cols-3 gap-2">
-          {AMBIENTS.map((ambient) => (
-            <Button
-              key={ambient.value}
-              variant={selectedAmbient === ambient.value ? "default" : "outline"}
-              className={`h-auto py-3 px-4 flex flex-col items-center gap-1 transition-all ${
-                selectedAmbient === ambient.value
-                  ? "bg-white/20 border-white/40"
-                  : "bg-black/20 border-white/20 hover:bg-white/10"
+              className={`p-4 rounded-lg border transition-all text-left ${
+                selectedMood === mood.value
+                  ? "border-primary bg-primary/10"
+                  : "border-border bg-card hover:bg-accent"
               }`}
-              onClick={() => onAmbientChange(ambient.value)}
             >
-              <span className="text-2xl">{ambient.emoji}</span>
-              <span className="text-xs text-white/90 font-light">
-                {ambient.label}
-              </span>
-            </Button>
+              <div className="text-2xl mb-1">{mood.emoji}</div>
+              <div className="text-sm lowercase">{mood.label}</div>
+            </button>
           ))}
         </div>
       </div>
 
+      {/* Ambient Selection */}
+      <div className="space-y-3">
+        <Label className="text-xs text-muted-foreground uppercase tracking-wider">
+          ambient
+        </Label>
+        <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
+          {AMBIENTS.map((ambient) => (
+            <button
+              key={ambient.value}
+              onClick={() => onAmbientChange(ambient.value)}
+              className={`p-4 rounded-lg border transition-all text-left ${
+                selectedAmbient === ambient.value
+                  ? "border-primary bg-primary/10"
+                  : "border-border bg-card hover:bg-accent"
+              }`}
+            >
+              <div className="text-2xl mb-1">{ambient.emoji}</div>
+              <div className="text-sm lowercase">{ambient.label}</div>
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {/* Loop Mode Toggle and Save Session */}
+      <div className="space-y-3">
+        <div className="flex items-center justify-between p-4 rounded-lg bg-card/50 border border-border/50">
+          <div className="flex items-center gap-2">
+            <Switch
+              checked={loopEnabled}
+              onCheckedChange={onLoopChange}
+              id="loop-preset"
+            />
+            <label htmlFor="loop-preset" className="text-sm lowercase tracking-wide cursor-pointer">
+              🔁 loop mode
+            </label>
+          </div>
+          <span className="text-xs text-muted-foreground">
+            {loopEnabled ? "will repeat continuously" : "play once"}
+          </span>
+        </div>
+
+        {user && (
+          <div className="flex items-center justify-between p-4 rounded-lg bg-card/50 border border-border/50">
+            <div className="flex items-center gap-2">
+              <Switch
+                checked={saveSession}
+                onCheckedChange={onSaveSessionChange}
+                id="save-session-preset"
+              />
+              <label htmlFor="save-session-preset" className="text-sm lowercase tracking-wide cursor-pointer">
+                💾 save to library
+              </label>
+            </div>
+            <span className="text-xs text-muted-foreground">
+              {saveSession ? "will be saved" : "temporary only"}
+            </span>
+          </div>
+        )}
+      </div>
+
+      {/* Generate Preset Button */}
       <Button
-        className="w-full bg-white/10 hover:bg-white/20 text-white border border-white/20"
         onClick={onGenerate}
-        disabled={!selectedMood || !selectedAmbient || isGenerating}
+        disabled={isGenerating || !selectedMood || !selectedAmbient}
+        className="w-full py-6 text-base lowercase tracking-wide"
+        size="lg"
       >
-        {isGenerating ? "Generating..." : "Generate Session"}
+        {isGenerating ? "creating..." : "generate preset"}
       </Button>
     </div>
   );

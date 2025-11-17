@@ -1,0 +1,1 @@
+export { RotatingHeroTitle } from './RotatingHeroTitle';

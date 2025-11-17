@@ -20,6 +20,8 @@ import { QuickPreset } from "@/components/session-creators/QuickPreset";
 import { CreatorMode } from "@/components/session-creators/CreatorMode";
 import { BinauralExperience } from "@/components/session-creators/BinauralExperience";
 import { VoiceJourney } from "@/components/session-creators/VoiceJourney";
+import { AudioControls } from "@/components/audio-player/AudioControls";
+import { SessionComplete } from "@/components/audio-player/SessionComplete";
 
 // Constants
 import {
@@ -1057,224 +1059,50 @@ const Index = () => {
 
   if (isPlaying || needsManualPlay) {
     return (
-      <div className="min-h-screen bg-background flex items-center justify-center p-4 relative">
-        <AmbientBackground isPlaying={true} />
-        <div className="text-center space-y-8">
-          <div className="text-center space-y-2">
-            <h2 className="text-3xl md:text-4xl font-light lowercase tracking-wider text-foreground">
-              {generatedTitle || `${selectedMood} + ${selectedAmbient}`}
-            </h2>
-            {loopEnabled && (
-              <div className="flex items-center justify-center gap-4 text-sm">
-                <p className="text-primary/80 flex items-center gap-2">
-                  <span>🔁</span> loop mode active
-                </p>
-                {loopCount > 0 && (
-                  <p className="text-muted-foreground">
-                    completed: {loopCount}
-                  </p>
-                )}
-              </div>
-            )}
-          </div>
-
-          <div className="relative w-48 h-48 mx-auto">
-            <div className="absolute inset-0 rounded-full border-4 border-primary/30" />
-            <div className="absolute inset-0 rounded-full border-4 border-primary border-t-transparent animate-spin" />
-            <div className="absolute inset-0 flex items-center justify-center">
-              <div className="text-center">
-                <div className="text-5xl font-light">{timeLeft}</div>
-                <div className="text-sm text-muted-foreground lowercase tracking-wide">seconds</div>
-              </div>
-            </div>
-          </div>
-
-          {needsManualPlay && audioRef.current && (
-            <Button 
-              onClick={() => {
-                audioRef.current?.play().then(() => {
-                  setNeedsManualPlay(false);
-                  setIsPlaying(true);
-                  console.log('Manual play successful');
-                }).catch((error) => {
-                  console.error('Manual play failed:', error);
-                  toast({
-                    title: "Playback Error",
-                    description: "Unable to play audio. Please try again.",
-                    variant: "destructive",
-                  });
-                });
-              }}
-              size="lg"
-              className="lowercase tracking-wide"
-            >
-              ▶️ tap to play audio
-            </Button>
-          )}
-
-          {/* Play button when audio is stopped but still available */}
-          {!isPlaying && !isComplete && !needsManualPlay && audioRef.current && (
-            <Button
-              onClick={handlePlay}
-              variant="default"
-              size="lg"
-              className="lowercase tracking-wide"
-            >
-              <span className="mr-2">▶️</span>
-              play
-            </Button>
-          )}
-
-          {/* Control buttons when audio is playing */}
-          {isPlaying && !needsManualPlay && (
-            <div className="space-y-4">
-              {isPaused && (
-                <p className="text-sm text-yellow-500 flex items-center justify-center gap-2">
-                  <span>⏸️</span> paused
-                </p>
-              )}
-              
-              <div className="flex gap-3 justify-center items-center">
-                <Button
-                  onClick={handlePauseResume}
-                  variant="outline"
-                  size="lg"
-                  className="lowercase tracking-wide"
-                >
-                  {isPaused ? (
-                    <>
-                      <span className="mr-2">▶️</span>
-                      resume
-                    </>
-                  ) : (
-                    <>
-                      <span className="mr-2">⏸️</span>
-                      pause
-                    </>
-                  )}
-                </Button>
-
-                <Button
-                  onClick={handleStop}
-                  variant="destructive"
-                  size="lg"
-                  className="lowercase tracking-wide"
-                >
-                  <span className="mr-2">⏹️</span>
-                  stop
-                </Button>
-              </div>
-            </div>
-          )}
-
-          <p className="text-sm text-muted-foreground lowercase tracking-wide">
-            breathe deep, let go
-          </p>
-        </div>
-      </div>
+      <AudioControls
+        generatedTitle={generatedTitle}
+        selectedMood={selectedMood}
+        selectedAmbient={selectedAmbient}
+        loopEnabled={loopEnabled}
+        loopCount={loopCount}
+        timeLeft={timeLeft}
+        needsManualPlay={needsManualPlay}
+        isPlaying={isPlaying}
+        isPaused={isPaused}
+        onManualPlay={() => {
+          audioRef.current?.play().then(() => {
+            setNeedsManualPlay(false);
+            setIsPlaying(true);
+            console.log('Manual play successful');
+          }).catch((error) => {
+            console.error('Manual play failed:', error);
+            toast({
+              title: "Playback Error",
+              description: "Unable to play audio. Please try again.",
+              variant: "destructive",
+            });
+          });
+        }}
+        onPlay={handlePlay}
+        onPauseResume={handlePauseResume}
+        onStop={handleStop}
+        audioRef={audioRef}
+      />
     );
   }
 
   if (isComplete) {
     return (
-      <div className="min-h-screen bg-background flex items-center justify-center p-4">
-        <div className="text-center space-y-6 max-w-lg w-full px-4">
-          {/* Header */}
-          <div className="space-y-2">
-            <div className="text-6xl mb-4">✨</div>
-            <h2 className="text-3xl font-light lowercase tracking-wide">session complete</h2>
-          </div>
-
-          {/* Feedback Section */}
-          <div className="space-y-4 py-6 border-y border-border/30">
-            <p className="text-muted-foreground text-sm">how was your experience?</p>
-            <div className="flex gap-3 justify-center">
-              <button
-                onClick={() => setSessionFeedback('loved')}
-                className={`px-6 py-3 rounded-lg border transition-all ${
-                  sessionFeedback === 'loved'
-                    ? 'border-primary bg-primary/10 scale-105'
-                    : 'border-border hover:border-primary/50'
-                }`}
-              >
-                <span className="text-2xl">❤️</span>
-                <p className="text-xs mt-1 lowercase">loved it</p>
-              </button>
-              <button
-                onClick={() => setSessionFeedback('liked')}
-                className={`px-6 py-3 rounded-lg border transition-all ${
-                  sessionFeedback === 'liked'
-                    ? 'border-primary bg-primary/10 scale-105'
-                    : 'border-border hover:border-primary/50'
-                }`}
-              >
-                <span className="text-2xl">👍</span>
-                <p className="text-xs mt-1 lowercase">it was good</p>
-              </button>
-            </div>
-          </div>
-
-          {/* Extended Sessions Teaser + Waitlist */}
-          {sessionFeedback && (
-            <div className="space-y-4 py-6 bg-card/30 rounded-lg px-6">
-              <div className="space-y-2">
-                <p className="text-sm font-medium lowercase">
-                  ✨ want longer sessions?
-                </p>
-                <p className="text-xs text-muted-foreground">
-                  join the waitlist for extended 5, 10, and 30-minute experiences
-                </p>
-              </div>
-
-              {!emailSubmitted ? (
-                <div className="flex flex-col sm:flex-row gap-2">
-                  <Input
-                    type="email"
-                    placeholder="your email"
-                    value={waitlistEmail}
-                    onChange={(e) => setWaitlistEmail(e.target.value)}
-                    className="lowercase"
-                    onKeyDown={(e) => {
-                      if (e.key === 'Enter') handleWaitlistSubmit();
-                    }}
-                  />
-                  <Button
-                    onClick={handleWaitlistSubmit}
-                    size="sm"
-                    className="lowercase tracking-wide whitespace-nowrap"
-                  >
-                    join waitlist
-                  </Button>
-                </div>
-              ) : (
-                <div className="text-sm text-primary lowercase flex items-center justify-center gap-2">
-                  <span>✓</span> you're on the list!
-                </div>
-              )}
-            </div>
-          )}
-
-          {/* Action Buttons */}
-          <div className="flex flex-col sm:flex-row gap-3 justify-center pt-4">
-            <Button
-              onClick={handleReplay}
-              variant="outline"
-              size="lg"
-              className="lowercase tracking-wide"
-            >
-              <span className="mr-2">🔄</span>
-              replay this session
-            </Button>
-            <Button
-              onClick={handleNewSession}
-              size="lg"
-              className="lowercase tracking-wide"
-            >
-              create new session
-            </Button>
-          </div>
-        </div>
-      </div>
+      <SessionComplete
+        sessionFeedback={sessionFeedback}
+        onFeedbackChange={setSessionFeedback}
+        waitlistEmail={waitlistEmail}
+        onWaitlistEmailChange={setWaitlistEmail}
+        emailSubmitted={emailSubmitted}
+        onWaitlistSubmit={handleWaitlistSubmit}
+        onReplay={handleReplay}
+        onNewSession={handleNewSession}
+      />
     );
   }
 

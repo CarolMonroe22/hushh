@@ -1,132 +1,124 @@
-import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Heart, ThumbsUp, RotateCw, Plus } from "lucide-react";
 
 interface SessionCompleteProps {
-  sessionTitle: string;
-  loopCount: number;
+  sessionFeedback: 'loved' | 'liked' | null;
+  onFeedbackChange: (feedback: 'loved' | 'liked') => void;
+  waitlistEmail: string;
+  onWaitlistEmailChange: (email: string) => void;
+  emailSubmitted: boolean;
+  onWaitlistSubmit: () => void;
   onReplay: () => void;
   onNewSession: () => void;
-  onFeedback?: (type: 'loved' | 'liked') => void;
-  onJoinWaitlist?: (email: string) => void;
 }
 
 export const SessionComplete = ({
-  sessionTitle,
-  loopCount,
+  sessionFeedback,
+  onFeedbackChange,
+  waitlistEmail,
+  onWaitlistEmailChange,
+  emailSubmitted,
+  onWaitlistSubmit,
   onReplay,
   onNewSession,
-  onFeedback,
-  onJoinWaitlist,
 }: SessionCompleteProps) => {
-  const [sessionFeedback, setSessionFeedback] = useState<'loved' | 'liked' | null>(null);
-  const [waitlistEmail, setWaitlistEmail] = useState("");
-  const [emailSubmitted, setEmailSubmitted] = useState(false);
-
-  const handleFeedback = (type: 'loved' | 'liked') => {
-    setSessionFeedback(type);
-    onFeedback?.(type);
-  };
-
-  const handleWaitlistSubmit = () => {
-    if (waitlistEmail.trim() && waitlistEmail.includes('@')) {
-      setEmailSubmitted(true);
-      onJoinWaitlist?.(waitlistEmail);
-    }
-  };
-
   return (
-    <div className="space-y-6 text-center">
-      <div className="space-y-2">
-        <h3 className="text-2xl font-light text-white">
-          Session Complete
-        </h3>
-        {loopCount > 0 && (
-          <p className="text-sm text-white/60">
-            You listened {loopCount + 1} {loopCount === 0 ? 'time' : 'times'}
-          </p>
-        )}
-        <p className="text-white/80 font-light">
-          {sessionTitle || "Your session"}
-        </p>
-      </div>
-
-      <div className="flex justify-center gap-3">
-        <Button
-          size="sm"
-          variant={sessionFeedback === 'loved' ? "default" : "outline"}
-          className={`gap-2 ${
-            sessionFeedback === 'loved'
-              ? "bg-red-500/20 border-red-400/40 text-red-300"
-              : "bg-black/20 border-white/20 text-white/80 hover:bg-white/10"
-          }`}
-          onClick={() => handleFeedback('loved')}
-        >
-          <Heart className={`w-4 h-4 ${sessionFeedback === 'loved' ? 'fill-red-400' : ''}`} />
-          Loved it
-        </Button>
-        <Button
-          size="sm"
-          variant={sessionFeedback === 'liked' ? "default" : "outline"}
-          className={`gap-2 ${
-            sessionFeedback === 'liked'
-              ? "bg-blue-500/20 border-blue-400/40 text-blue-300"
-              : "bg-black/20 border-white/20 text-white/80 hover:bg-white/10"
-          }`}
-          onClick={() => handleFeedback('liked')}
-        >
-          <ThumbsUp className={`w-4 h-4 ${sessionFeedback === 'liked' ? 'fill-blue-400' : ''}`} />
-          Good
-        </Button>
-      </div>
-
-      {onJoinWaitlist && (
-        <div className="space-y-3 pt-4 border-t border-white/10">
-          <p className="text-sm text-white/70">
-            Want longer sessions? (5, 10, 30 minutes)
-          </p>
-          {!emailSubmitted ? (
-            <div className="flex gap-2">
-              <Input
-                type="email"
-                placeholder="your@email.com"
-                value={waitlistEmail}
-                onChange={(e) => setWaitlistEmail(e.target.value)}
-                className="bg-black/20 border-white/20 text-white placeholder:text-white/40"
-              />
-              <Button
-                size="sm"
-                onClick={handleWaitlistSubmit}
-                disabled={!waitlistEmail.trim() || !waitlistEmail.includes('@')}
-                className="bg-white/10 hover:bg-white/20 text-white border border-white/20"
-              >
-                Join Waitlist
-              </Button>
-            </div>
-          ) : (
-            <p className="text-sm text-green-400/80">
-              ✓ You're on the list! We'll notify you soon.
-            </p>
-          )}
+    <div className="min-h-screen bg-background flex items-center justify-center p-4">
+      <div className="text-center space-y-6 max-w-lg w-full px-4">
+        {/* Header */}
+        <div className="space-y-2">
+          <div className="text-6xl mb-4">✨</div>
+          <h2 className="text-3xl font-light lowercase tracking-wide">session complete</h2>
         </div>
-      )}
 
-      <div className="flex gap-3 pt-4">
-        <Button
-          className="flex-1 bg-white/10 hover:bg-white/20 text-white border border-white/20 gap-2"
-          onClick={onReplay}
-        >
-          <RotateCw className="w-4 h-4" />
-          Replay
-        </Button>
-        <Button
-          className="flex-1 bg-white/20 hover:bg-white/30 text-white border border-white/30 gap-2"
-          onClick={onNewSession}
-        >
-          <Plus className="w-4 h-4" />
-          New Session
-        </Button>
+        {/* Feedback Section */}
+        <div className="space-y-4 py-6 border-y border-border/30">
+          <p className="text-muted-foreground text-sm">how was your experience?</p>
+          <div className="flex gap-3 justify-center">
+            <button
+              onClick={() => onFeedbackChange('loved')}
+              className={`px-6 py-3 rounded-lg border transition-all ${
+                sessionFeedback === 'loved'
+                  ? 'border-primary bg-primary/10 scale-105'
+                  : 'border-border hover:border-primary/50'
+              }`}
+            >
+              <span className="text-2xl">❤️</span>
+              <p className="text-xs mt-1 lowercase">loved it</p>
+            </button>
+            <button
+              onClick={() => onFeedbackChange('liked')}
+              className={`px-6 py-3 rounded-lg border transition-all ${
+                sessionFeedback === 'liked'
+                  ? 'border-primary bg-primary/10 scale-105'
+                  : 'border-border hover:border-primary/50'
+              }`}
+            >
+              <span className="text-2xl">👍</span>
+              <p className="text-xs mt-1 lowercase">it was good</p>
+            </button>
+          </div>
+        </div>
+
+        {/* Extended Sessions Teaser + Waitlist */}
+        {sessionFeedback && (
+          <div className="space-y-4 py-6 bg-card/30 rounded-lg px-6">
+            <div className="space-y-2">
+              <p className="text-sm font-medium lowercase">
+                ✨ want longer sessions?
+              </p>
+              <p className="text-xs text-muted-foreground">
+                join the waitlist for extended 5, 10, and 30-minute experiences
+              </p>
+            </div>
+
+            {!emailSubmitted ? (
+              <div className="flex flex-col sm:flex-row gap-2">
+                <Input
+                  type="email"
+                  placeholder="your email"
+                  value={waitlistEmail}
+                  onChange={(e) => onWaitlistEmailChange(e.target.value)}
+                  className="lowercase"
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter') onWaitlistSubmit();
+                  }}
+                />
+                <Button
+                  onClick={onWaitlistSubmit}
+                  size="sm"
+                  className="lowercase tracking-wide whitespace-nowrap"
+                >
+                  join waitlist
+                </Button>
+              </div>
+            ) : (
+              <div className="text-sm text-primary lowercase flex items-center justify-center gap-2">
+                <span>✓</span> you're on the list!
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* Action Buttons */}
+        <div className="flex flex-col sm:flex-row gap-3 justify-center pt-4">
+          <Button
+            onClick={onReplay}
+            variant="outline"
+            size="lg"
+            className="lowercase tracking-wide"
+          >
+            <span className="mr-2">🔄</span>
+            replay this session
+          </Button>
+          <Button
+            onClick={onNewSession}
+            size="lg"
+            className="lowercase tracking-wide"
+          >
+            create new session
+          </Button>
+        </div>
       </div>
     </div>
   );

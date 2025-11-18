@@ -1,8 +1,20 @@
-# Welcome to your Lovable project
+# Hushh - AI-Powered Personalized Audio Experiences
+
+Hushh is an innovative web application that generates personalized 1-minute audio experiences for wellness, sleep, focus, and relaxation using AI technology.
 
 ## Project info
 
 **URL**: https://lovable.dev/projects/9998cf32-2dd2-4880-8c79-cd1f6b36cdb8
+**Live App**: https://hushh.lovable.app/
+
+## Features
+
+- 🎧 **Quick Preset Sessions**: Combine moods (relax, sleep, focus, gratitude, boost, stoic) with ambient sounds
+- 🎨 **Creator Mode**: Describe your desired vibe and get custom AI-generated audio
+- 🎯 **3D Binaural Experiences**: Immersive spatial audio (barbershop, spa, yoga, etc.)
+- 🗣️ **Voice Journeys**: AI-generated spoken content with voice selection
+- 📚 **Session Library**: Save, replay, and favorite your sessions
+- 🔐 **User Authentication**: Email/password and Google OAuth support
 
 ## How can I edit this code?
 
@@ -52,13 +64,60 @@ npm run dev
 
 ## What technologies are used for this project?
 
-This project is built with:
+### Frontend
+- **Vite** - Build tool and dev server
+- **TypeScript** - Type-safe development
+- **React 18** - UI library
+- **shadcn-ui** - Component library built on Radix UI
+- **Tailwind CSS** - Utility-first styling
+- **TanStack React Query** - Server state management
+- **React Router v6** - Client-side routing
 
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
+### Backend
+- **Supabase** - Backend-as-a-Service
+  - PostgreSQL database
+  - Authentication (Email/Password + Google OAuth)
+  - Row Level Security (RLS)
+  - Edge Functions (Deno runtime)
+  - Storage for audio files
+
+### External APIs
+- **ElevenLabs Music API** - AI music generation
+- **ElevenLabs Voice API** - AI voice synthesis
+
+## Environment Setup
+
+1. Copy the example environment file:
+```sh
+cp .env.example .env
+```
+
+2. Fill in your Supabase credentials in `.env`:
+```
+VITE_SUPABASE_PROJECT_ID="your-project-id"
+VITE_SUPABASE_PUBLISHABLE_KEY="your-anon-key"
+VITE_SUPABASE_URL="https://your-project-id.supabase.co"
+```
+
+3. Get your Supabase credentials from: https://app.supabase.com/project/_/settings/api
+
+## Project Structure
+
+```
+src/
+├── components/        # React components
+│   ├── ui/           # shadcn-ui components
+│   └── ...           # Feature components
+├── hooks/            # Custom React hooks
+├── integrations/     # Third-party integrations (Supabase)
+├── lib/              # Utility functions
+├── pages/            # Page components
+└── main.tsx          # Application entry point
+
+supabase/
+├── functions/        # Supabase Edge Functions
+└── migrations/       # Database migrations
+```
 
 ## How can I deploy this project?
 

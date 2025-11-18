@@ -10,6 +10,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/useAuth";
+import { logger } from "@/lib/logger";
 import AmbientBackground from "@/components/AmbientBackground";
 import { SessionHistory } from "@/components/SessionHistory";
 import { AuthModal } from "@/components/AuthModal";
@@ -352,7 +353,7 @@ const Index = () => {
   };
 
   const handlePlaySession = async (session: UserSession) => {
-    console.log('Playing session from history:', session);
+    logger.log('Playing session from history:', session);
 
     // Stop current audio if any
     if (audioRef.current) {
@@ -428,7 +429,7 @@ const Index = () => {
         duration: 2000,
       });
     } catch (error) {
-      console.error('Error playing session:', error);
+      logger.error('Error playing session:', error);
       toast({
         title: "❌ Playback Error",
         description: error instanceof Error ? error.message : "Could not play session",
@@ -450,12 +451,12 @@ const Index = () => {
   const initAudioContext = () => {
     if (!audioContextRef.current) {
       audioContextRef.current = new (window.AudioContext || (window as any).webkitAudioContext)();
-      console.log('AudioContext initialized for mobile');
+      logger.log('AudioContext initialized for mobile');
     }
     
     if (audioContextRef.current.state === 'suspended') {
       audioContextRef.current.resume();
-      console.log('AudioContext resumed');
+      logger.log('AudioContext resumed');
     }
   };
 
@@ -557,12 +558,12 @@ const Index = () => {
         if (playPromise !== undefined) {
           playPromise
             .then(() => {
-              console.log('Audio started playing successfully');
+              logger.log('Audio started playing successfully');
               setIsPlaying(true);
               setNeedsManualPlay(false);
             })
             .catch((error) => {
-              console.error('Play was prevented:', error);
+              logger.error('Play was prevented:', error);
               setNeedsManualPlay(true);
               toast({
                 title: "Tap to Play",
@@ -607,7 +608,7 @@ const Index = () => {
         }
       }
     } catch (error) {
-      console.error("Session generation error:", error);
+      logger.error("Session generation error:", error);
       
       if (error?.message?.includes('tokens') || error?.message?.includes('NO_TOKENS_AVAILABLE')) {
         toast({
@@ -655,7 +656,7 @@ const Index = () => {
     });
 
     try {
-      console.log("Step 1: Interpreting vibe prompt...");
+      logger.log("Step 1: Interpreting vibe prompt...");
       const { data: interpretData, error: interpretError } = await supabase.functions.invoke(
         "interpret-vibe-prompt",
         {
@@ -666,7 +667,7 @@ const Index = () => {
       );
 
       if (interpretError) {
-        console.error("Interpretation error:", interpretError);
+        logger.error("Interpretation error:", interpretError);
         throw interpretError;
       }
 
@@ -674,7 +675,7 @@ const Index = () => {
         throw new Error("No prompt received from interpreter");
       }
 
-      console.log("Step 2: Generating ASMR audio...");
+      logger.log("Step 2: Generating ASMR audio...");
       setGeneratedTitle(interpretData.title || "your vibe");
       
       toast({
@@ -697,12 +698,12 @@ const Index = () => {
       );
 
       if (asmrError) {
-        console.error("ASMR generation error:", asmrError);
+        logger.error("ASMR generation error:", asmrError);
         throw asmrError;
       }
 
       if (asmrData?.audioContent) {
-        console.log("Step 3: Playing audio...");
+        logger.log("Step 3: Playing audio...");
         const audioBlob = base64ToBlob(asmrData.audioContent);
         const audioUrl = URL.createObjectURL(audioBlob);
 
@@ -713,12 +714,12 @@ const Index = () => {
         if (playPromise !== undefined) {
           playPromise
             .then(() => {
-              console.log('Audio started playing successfully');
+              logger.log('Audio started playing successfully');
               setIsPlaying(true);
               setNeedsManualPlay(false);
             })
             .catch((error) => {
-              console.error('Play was prevented:', error);
+              logger.error('Play was prevented:', error);
               setNeedsManualPlay(true);
               toast({
                 title: "Tap to Play",
@@ -763,7 +764,7 @@ const Index = () => {
         }
       }
     } catch (error) {
-      console.error("Creator session error:", error);
+      logger.error("Creator session error:", error);
       
       if (error?.message?.includes('tokens') || error?.message?.includes('NO_TOKENS_AVAILABLE')) {
         toast({
@@ -835,12 +836,12 @@ const Index = () => {
         if (playPromise !== undefined) {
           playPromise
             .then(() => {
-              console.log('3D Audio started playing');
+              logger.log('3D Audio started playing');
               setIsPlaying(true);
               setNeedsManualPlay(false);
             })
             .catch((error) => {
-              console.error('Play prevented:', error);
+              logger.error('Play prevented:', error);
               setNeedsManualPlay(true);
               toast({
                 title: "Tap to Play",
@@ -888,7 +889,7 @@ const Index = () => {
         }
       }
     } catch (error) {
-      console.error("Binaural experience error:", error);
+      logger.error("Binaural experience error:", error);
       
       if (error?.message?.includes('tokens') || error?.message?.includes('NO_TOKENS_AVAILABLE')) {
         toast({
@@ -948,7 +949,7 @@ const Index = () => {
     });
 
     try {
-      console.log("Step 1: Generating voice journey script...");
+      logger.log("Step 1: Generating voice journey script...");
       const { data: scriptData, error: scriptError } = await supabase.functions.invoke(
         "generate-voice-journey",
         { body: { category: selectedJourney } }
@@ -957,7 +958,7 @@ const Index = () => {
       if (scriptError) throw scriptError;
       if (!scriptData?.text) throw new Error("No script generated");
 
-      console.log("Step 2: Converting to speech...");
+      logger.log("Step 2: Converting to speech...");
       const journey = VOICE_JOURNEYS.find(j => j.value === selectedJourney);
       const selectedVoiceId = journey?.voices[voiceGender];
       const voiceSettings = JOURNEY_VOICE_SETTINGS[selectedJourney];

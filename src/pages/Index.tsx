@@ -1890,36 +1890,36 @@ const Index = () => {
 
           {/* Loop Mode Toggle and Save Session */}
           <div className="space-y-3">
-            <div className="flex items-center justify-between p-4 rounded-lg bg-card/50 border border-border/50">
-              <div className="flex items-center gap-2">
+            <div className="flex items-center justify-between p-2.5 rounded-md bg-card/20 border border-border/20">
+              <div className="flex items-center gap-1.5">
                 <Switch 
                   checked={loopEnabled} 
                   onCheckedChange={setLoopEnabled}
                   id="loop-creator"
                 />
-                <label htmlFor="loop-creator" className="text-sm lowercase tracking-wide cursor-pointer">
-                  🔁 loop mode
+                <label htmlFor="loop-creator" className="text-xs lowercase tracking-wide cursor-pointer text-foreground/50 hover:text-foreground/70 transition-colors duration-500">
+                  loop mode
                 </label>
               </div>
-              <span className="text-xs text-muted-foreground">
-                {loopEnabled ? "will repeat continuously" : "play once"}
+              <span className="text-xs text-muted-foreground/50">
+                {loopEnabled ? "loop" : "once"}
               </span>
             </div>
             
             {user && (
-              <div className="flex items-center justify-between p-4 rounded-lg bg-card/50 border border-border/50">
-                <div className="flex items-center gap-2">
+              <div className="flex items-center justify-between p-2.5 rounded-md bg-card/20 border border-border/20">
+                <div className="flex items-center gap-1.5">
                   <Switch 
                     checked={saveSession} 
                     onCheckedChange={setSaveSession}
                     id="save-session-creator"
                   />
-                  <label htmlFor="save-session-creator" className="text-sm lowercase tracking-wide cursor-pointer">
-                    💾 save to library
+                  <label htmlFor="save-session-creator" className="text-xs lowercase tracking-wide cursor-pointer text-foreground/50 hover:text-foreground/70 transition-colors duration-500">
+                    save to library
                   </label>
                 </div>
-                <span className="text-xs text-muted-foreground">
-                  {saveSession ? "will be saved" : "temporary only"}
+                <span className="text-xs text-muted-foreground/50">
+                  {saveSession ? "saved" : "temp"}
                 </span>
               </div>
             )}
@@ -2016,36 +2016,36 @@ const Index = () => {
 
                 {/* Loop Mode Toggle and Save Session */}
                 <div className="space-y-3">
-                  <div className="flex items-center justify-between p-4 rounded-lg bg-card/50 border border-border/50">
-                    <div className="flex items-center gap-2">
+                  <div className="flex items-center justify-between p-2.5 rounded-md bg-card/20 border border-border/20">
+                    <div className="flex items-center gap-1.5">
                       <Switch 
                         checked={loopEnabled} 
                         onCheckedChange={setLoopEnabled}
                         id="loop-preset"
                       />
-                      <label htmlFor="loop-preset" className="text-sm lowercase tracking-wide cursor-pointer">
-                        🔁 loop mode
+                      <label htmlFor="loop-preset" className="text-xs lowercase tracking-wide cursor-pointer text-foreground/50 hover:text-foreground/70 transition-colors duration-500">
+                        loop mode
                       </label>
                     </div>
-                    <span className="text-xs text-muted-foreground">
-                      {loopEnabled ? "will repeat continuously" : "play once"}
+                    <span className="text-xs text-muted-foreground/50">
+                      {loopEnabled ? "loop" : "once"}
                     </span>
                   </div>
                   
                   {user && (
-                    <div className="flex items-center justify-between p-4 rounded-lg bg-card/50 border border-border/50">
-                      <div className="flex items-center gap-2">
+                    <div className="flex items-center justify-between p-2.5 rounded-md bg-card/20 border border-border/20">
+                      <div className="flex items-center gap-1.5">
                         <Switch 
                           checked={saveSession} 
                           onCheckedChange={setSaveSession}
                           id="save-session-preset"
                         />
-                        <label htmlFor="save-session-preset" className="text-sm lowercase tracking-wide cursor-pointer">
-                          💾 save to library
+                        <label htmlFor="save-session-preset" className="text-xs lowercase tracking-wide cursor-pointer text-foreground/50 hover:text-foreground/70 transition-colors duration-500">
+                          save to library
                         </label>
                       </div>
-                      <span className="text-xs text-muted-foreground">
-                        {saveSession ? "will be saved" : "temporary only"}
+                      <span className="text-xs text-muted-foreground/50">
+                        {saveSession ? "saved" : "temp"}
                       </span>
                     </div>
                   )}
@@ -2100,36 +2100,36 @@ const Index = () => {
 
             {/* Loop Mode Toggle and Save Session */}
             <div className="px-4 space-y-3">
-              <div className="flex items-center justify-between p-4 rounded-lg bg-card/50 border border-border/50">
-                <div className="flex items-center gap-2">
+              <div className="flex items-center justify-between p-2.5 rounded-md bg-card/20 border border-border/20">
+                <div className="flex items-center gap-1.5">
                   <Switch 
                     checked={loopEnabled} 
                     onCheckedChange={setLoopEnabled}
                     id="loop-binaural"
                   />
-                  <label htmlFor="loop-binaural" className="text-sm lowercase tracking-wide cursor-pointer">
-                    🔁 loop mode
+                  <label htmlFor="loop-binaural" className="text-xs lowercase tracking-wide cursor-pointer text-foreground/50 hover:text-foreground/70 transition-colors duration-500">
+                    loop mode
                   </label>
                 </div>
-                <span className="text-xs text-muted-foreground">
-                  {loopEnabled ? "will repeat continuously" : "play once"}
+                <span className="text-xs text-muted-foreground/50">
+                  {loopEnabled ? "loop" : "once"}
                 </span>
               </div>
               
               {user && (
-                <div className="flex items-center justify-between p-4 rounded-lg bg-card/50 border border-border/50">
-                  <div className="flex items-center gap-2">
+                <div className="flex items-center justify-between p-2.5 rounded-md bg-card/20 border border-border/20">
+                  <div className="flex items-center gap-1.5">
                     <Switch 
                       checked={saveSession} 
                       onCheckedChange={setSaveSession}
                       id="save-session-binaural"
                     />
-                    <label htmlFor="save-session-binaural" className="text-sm lowercase tracking-wide cursor-pointer">
-                      💾 save to library
+                    <label htmlFor="save-session-binaural" className="text-xs lowercase tracking-wide cursor-pointer text-foreground/50 hover:text-foreground/70 transition-colors duration-500">
+                      save to library
                     </label>
                   </div>
-                  <span className="text-xs text-muted-foreground">
-                    {saveSession ? "will be saved" : "temporary only"}
+                  <span className="text-xs text-muted-foreground/50">
+                    {saveSession ? "saved" : "temp"}
                   </span>
                 </div>
               )}
@@ -2255,36 +2255,36 @@ const Index = () => {
 
             {/* Loop Mode Toggle and Save Session */}
             <div className="px-4 space-y-3">
-              <div className="flex items-center justify-between p-4 rounded-lg bg-card/50 border border-border/50">
-                <div className="flex items-center gap-2">
+              <div className="flex items-center justify-between p-2.5 rounded-md bg-card/20 border border-border/20">
+                <div className="flex items-center gap-1.5">
                   <Switch 
                     checked={loopEnabled} 
                     onCheckedChange={setLoopEnabled}
                     id="loop-voice"
                   />
-                  <label htmlFor="loop-voice" className="text-sm lowercase tracking-wide cursor-pointer">
-                    🔁 loop mode
+                  <label htmlFor="loop-voice" className="text-xs lowercase tracking-wide cursor-pointer text-foreground/50 hover:text-foreground/70 transition-colors duration-500">
+                    loop mode
                   </label>
                 </div>
-                <span className="text-xs text-muted-foreground">
-                  {loopEnabled ? "will repeat continuously" : "play once"}
+                <span className="text-xs text-muted-foreground/50">
+                  {loopEnabled ? "loop" : "once"}
                 </span>
               </div>
               
               {user && (
-                <div className="flex items-center justify-between p-4 rounded-lg bg-card/50 border border-border/50">
-                  <div className="flex items-center gap-2">
+                <div className="flex items-center justify-between p-2.5 rounded-md bg-card/20 border border-border/20">
+                  <div className="flex items-center gap-1.5">
                     <Switch 
                       checked={saveSession} 
                       onCheckedChange={setSaveSession}
                       id="save-session-voice"
                     />
-                    <label htmlFor="save-session-voice" className="text-sm lowercase tracking-wide cursor-pointer">
-                      💾 save to library
+                    <label htmlFor="save-session-voice" className="text-xs lowercase tracking-wide cursor-pointer text-foreground/50 hover:text-foreground/70 transition-colors duration-500">
+                      save to library
                     </label>
                   </div>
-                  <span className="text-xs text-muted-foreground">
-                    {saveSession ? "will be saved" : "temporary only"}
+                  <span className="text-xs text-muted-foreground/50">
+                    {saveSession ? "saved" : "temp"}
                   </span>
                 </div>
               )}

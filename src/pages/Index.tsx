@@ -385,7 +385,22 @@ const Index = () => {
       audioRef.current = new Audio(audioUrl);
       audioRef.current.loop = loopEnabled;
 
+      // Cleanup object URL when audio ends
+      audioRef.current.addEventListener('ended', () => {
+        URL.revokeObjectURL(audioUrl);
+      });
+
       await audioRef.current.play();
+
+      // Increment play count in database
+      try {
+        await supabase.rpc('increment_session_play_count', {
+          session_id: session.id,
+        });
+      } catch (rpcError) {
+        console.error('Failed to increment play count:', rpcError);
+        // Don't fail playback if this fails
+      }
 
       setIsPlaying(true);
       setIsPaused(false);

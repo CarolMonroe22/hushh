@@ -337,11 +337,11 @@ const Index = () => {
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
-  // Auto-rotate examples every 4 seconds
+  // Auto-rotate examples every 10 seconds
   useEffect(() => {
     const interval = setInterval(() => {
       setExampleIndex((prev) => (prev + 3) % allExamples.length);
-    }, 4000);
+    }, 10000);
     return () => clearInterval(interval);
   }, []);
 
@@ -1845,10 +1845,10 @@ const Index = () => {
                 {[0, 1, 2].map((dot) => (
                   <div 
                     key={dot}
-                    className={`h-1 w-1 rounded-full transition-all duration-300 ${
+                    className={`h-1 w-1 rounded-full transition-all duration-1000 ease-out ${
                       Math.floor(exampleIndex / 3) === dot 
-                        ? 'bg-primary/60 w-3' 
-                        : 'bg-muted-foreground/30'
+                        ? 'bg-primary/40 w-2.5' 
+                        : 'bg-muted-foreground/20'
                     }`}
                   />
                 ))}
@@ -1870,17 +1870,17 @@ const Index = () => {
                     onClick={() => setVibeDescription(example)}
                     className="group px-3.5 py-2 rounded-lg text-xs font-medium
                              bg-card/60 border border-border/40
-                             hover:bg-card/90 hover:border-primary/40
-                             text-foreground/70 hover:text-foreground
-                             transition-all duration-300
-                             shadow-sm hover:shadow-md hover:shadow-primary/5
+                             hover:bg-card/80 hover:border-primary/30
+                             text-foreground/70 hover:text-foreground/90
+                             transition-all duration-1000 ease-out
+                             shadow-sm hover:shadow-md hover:shadow-primary/3
                              animate-fade-in"
                   >
                     <span className="relative">
                       {example}
-                      <span className="absolute inset-0 opacity-0 group-hover:opacity-100 
-                                   bg-gradient-to-r from-primary/10 to-transparent 
-                                   blur-xl transition-opacity duration-300" 
+                      <span className="absolute inset-0 opacity-0 group-hover:opacity-30 
+                                   bg-gradient-to-r from-primary/5 to-transparent 
+                                   blur-2xl transition-opacity duration-1000 ease-out" 
                       />
                     </span>
                   </button>

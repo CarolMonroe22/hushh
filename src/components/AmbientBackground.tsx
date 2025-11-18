@@ -7,9 +7,22 @@ const AmbientBackground = ({ isPlaying }: AmbientBackgroundProps) => {
 
   return (
     <div className="fixed inset-0 pointer-events-none z-0 overflow-hidden">
-      {/* Animated gradient background */}
-      <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-background to-accent/5 animate-pulse" 
-           style={{ animationDuration: '8s' }} />
+      {/* Video background layer */}
+      <video
+        autoPlay
+        loop
+        muted
+        playsInline
+        className="absolute inset-0 w-full h-full object-cover opacity-30"
+        style={{
+          filter: 'hue-rotate(260deg) saturate(0.8) brightness(0.6)'
+        }}
+      >
+        <source src="/videos/ambient-bg.mp4" type="video/mp4" />
+      </video>
+      
+      {/* Gradient overlay for blend */}
+      <div className="absolute inset-0 bg-gradient-to-br from-primary/10 via-transparent to-accent/10" />
       
       {/* Floating particles */}
       <div className="absolute inset-0">

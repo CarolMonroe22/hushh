@@ -351,29 +351,62 @@ const Index = () => {
     action();
   };
 
-  const handlePlaySession = (session: UserSession) => {
+  const handlePlaySession = async (session: UserSession) => {
     console.log('Playing session from history:', session);
-    
+
     // Stop current audio if any
     if (audioRef.current) {
       audioRef.current.pause();
       audioRef.current = null;
     }
-    
+
     // Clear timers
     if (timerRef.current) clearInterval(timerRef.current);
     if (animationRef.current) clearInterval(animationRef.current);
-    
-    // Set up new audio
-    audioRef.current = new Audio(session.audio_url);
-    audioRef.current.loop = loopEnabled;
-    
-    audioRef.current.play().then(() => {
+
+    try {
+      // Download audio file from storage bucket
+      const { data: audioData, error: downloadError } = await supabase.storage
+        .from('user-sessions')
+        .download(session.audio_url);
+
+      if (downloadError) {
+        throw new Error(`Failed to download audio: ${downloadError.message}`);
+      }
+
+      if (!audioData) {
+        throw new Error('No audio data received');
+      }
+
+      // Convert blob to object URL
+      const audioUrl = URL.createObjectURL(audioData);
+
+      // Set up new audio
+      audioRef.current = new Audio(audioUrl);
+      audioRef.current.loop = loopEnabled;
+
+      // Cleanup object URL when audio ends
+      audioRef.current.addEventListener('ended', () => {
+        URL.revokeObjectURL(audioUrl);
+      });
+
+      await audioRef.current.play();
+
+      // Increment play count in database
+      try {
+        await supabase.rpc('increment_session_play_count', {
+          session_id: session.id,
+        });
+      } catch (rpcError) {
+        console.error('Failed to increment play count:', rpcError);
+        // Don't fail playback if this fails
+      }
+
       setIsPlaying(true);
       setIsPaused(false);
       setTimeLeft(session.duration_seconds);
       setIsComplete(false);
-      
+
       // Set session type specific states
       switch (session.session_type) {
         case 'preset':
@@ -391,7 +424,7 @@ const Index = () => {
           setVoiceGender(session.voice_gender as "female" | "male");
           break;
       }
-      
+
       // Start timer
       timerRef.current = setInterval(() => {
         setTimeLeft((prev) => {
@@ -404,19 +437,19 @@ const Index = () => {
           return prev - 1;
         });
       }, 1000);
-      
+
       toast({
         title: "▶️ Playing from library",
         duration: 2000,
       });
-    }).catch((error) => {
+    } catch (error) {
       console.error('Error playing session:', error);
       toast({
         title: "❌ Playback Error",
-        description: "Could not play session",
+        description: error instanceof Error ? error.message : "Could not play session",
         variant: "destructive",
       });
-    });
+    }
   };
 
   const base64ToBlob = (base64: string, type: string = "audio/mpeg") => {

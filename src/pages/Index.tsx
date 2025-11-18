@@ -1356,10 +1356,41 @@ const Index = () => {
     setLoopCount(0);
   };
 
+  const getVideoKey = (): string => {
+    // Si no está reproduciendo, mostrar home
+    if (!isPlaying && !needsManualPlay) {
+      return 'home';
+    }
+    
+    // Durante reproducción, determinar según tipo de sesión
+    // Prioridad: Binaural > Voice Journey > Custom Vibe > Preset
+    
+    if (selectedExperience) {
+      return selectedExperience; // 'barbershop', 'spa', etc.
+    }
+    
+    if (selectedJourney) {
+      // Mapeo especial para voice journeys
+      if (selectedJourney === 'stoic') return 'stoic-voice';
+      return selectedJourney; // 'story', 'prayer', etc.
+    }
+    
+    if (vibeDescription) {
+      return 'creator'; // Video para custom vibes
+    }
+    
+    if (selectedMood) {
+      // Para presets, usar el mood como video
+      return selectedMood; // 'relax', 'sleep', 'focus', etc.
+    }
+    
+    return 'default'; // Fallback
+  };
+
   if (isPlaying || needsManualPlay) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center p-4 relative">
-        <AmbientBackground isPlaying={true} />
+        <AmbientBackground isPlaying={true} videoKey={getVideoKey()} />
         <div className="text-center space-y-8">
           <div className="text-center space-y-2">
             <h2 className="text-3xl md:text-4xl font-light lowercase tracking-wider text-foreground">
@@ -1593,6 +1624,8 @@ const Index = () => {
 
   return (
     <div className="min-h-screen bg-background text-foreground">
+      <AmbientBackground isPlaying={false} videoKey={getVideoKey()} />
+      
       {/* Elegant Header */}
       <header className="fixed top-0 w-full z-50 backdrop-blur-md bg-background/80 border-b border-border/50 shadow-sm animate-fade-in">
         <div className="container mx-auto px-4 h-16 flex items-center justify-between">

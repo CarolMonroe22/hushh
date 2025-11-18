@@ -269,6 +269,7 @@ const Index = () => {
   const [selectedMood, setSelectedMood] = useState<Mood | null>(null);
   const [selectedAmbient, setSelectedAmbient] = useState<Ambient | null>(null);
   const [isGenerating, setIsGenerating] = useState(false);
+  const [generatingMessage, setGeneratingMessage] = useState("building your vibe...");
   const [isPlaying, setIsPlaying] = useState(false);
   const [timeLeft, setTimeLeft] = useState(60);
   const [isComplete, setIsComplete] = useState(false);
@@ -545,13 +546,8 @@ const Index = () => {
 
     initAudioContext();
     setIsGenerating(true);
+    setGeneratingMessage("generating audio...");
     setNeedsManualPlay(false);
-
-    toast({
-      title: "🎵 starting your asmr experience",
-      description: `generating ${selectedMood} with ${selectedAmbient} sounds...`,
-      duration: 3000,
-    });
 
     try {
       const { data, error } = await supabase.functions.invoke("generate-asmr-session", {
@@ -566,11 +562,8 @@ const Index = () => {
       if (error) throw error;
 
       if (data?.saved) {
-        toast({
-          title: "💾 Saved to Library",
-          description: "Your session is now in your collection",
-          duration: 2000,
-        });
+        setGeneratingMessage("💾 saved to library!");
+        await new Promise(resolve => setTimeout(resolve, 1500));
       }
 
       if (data?.audioContent) {
@@ -658,6 +651,7 @@ const Index = () => {
       }
     } finally {
       setIsGenerating(false);
+      setGeneratingMessage("building your vibe...");
     }
   };
 
@@ -673,13 +667,8 @@ const Index = () => {
 
     initAudioContext();
     setIsGenerating(true);
+    setGeneratingMessage("creating your custom vibe...");
     setNeedsManualPlay(false);
-
-    toast({
-      title: "🎨 creating your custom vibe",
-      description: "step 1: interpreting your description...",
-      duration: 3000,
-    });
 
     try {
       logger.log("Step 1: Interpreting vibe prompt...");
@@ -703,12 +692,7 @@ const Index = () => {
 
       logger.log("Step 2: Generating ASMR audio...");
       setGeneratedTitle(interpretData.title || "your vibe");
-      
-      toast({
-        title: "🎵 generating audio",
-        description: `step 2: crafting "${interpretData.title || 'your vibe'}"...`,
-        duration: 3000,
-      });
+      setGeneratingMessage("generating audio...");
       
       const { data: asmrData, error: asmrError } = await supabase.functions.invoke(
         "generate-custom-asmr",
@@ -729,11 +713,8 @@ const Index = () => {
       }
 
       if (asmrData?.saved) {
-        toast({
-          title: "💾 Saved to Library",
-          description: "Your custom vibe is now in your collection",
-          duration: 2000,
-        });
+        setGeneratingMessage("💾 saved to library!");
+        await new Promise(resolve => setTimeout(resolve, 1500));
       }
 
       if (asmrData?.audioContent) {
@@ -822,6 +803,7 @@ const Index = () => {
       }
     } finally {
       setIsGenerating(false);
+      setGeneratingMessage("building your vibe...");
     }
   };
 
@@ -837,13 +819,8 @@ const Index = () => {
 
     initAudioContext();
     setIsGenerating(true);
+    setGeneratingMessage("creating 3d binaural experience...");
     setNeedsManualPlay(false);
-
-    toast({
-      title: "🎧 creating 3d experience",
-      description: "generating immersive binaural audio...",
-      duration: 3000,
-    });
 
     try {
       const { data, error } = await supabase.functions.invoke("generate-binaural-experience", {
@@ -857,11 +834,8 @@ const Index = () => {
       if (error) throw error;
 
       if (data?.saved) {
-        toast({
-          title: "💾 Saved to Library",
-          description: "Your 3D experience is now in your collection",
-          duration: 2000,
-        });
+        setGeneratingMessage("💾 saved to library!");
+        await new Promise(resolve => setTimeout(resolve, 1500));
       }
 
       if (data?.audioContent) {
@@ -955,6 +929,7 @@ const Index = () => {
       }
     } finally {
       setIsGenerating(false);
+      setGeneratingMessage("building your vibe...");
     }
   };
 
@@ -982,13 +957,8 @@ const Index = () => {
 
     initAudioContext();
     setIsGenerating(true);
+    setGeneratingMessage("creating voice journey...");
     setNeedsManualPlay(false);
-
-    toast({
-      title: "🗣️ preparing your voice journey",
-      description: `generating guided ${selectedJourney} meditation...`,
-      duration: 3000,
-    });
 
     try {
       logger.log("Step 1: Generating voice journey script...");
@@ -1001,6 +971,7 @@ const Index = () => {
       if (!scriptData?.text) throw new Error("No script generated");
 
       logger.log("Step 2: Converting to speech...");
+      setGeneratingMessage("generating voice audio...");
       const journey = VOICE_JOURNEYS.find(j => j.value === selectedJourney);
       const selectedVoiceId = journey?.voices[voiceGender];
       const voiceSettings = JOURNEY_VOICE_SETTINGS[selectedJourney];
@@ -1024,16 +995,14 @@ const Index = () => {
       if (!audioData?.audioContent) throw new Error("No audio generated");
 
       if (audioData?.saved) {
-        toast({
-          title: "💾 Saved to Library",
-          description: "Your voice journey is now in your collection",
-          duration: 2000,
-        });
+        setGeneratingMessage("💾 saved to library!");
+        await new Promise(resolve => setTimeout(resolve, 1500));
       }
 
       // Step 3: Load ambient sound if enabled
       if (withAmbient && ambientForJourney) {
         console.log("Step 3: Loading ambient sound...");
+        setGeneratingMessage("adding ambient sounds...");
 
         const { data: ambientData, error: ambientError } = await supabase.functions.invoke(
           "generate-ambient-sound",
@@ -1152,6 +1121,7 @@ const Index = () => {
       }
     } finally {
       setIsGenerating(false);
+      setGeneratingMessage("building your vibe...");
     }
   };
 
@@ -2323,7 +2293,7 @@ const Index = () => {
               <div className="w-full h-full border-4 border-primary/30 border-t-primary rounded-full animate-spin" />
             </div>
             <p className="text-sm text-muted-foreground lowercase tracking-wide">
-              building your vibe...
+              {generatingMessage}
             </p>
           </div>
         </div>

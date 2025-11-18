@@ -17,8 +17,7 @@ import { QuickPreset } from "@/components/session-creators/QuickPreset";
 import { CreatorMode } from "@/components/session-creators/CreatorMode";
 import { BinauralExperience } from "@/components/session-creators/BinauralExperience";
 import { VoiceJourney } from "@/components/session-creators/VoiceJourney";
-import { AudioControls } from "@/components/audio-player/AudioControls";
-import { SessionComplete } from "@/components/audio-player/SessionComplete";
+import { AudioControls, SessionComplete, GeneratingScreen } from "@/components/audio-player";
 
 // Constants
 import {
@@ -266,12 +265,6 @@ const Index = () => {
     setIsGenerating(true);
     setNeedsManualPlay(false);
 
-    toast({
-      title: "🎵 starting your asmr experience",
-      description: `generating ${selectedMood} with ${selectedAmbient} sounds...`,
-      duration: 3000,
-    });
-
     try {
       const { data, error } = await supabase.functions.invoke("generate-asmr-session", {
         body: { 
@@ -387,12 +380,6 @@ const Index = () => {
     setIsGenerating(true);
     setNeedsManualPlay(false);
 
-    toast({
-      title: "🎨 creating your custom vibe",
-      description: "step 1: interpreting your description...",
-      duration: 3000,
-    });
-
     try {
       console.log("Step 1: Interpreting vibe prompt...");
       const { data: interpretData, error: interpretError } = await supabase.functions.invoke(
@@ -415,13 +402,7 @@ const Index = () => {
 
       console.log("Step 2: Generating ASMR audio...");
       setGeneratedTitle(interpretData.title || "your vibe");
-      
-      toast({
-        title: "🎵 generating audio",
-        description: `step 2: crafting "${interpretData.title || 'your vibe'}"...`,
-        duration: 3000,
-      });
-      
+
       const { data: asmrData, error: asmrError } = await supabase.functions.invoke(
         "generate-custom-asmr",
         {
@@ -543,12 +524,6 @@ const Index = () => {
     initAudioContext();
     setIsGenerating(true);
     setNeedsManualPlay(false);
-
-    toast({
-      title: "🎧 creating 3d experience",
-      description: "generating immersive binaural audio...",
-      duration: 3000,
-    });
 
     try {
       const { data, error } = await supabase.functions.invoke("generate-binaural-experience", {
@@ -1061,6 +1036,11 @@ const Index = () => {
     setLoopCount(0);
   };
 
+  // Show generating screen when creating audio
+  if (isGenerating) {
+    return <GeneratingScreen />;
+  }
+
   if (isPlaying || needsManualPlay) {
     return (
       <AudioControls
@@ -1081,9 +1061,9 @@ const Index = () => {
           }).catch((error) => {
             console.error('Manual play failed:', error);
             toast({
-              title: "Playback Error",
-              description: "Unable to play audio. Please try again.",
-              variant: "destructive",
+              title: "🌊 gentle pause",
+              description: "let's try playing once more",
+              variant: "gentle",
             });
           });
         }}

@@ -1627,13 +1627,16 @@ const Index = () => {
       <AmbientBackground isPlaying={false} videoKey={getVideoKey()} />
       
       {/* Elegant Header */}
-      <header className="fixed top-0 w-full z-50 backdrop-blur-md bg-background/80 border-b border-border/50 shadow-sm animate-fade-in">
-        <div className="container mx-auto px-4 h-16 flex items-center justify-between">
-          <div className="flex items-center gap-4">
+      <header className="fixed top-0 w-full z-50 backdrop-blur-xl bg-background/90 border-b border-border/30 shadow-lg animate-fade-in transition-all duration-300">
+        <div className="container mx-auto px-4 h-16 flex items-center justify-between relative">
+          {/* Gradiente inferior para fundido suave */}
+          <div className="absolute bottom-0 left-0 right-0 h-8 bg-gradient-to-b from-transparent via-background/20 to-transparent pointer-events-none" />
+          
+          <div className="flex items-center gap-4 relative z-10">
             {/* Left side - could add logo here */}
           </div>
           
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-3 relative z-10">
             {user ? (
               <>
                 {/* Library Icon with Tooltip */}
@@ -1738,7 +1741,7 @@ const Index = () => {
         }}
       />
 
-      <div className="container mx-auto px-4 py-12 md:py-20 max-w-4xl">
+      <div className="container mx-auto px-4 pt-24 pb-12 md:pt-28 md:pb-20 max-w-4xl">
         {/* Logo Header */}
         <header className="flex items-center justify-center mb-16">
           <div className="text-4xl md:text-5xl font-light lowercase tracking-wide" role="banner">

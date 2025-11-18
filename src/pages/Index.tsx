@@ -351,6 +351,21 @@ const Index = () => {
     action();
   };
 
+  const getSessionTitle = (session: UserSession): string => {
+    switch (session.session_type) {
+      case 'preset':
+        return `${session.mood} + ${session.ambient}`;
+      case 'creator':
+        return session.vibe_description?.substring(0, 40) || 'Custom vibe';
+      case 'binaural':
+        return session.binaural_experience || 'Binaural experience';
+      case 'voice':
+        return `${session.voice_journey} (${session.voice_gender})`;
+      default:
+        return 'Session';
+    }
+  };
+
   const handlePlaySession = async (session: UserSession) => {
     console.log('Playing session from history:', session);
 
@@ -409,6 +424,9 @@ const Index = () => {
           setVoiceGender(session.voice_gender as "female" | "male");
           break;
       }
+
+      // Set the display title based on session type
+      setGeneratedTitle(getSessionTitle(session));
 
       // Start timer
       timerRef.current = setInterval(() => {

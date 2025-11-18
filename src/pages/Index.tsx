@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, lazy, Suspense } from "react";
 import { Navigate, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -7,9 +7,11 @@ import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/useAuth";
 import AmbientBackground from "@/components/AmbientBackground";
-import { SessionHistory } from "@/components/SessionHistory";
-import { AuthModal } from "@/components/AuthModal";
 import { type UserSession } from "@/hooks/useUserSessions";
+
+// Lazy load components for code splitting
+const SessionHistory = lazy(() => import("@/components/SessionHistory").then(module => ({ default: module.SessionHistory })));
+const AuthModal = lazy(() => import("@/components/AuthModal").then(module => ({ default: module.AuthModal })));
 import { LogOut, Archive, User, ChevronDown } from "lucide-react";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
@@ -1339,25 +1341,29 @@ const Index = () => {
 
       {/* Session History Modal */}
       {user && (
-        <SessionHistory
-          open={showHistory}
-          onOpenChange={setShowHistory}
-          onPlaySession={handlePlaySession}
-        />
+        <Suspense fallback={<div />}>
+          <SessionHistory
+            open={showHistory}
+            onOpenChange={setShowHistory}
+            onPlaySession={handlePlaySession}
+          />
+        </Suspense>
       )}
 
       {/* Auth Modal */}
-      <AuthModal
-        open={showAuthModal}
-        onOpenChange={setShowAuthModal}
-        onSuccess={() => {
-          setShowAuthModal(false);
-          toast({
-            title: "Welcome! 🎉",
-            description: "You can now generate your personalized audio",
-          });
-        }}
-      />
+      <Suspense fallback={<div />}>
+        <AuthModal
+          open={showAuthModal}
+          onOpenChange={setShowAuthModal}
+          onSuccess={() => {
+            setShowAuthModal(false);
+            toast({
+              title: "Welcome! 🎉",
+              description: "You can now generate your personalized audio",
+            });
+          }}
+        />
+      </Suspense>
 
       <div className="container mx-auto px-4 py-12 md:py-20 max-w-4xl">
         {/* Logo Header */}

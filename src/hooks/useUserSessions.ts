@@ -65,24 +65,50 @@ export const useUserSessions = () => {
     },
   });
 
-  // Toggle favorite status
+  // Toggle favorite status with optimistic updates
   const toggleFavoriteMutation = useMutation({
     mutationFn: async ({ sessionId, isFavorite }: { sessionId: string; isFavorite: boolean }) => {
       const { error } = await supabase
         .from('user_sessions')
         .update({ is_favorite: !isFavorite })
         .eq('id', sessionId);
-      
+
       if (error) throw error;
     },
+    // Optimistic update
+    onMutate: async ({ sessionId, isFavorite }) => {
+      // Cancel any outgoing refetches to avoid overwriting optimistic update
+      await queryClient.cancelQueries({ queryKey: ['user-sessions', user?.id] });
+
+      // Snapshot the previous value
+      const previousSessions = queryClient.getQueryData<UserSession[]>(['user-sessions', user?.id]);
+
+      // Optimistically update to the new value
+      if (previousSessions) {
+        queryClient.setQueryData<UserSession[]>(
+          ['user-sessions', user?.id],
+          previousSessions.map(session =>
+            session.id === sessionId
+              ? { ...session, is_favorite: !isFavorite }
+              : session
+          )
+        );
+      }
+
+      // Return context with the snapshot value
+      return { previousSessions };
+    },
     onSuccess: (_, { isFavorite }) => {
-      queryClient.invalidateQueries({ queryKey: ['user-sessions'] });
       toast({
         title: isFavorite ? "⭐ Removed from favorites" : "⭐ Added to favorites",
         duration: 2000,
       });
     },
-    onError: (error) => {
+    onError: (error, _, context) => {
+      // Rollback to the previous value on error
+      if (context?.previousSessions) {
+        queryClient.setQueryData(['user-sessions', user?.id], context.previousSessions);
+      }
       console.error('Error toggling favorite:', error);
       toast({
         title: "❌ Error",
@@ -90,32 +116,62 @@ export const useUserSessions = () => {
         variant: "destructive",
       });
     },
+    // Always refetch after error or success to sync with server
+    onSettled: () => {
+      queryClient.invalidateQueries({ queryKey: ['user-sessions', user?.id] });
+    },
   });
 
-  // Delete session
+  // Delete session with optimistic updates
   const deleteSessionMutation = useMutation({
     mutationFn: async (sessionId: string) => {
       const { error } = await supabase
         .from('user_sessions')
         .delete()
         .eq('id', sessionId);
-      
+
       if (error) throw error;
     },
+    // Optimistic update
+    onMutate: async (sessionId) => {
+      // Cancel any outgoing refetches
+      await queryClient.cancelQueries({ queryKey: ['user-sessions', user?.id] });
+
+      // Snapshot the previous value
+      const previousSessions = queryClient.getQueryData<UserSession[]>(['user-sessions', user?.id]);
+
+      // Optimistically remove the session
+      if (previousSessions) {
+        queryClient.setQueryData<UserSession[]>(
+          ['user-sessions', user?.id],
+          previousSessions.filter(session => session.id !== sessionId)
+        );
+      }
+
+      // Return context with the snapshot value
+      return { previousSessions };
+    },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['user-sessions'] });
       toast({
         title: "🗑️ Session deleted",
         duration: 2000,
       });
     },
-    onError: (error) => {
+    onError: (error, _, context) => {
+      // Rollback to the previous value on error
+      if (context?.previousSessions) {
+        queryClient.setQueryData(['user-sessions', user?.id], context.previousSessions);
+      }
       console.error('Error deleting session:', error);
       toast({
         title: "❌ Error",
         description: "Could not delete session",
         variant: "destructive",
       });
+    },
+    // Always refetch after error or success to sync with server
+    onSettled: () => {
+      queryClient.invalidateQueries({ queryKey: ['user-sessions', user?.id] });
     },
   });
 

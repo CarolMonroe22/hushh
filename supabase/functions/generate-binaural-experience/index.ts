@@ -1,4 +1,5 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.39.3';
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -26,7 +27,7 @@ serve(async (req) => {
   }
 
   try {
-    const { experience } = await req.json();
+    const { experience, saveSession, userId } = await req.json();
 
     if (!experience || !BINAURAL_PROMPTS[experience]) {
       throw new Error('Invalid binaural experience selected');
@@ -40,6 +41,7 @@ serve(async (req) => {
 
     const prompt = BINAURAL_PROMPTS[experience];
     console.log(`Generating binaural experience: ${experience}, promptLen=${prompt.length}`);
+    console.log(`[generate-binaural-experience] Save session: ${saveSession}, User ID: ${userId}`);
 
     const response = await fetch('https://api.elevenlabs.io/v1/music/compose', {
       method: 'POST',
@@ -90,15 +92,64 @@ serve(async (req) => {
     const uint8Array = new Uint8Array(audioArrayBuffer);
     let binaryString = '';
     const chunkSize = 8192;
-    
+
     for (let i = 0; i < uint8Array.length; i += chunkSize) {
       const chunk = uint8Array.slice(i, i + chunkSize);
       binaryString += String.fromCharCode(...chunk);
     }
-    
+
     const audioBase64 = btoa(binaryString);
 
     console.log(`Binaural experience generated: ${audioBase64.length} bytes`);
+
+    // Save to user's personal library if requested
+    if (saveSession && userId) {
+      console.log(`[generate-binaural-experience] Saving to user library for user: ${userId}`);
+
+      try {
+        const SUPABASE_URL = Deno.env.get('SUPABASE_URL')!;
+        const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
+        const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
+
+        // Upload to user-sessions bucket
+        const userFileName = `${userId}/${Date.now()}_binaural_${experience}.mp3`;
+        const { data: uploadData, error: userUploadError } = await supabase.storage
+          .from('user-sessions')
+          .upload(userFileName, audioArrayBuffer, {
+            contentType: 'audio/mpeg',
+            upsert: false,
+          });
+
+        if (userUploadError) {
+          console.error('User session storage upload error:', userUploadError);
+        } else {
+          // Get public URL
+          const { data: urlData } = supabase.storage
+            .from('user-sessions')
+            .getPublicUrl(userFileName);
+
+          // Save to user_sessions table
+          const { error: dbError } = await supabase
+            .from('user_sessions')
+            .insert({
+              user_id: userId,
+              session_type: 'binaural',
+              binaural_experience: experience,
+              audio_url: urlData.publicUrl,
+              duration_seconds: 60,
+            });
+
+          if (dbError) {
+            console.error('Error saving to user_sessions table:', dbError);
+          } else {
+            console.log('Successfully saved binaural experience to user library');
+          }
+        }
+      } catch (saveError) {
+        console.error('Error saving user session:', saveError);
+        // Don't fail the entire request if user save fails
+      }
+    }
 
     return new Response(
       JSON.stringify({ audioContent: audioBase64 }),

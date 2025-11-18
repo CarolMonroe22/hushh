@@ -90,8 +90,8 @@ serve(async (req) => {
   console.log(`[generate-custom-asmr] Client: ${clientId}, Rate limit: ${rateLimit.remaining}/5`);
 
   try {
-    const { prompt, title } = await req.json();
-    
+    const { prompt, title, saveSession, userId, vibeDescription } = await req.json();
+
     if (!prompt || typeof prompt !== 'string') {
       throw new Error('Prompt is required and must be a string');
     }
@@ -105,13 +105,14 @@ serve(async (req) => {
     }
 
     const sanitizedPrompt = sanitizePrompt(trimmedPrompt);
-    
+
     let sanitizedTitle = title || 'Custom Vibe';
     if (typeof sanitizedTitle === 'string' && sanitizedTitle.length > 100) {
       sanitizedTitle = sanitizedTitle.substring(0, 100);
     }
 
     console.log(`[generate-custom-asmr] Input validation passed`);
+    console.log(`[generate-custom-asmr] Save session: ${saveSession}, User ID: ${userId}`);
 
     const elevenLabsKey = Deno.env.get('ELEVENLABS_API_KEY');
     if (!elevenLabsKey) {
@@ -170,22 +171,67 @@ serve(async (req) => {
     const uint8Array = new Uint8Array(audioArrayBuffer);
     let binaryString = '';
     const chunkSize = 8192; // Process in 8KB chunks to avoid stack overflow
-    
+
     for (let i = 0; i < uint8Array.length; i += chunkSize) {
       const chunk = uint8Array.slice(i, i + chunkSize);
       binaryString += String.fromCharCode(...chunk);
     }
-    
+
     const audioBase64 = btoa(binaryString);
 
     console.log(`Custom ASMR generated: ${audioBase64.length} bytes`);
 
+    // Save to user's personal library if requested
+    if (saveSession && userId) {
+      console.log(`[generate-custom-asmr] Saving to user library for user: ${userId}`);
+
+      try {
+        // Upload to user-sessions bucket
+        const userFileName = `${userId}/${Date.now()}_custom_${sanitizedTitle.replace(/[^a-z0-9]/gi, '_').toLowerCase()}.mp3`;
+        const { data: uploadData, error: userUploadError } = await supabase.storage
+          .from('user-sessions')
+          .upload(userFileName, audioArrayBuffer, {
+            contentType: 'audio/mpeg',
+            upsert: false,
+          });
+
+        if (userUploadError) {
+          console.error('User session storage upload error:', userUploadError);
+        } else {
+          // Get public URL
+          const { data: urlData } = supabase.storage
+            .from('user-sessions')
+            .getPublicUrl(userFileName);
+
+          // Save to user_sessions table
+          const { error: dbError } = await supabase
+            .from('user_sessions')
+            .insert({
+              user_id: userId,
+              session_type: 'creator',
+              vibe_description: vibeDescription || sanitizedTitle,
+              audio_url: urlData.publicUrl,
+              duration_seconds: 60,
+            });
+
+          if (dbError) {
+            console.error('Error saving to user_sessions table:', dbError);
+          } else {
+            console.log('Successfully saved custom ASMR to user library');
+          }
+        }
+      } catch (saveError) {
+        console.error('Error saving user session:', saveError);
+        // Don't fail the entire request if user save fails
+      }
+    }
+
     return new Response(
-      JSON.stringify({ 
+      JSON.stringify({
         audioContent: audioBase64,
         title: sanitizedTitle
       }),
-      { 
+      {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' }
       }
     );

@@ -156,20 +156,21 @@ serve(async (req) => {
   console.log(`[generate-asmr-session] Client: ${clientId}, Rate limit: ${10 - rateLimit.remaining}/10`);
 
   try {
-    const { mood, ambient } = await req.json();
-    
+    const { mood, ambient, saveSession, userId } = await req.json();
+
     const validMoods = ['relax', 'sleep', 'focus', 'gratitude', 'boost', 'stoic'];
     const validAmbients = ['rain', 'ocean', 'forest', 'fireplace', 'whitenoise', 'city'];
-    
+
     if (!mood || !validMoods.includes(mood)) {
       throw new Error('Invalid mood. Must be one of: relax, sleep, focus, gratitude, boost');
     }
-    
+
     if (!ambient || !validAmbients.includes(ambient)) {
       throw new Error('Invalid ambient. Must be one of: rain, ocean, forest, fireplace, whitenoise, city');
     }
 
     console.log(`[generate-asmr-session] Input validation passed`);
+    console.log(`[generate-asmr-session] Save session: ${saveSession}, User ID: ${userId}`);
 
     const weekKey = getWeekKey();
 
@@ -261,30 +262,77 @@ serve(async (req) => {
 
     const audioBuffer = await elevenLabsResponse.arrayBuffer();
     const base64Audio = base64Encode(audioBuffer);
-    // Save to storage
-    const fileName = `${mood}_${ambient}_${weekKey}.mp3`;
+
+    // Save to cache storage
+    const cacheFileName = `${mood}_${ambient}_${weekKey}.mp3`;
     const { error: uploadError } = await supabase.storage
       .from('asmr-cache')
-      .upload(fileName, audioBuffer, {
+      .upload(cacheFileName, audioBuffer, {
         contentType: 'audio/mpeg',
         upsert: false,
       });
 
     if (uploadError) {
-      console.error('Storage upload error:', uploadError);
+      console.error('Cache storage upload error:', uploadError);
     } else {
-      // Save to database
+      // Save to cache database
       await supabase
         .from('asmr_sessions')
         .insert({
           mood,
           ambient,
-          audio_url: fileName,
+          audio_url: cacheFileName,
           week_key: weekKey,
           times_played: 1,
         });
-      
+
       console.log('Successfully cached new ASMR session');
+    }
+
+    // Save to user's personal library if requested
+    if (saveSession && userId) {
+      console.log(`[generate-asmr-session] Saving to user library for user: ${userId}`);
+
+      try {
+        // Upload to user-sessions bucket
+        const userFileName = `${userId}/${Date.now()}_${mood}_${ambient}.mp3`;
+        const { data: uploadData, error: userUploadError } = await supabase.storage
+          .from('user-sessions')
+          .upload(userFileName, audioBuffer, {
+            contentType: 'audio/mpeg',
+            upsert: false,
+          });
+
+        if (userUploadError) {
+          console.error('User session storage upload error:', userUploadError);
+        } else {
+          // Get public URL
+          const { data: urlData } = supabase.storage
+            .from('user-sessions')
+            .getPublicUrl(userFileName);
+
+          // Save to user_sessions table
+          const { error: dbError } = await supabase
+            .from('user_sessions')
+            .insert({
+              user_id: userId,
+              session_type: 'preset',
+              mood: mood,
+              ambient: ambient,
+              audio_url: urlData.publicUrl,
+              duration_seconds: 60,
+            });
+
+          if (dbError) {
+            console.error('Error saving to user_sessions table:', dbError);
+          } else {
+            console.log('Successfully saved to user library');
+          }
+        }
+      } catch (saveError) {
+        console.error('Error saving user session:', saveError);
+        // Don't fail the entire request if user save fails
+      }
     }
 
     return new Response(

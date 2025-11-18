@@ -50,7 +50,7 @@ const AmbientBackground = ({ isPlaying, videoKey = 'home' }: AmbientBackgroundPr
   const videoSrc = videoMap[videoKey] || videoMap['home'];
   
   // Opacidad más baja para home, normal para sesiones
-  const opacity = videoKey === 'home' ? 'opacity-[0.15]' : 'opacity-30';
+  const opacity = videoKey === 'home' ? 'opacity-25' : 'opacity-30';
 
   return (
     <div className="fixed inset-0 pointer-events-none z-0 overflow-hidden">
@@ -63,7 +63,7 @@ const AmbientBackground = ({ isPlaying, videoKey = 'home' }: AmbientBackgroundPr
         playsInline
         className={`absolute inset-0 w-full h-full object-cover ${opacity} transition-opacity duration-1000`}
         style={{
-          filter: 'hue-rotate(260deg) saturate(0.8) brightness(0.6)'
+          filter: 'hue-rotate(260deg) saturate(0.8) brightness(0.7)'
         }}
       >
         <source src={videoSrc} type="video/mp4" />

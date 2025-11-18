@@ -1,3 +1,4 @@
+import "https://deno.land/x/xhr@0.1.0/mod.ts";
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.7.1';
 
@@ -181,9 +182,16 @@ serve(async (req) => {
     console.log(`Custom ASMR generated: ${audioBase64.length} bytes`);
 
     // Save to user's personal library if requested
+    let saved = false;
+    let savedKey = '';
+    
     if (saveSession && userId) {
+      console.log('[generate-custom-asmr] Saving to library', { saveSession, hasUserId: !!userId });
       try {
         const userFileName = `${userId}/${Date.now()}_custom_${sanitizedTitle.replace(/[^a-zA-Z0-9]/g, '_')}.mp3`;
+        savedKey = userFileName;
+
+        console.log('[generate-custom-asmr] Uploading to user-sessions', { key: userFileName });
 
         // Upload to user-sessions bucket
         const { error: userUploadError } = await supabase.storage
@@ -194,8 +202,14 @@ serve(async (req) => {
           });
 
         if (userUploadError) {
-          console.error('User session upload error:', userUploadError);
+          console.error('[generate-custom-asmr] Upload error:', userUploadError);
         } else {
+          console.log('[generate-custom-asmr] Insert user_sessions', { 
+            user_id: userId, 
+            audio_url: userFileName, 
+            session_type: 'creator' 
+          });
+
           // Insert into user_sessions table
           const { error: dbError } = await supabase
             .from('user_sessions')
@@ -208,13 +222,14 @@ serve(async (req) => {
             });
 
           if (dbError) {
-            console.error('User session DB error:', dbError);
+            console.error('[generate-custom-asmr] DB insert error:', dbError);
           } else {
-            console.log('Successfully saved custom vibe to user library');
+            console.log('[generate-custom-asmr] Saved OK');
+            saved = true;
           }
         }
       } catch (saveError) {
-        console.error('Error saving user session:', saveError);
+        console.error('[generate-custom-asmr] Error saving user session:', saveError);
         // Don't fail the request if saving to library fails
       }
     }
@@ -222,7 +237,9 @@ serve(async (req) => {
     return new Response(
       JSON.stringify({
         audioContent: audioBase64,
-        title: sanitizedTitle
+        title: sanitizedTitle,
+        saved,
+        key: savedKey
       }),
       {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' }

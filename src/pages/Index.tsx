@@ -10,7 +10,6 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/useAuth";
-import { logger } from "@/lib/logger";
 import AmbientBackground from "@/components/AmbientBackground";
 import { SessionHistory } from "@/components/SessionHistory";
 import { AuthModal } from "@/components/AuthModal";
@@ -269,7 +268,6 @@ const Index = () => {
   const [selectedMood, setSelectedMood] = useState<Mood | null>(null);
   const [selectedAmbient, setSelectedAmbient] = useState<Ambient | null>(null);
   const [isGenerating, setIsGenerating] = useState(false);
-  const [generatingMessage, setGeneratingMessage] = useState("building your vibe...");
   const [isPlaying, setIsPlaying] = useState(false);
   const [timeLeft, setTimeLeft] = useState(60);
   const [isComplete, setIsComplete] = useState(false);
@@ -369,7 +367,7 @@ const Index = () => {
   };
 
   const handlePlaySession = async (session: UserSession) => {
-    logger.log('Playing session from history:', session);
+    console.log('Playing session from history:', session);
 
     // Stop current audio if any
     if (audioRef.current) {
@@ -448,7 +446,7 @@ const Index = () => {
         duration: 2000,
       });
     } catch (error) {
-      logger.error('Error playing session:', error);
+      console.error('Error playing session:', error);
       toast({
         title: "❌ Playback Error",
         description: error instanceof Error ? error.message : "Could not play session",
@@ -470,12 +468,12 @@ const Index = () => {
   const initAudioContext = () => {
     if (!audioContextRef.current) {
       audioContextRef.current = new (window.AudioContext || (window as any).webkitAudioContext)();
-      logger.log('AudioContext initialized for mobile');
+      console.log('AudioContext initialized for mobile');
     }
     
     if (audioContextRef.current.state === 'suspended') {
       audioContextRef.current.resume();
-      logger.log('AudioContext resumed');
+      console.log('AudioContext resumed');
     }
   };
 
@@ -546,8 +544,13 @@ const Index = () => {
 
     initAudioContext();
     setIsGenerating(true);
-    setGeneratingMessage("generating audio...");
     setNeedsManualPlay(false);
+
+    toast({
+      title: "🎵 starting your asmr experience",
+      description: `generating ${selectedMood} with ${selectedAmbient} sounds...`,
+      duration: 3000,
+    });
 
     try {
       const { data, error } = await supabase.functions.invoke("generate-asmr-session", {
@@ -562,8 +565,11 @@ const Index = () => {
       if (error) throw error;
 
       if (data?.saved) {
-        setGeneratingMessage("💾 saved to library!");
-        await new Promise(resolve => setTimeout(resolve, 1500));
+        toast({
+          title: "💾 Saved to Library",
+          description: "Your session is now in your collection",
+          duration: 2000,
+        });
       }
 
       if (data?.audioContent) {
@@ -577,12 +583,12 @@ const Index = () => {
         if (playPromise !== undefined) {
           playPromise
             .then(() => {
-              logger.log('Audio started playing successfully');
+              console.log('Audio started playing successfully');
               setIsPlaying(true);
               setNeedsManualPlay(false);
             })
             .catch((error) => {
-              logger.error('Play was prevented:', error);
+              console.error('Play was prevented:', error);
               setNeedsManualPlay(true);
               toast({
                 title: "Tap to Play",
@@ -627,7 +633,7 @@ const Index = () => {
         }
       }
     } catch (error) {
-      logger.error("Session generation error:", error);
+      console.error("Session generation error:", error);
       
       if (error?.message?.includes('tokens') || error?.message?.includes('NO_TOKENS_AVAILABLE')) {
         toast({
@@ -651,7 +657,6 @@ const Index = () => {
       }
     } finally {
       setIsGenerating(false);
-      setGeneratingMessage("building your vibe...");
     }
   };
 
@@ -667,11 +672,16 @@ const Index = () => {
 
     initAudioContext();
     setIsGenerating(true);
-    setGeneratingMessage("creating your custom vibe...");
     setNeedsManualPlay(false);
 
+    toast({
+      title: "🎨 creating your custom vibe",
+      description: "step 1: interpreting your description...",
+      duration: 3000,
+    });
+
     try {
-      logger.log("Step 1: Interpreting vibe prompt...");
+      console.log("Step 1: Interpreting vibe prompt...");
       const { data: interpretData, error: interpretError } = await supabase.functions.invoke(
         "interpret-vibe-prompt",
         {
@@ -682,7 +692,7 @@ const Index = () => {
       );
 
       if (interpretError) {
-        logger.error("Interpretation error:", interpretError);
+        console.error("Interpretation error:", interpretError);
         throw interpretError;
       }
 
@@ -690,9 +700,14 @@ const Index = () => {
         throw new Error("No prompt received from interpreter");
       }
 
-      logger.log("Step 2: Generating ASMR audio...");
+      console.log("Step 2: Generating ASMR audio...");
       setGeneratedTitle(interpretData.title || "your vibe");
-      setGeneratingMessage("generating audio...");
+      
+      toast({
+        title: "🎵 generating audio",
+        description: `step 2: crafting "${interpretData.title || 'your vibe'}"...`,
+        duration: 3000,
+      });
       
       const { data: asmrData, error: asmrError } = await supabase.functions.invoke(
         "generate-custom-asmr",
@@ -708,17 +723,20 @@ const Index = () => {
       );
 
       if (asmrError) {
-        logger.error("ASMR generation error:", asmrError);
+        console.error("ASMR generation error:", asmrError);
         throw asmrError;
       }
 
       if (asmrData?.saved) {
-        setGeneratingMessage("💾 saved to library!");
-        await new Promise(resolve => setTimeout(resolve, 1500));
+        toast({
+          title: "💾 Saved to Library",
+          description: "Your custom vibe is now in your collection",
+          duration: 2000,
+        });
       }
 
       if (asmrData?.audioContent) {
-        logger.log("Step 3: Playing audio...");
+        console.log("Step 3: Playing audio...");
         const audioBlob = base64ToBlob(asmrData.audioContent);
         const audioUrl = URL.createObjectURL(audioBlob);
 
@@ -729,12 +747,12 @@ const Index = () => {
         if (playPromise !== undefined) {
           playPromise
             .then(() => {
-              logger.log('Audio started playing successfully');
+              console.log('Audio started playing successfully');
               setIsPlaying(true);
               setNeedsManualPlay(false);
             })
             .catch((error) => {
-              logger.error('Play was prevented:', error);
+              console.error('Play was prevented:', error);
               setNeedsManualPlay(true);
               toast({
                 title: "Tap to Play",
@@ -779,7 +797,7 @@ const Index = () => {
         }
       }
     } catch (error) {
-      logger.error("Creator session error:", error);
+      console.error("Creator session error:", error);
       
       if (error?.message?.includes('tokens') || error?.message?.includes('NO_TOKENS_AVAILABLE')) {
         toast({
@@ -803,7 +821,6 @@ const Index = () => {
       }
     } finally {
       setIsGenerating(false);
-      setGeneratingMessage("building your vibe...");
     }
   };
 
@@ -819,8 +836,13 @@ const Index = () => {
 
     initAudioContext();
     setIsGenerating(true);
-    setGeneratingMessage("creating 3d binaural experience...");
     setNeedsManualPlay(false);
+
+    toast({
+      title: "🎧 creating 3d experience",
+      description: "generating immersive binaural audio...",
+      duration: 3000,
+    });
 
     try {
       const { data, error } = await supabase.functions.invoke("generate-binaural-experience", {
@@ -834,8 +856,11 @@ const Index = () => {
       if (error) throw error;
 
       if (data?.saved) {
-        setGeneratingMessage("💾 saved to library!");
-        await new Promise(resolve => setTimeout(resolve, 1500));
+        toast({
+          title: "💾 Saved to Library",
+          description: "Your 3D experience is now in your collection",
+          duration: 2000,
+        });
       }
 
       if (data?.audioContent) {
@@ -852,12 +877,12 @@ const Index = () => {
         if (playPromise !== undefined) {
           playPromise
             .then(() => {
-              logger.log('3D Audio started playing');
+              console.log('3D Audio started playing');
               setIsPlaying(true);
               setNeedsManualPlay(false);
             })
             .catch((error) => {
-              logger.error('Play prevented:', error);
+              console.error('Play prevented:', error);
               setNeedsManualPlay(true);
               toast({
                 title: "Tap to Play",
@@ -905,7 +930,7 @@ const Index = () => {
         }
       }
     } catch (error) {
-      logger.error("Binaural experience error:", error);
+      console.error("Binaural experience error:", error);
       
       if (error?.message?.includes('tokens') || error?.message?.includes('NO_TOKENS_AVAILABLE')) {
         toast({
@@ -929,7 +954,6 @@ const Index = () => {
       }
     } finally {
       setIsGenerating(false);
-      setGeneratingMessage("building your vibe...");
     }
   };
 
@@ -957,11 +981,16 @@ const Index = () => {
 
     initAudioContext();
     setIsGenerating(true);
-    setGeneratingMessage("creating voice journey...");
     setNeedsManualPlay(false);
 
+    toast({
+      title: "🗣️ preparing your voice journey",
+      description: `generating guided ${selectedJourney} meditation...`,
+      duration: 3000,
+    });
+
     try {
-      logger.log("Step 1: Generating voice journey script...");
+      console.log("Step 1: Generating voice journey script...");
       const { data: scriptData, error: scriptError } = await supabase.functions.invoke(
         "generate-voice-journey",
         { body: { category: selectedJourney } }
@@ -970,8 +999,7 @@ const Index = () => {
       if (scriptError) throw scriptError;
       if (!scriptData?.text) throw new Error("No script generated");
 
-      logger.log("Step 2: Converting to speech...");
-      setGeneratingMessage("generating voice audio...");
+      console.log("Step 2: Converting to speech...");
       const journey = VOICE_JOURNEYS.find(j => j.value === selectedJourney);
       const selectedVoiceId = journey?.voices[voiceGender];
       const voiceSettings = JOURNEY_VOICE_SETTINGS[selectedJourney];
@@ -995,14 +1023,16 @@ const Index = () => {
       if (!audioData?.audioContent) throw new Error("No audio generated");
 
       if (audioData?.saved) {
-        setGeneratingMessage("💾 saved to library!");
-        await new Promise(resolve => setTimeout(resolve, 1500));
+        toast({
+          title: "💾 Saved to Library",
+          description: "Your voice journey is now in your collection",
+          duration: 2000,
+        });
       }
 
       // Step 3: Load ambient sound if enabled
       if (withAmbient && ambientForJourney) {
         console.log("Step 3: Loading ambient sound...");
-        setGeneratingMessage("adding ambient sounds...");
 
         const { data: ambientData, error: ambientError } = await supabase.functions.invoke(
           "generate-ambient-sound",
@@ -1121,7 +1151,6 @@ const Index = () => {
       }
     } finally {
       setIsGenerating(false);
-      setGeneratingMessage("building your vibe...");
     }
   };
 
@@ -2293,7 +2322,7 @@ const Index = () => {
               <div className="w-full h-full border-4 border-primary/30 border-t-primary rounded-full animate-spin" />
             </div>
             <p className="text-sm text-muted-foreground lowercase tracking-wide">
-              {generatingMessage}
+              building your vibe...
             </p>
           </div>
         </div>

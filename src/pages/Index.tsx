@@ -293,6 +293,20 @@ const Index = () => {
   const [showAuthModal, setShowAuthModal] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
   
+  // Rotation state for prompt examples
+  const [exampleIndex, setExampleIndex] = useState(0);
+
+  const allExamples = [
+    "I need deep focus with rain sounds",
+    "Can you help me sleep?",
+    "Confidence boost for my presentation",
+    "How can I calm my anxiety with ocean?",
+    "Morning energy, no background music",
+    "Help me meditate with singing bowls",
+    "Study session with male voice and rain",
+    "Can you create a peaceful lullaby?",
+  ];
+  
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const timerRef = useRef<NodeJS.Timeout | null>(null);
   const audioContextRef = useRef<AudioContext | null>(null);
@@ -321,6 +335,14 @@ const Index = () => {
     
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
+
+  // Auto-rotate examples every 4 seconds
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setExampleIndex((prev) => (prev + 3) % allExamples.length);
+    }, 4000);
+    return () => clearInterval(interval);
   }, []);
 
   // Title rotation effect - MUST be before any conditional returns
@@ -1813,30 +1835,56 @@ const Index = () => {
             </div>
           </div>
 
-          {/* Prompt Examples */}
-          <div className="space-y-2">
-            <p className="text-xs text-muted-foreground/70 px-1">
-              💡 try examples like:
-            </p>
-            <div className="flex flex-wrap gap-1.5">
-              {[
-                "I need deep focus with rain sounds",
-                "Can you help me sleep?",
-                "Confidence boost for my presentation",
-                "How can I calm my anxiety with ocean?",
-                "Morning energy, no background music",
-                "Help me meditate with singing bowls",
-                "Study session with male voice and rain",
-                "Can you create a peaceful lullaby?",
-              ].map((example) => (
-                <button
-                  key={example}
-                  onClick={() => setVibeDescription(example)}
-                  className="px-2.5 py-1 rounded-md text-xs bg-muted/40 hover:bg-muted/70 text-muted-foreground hover:text-foreground transition-all border border-transparent hover:border-border/50"
-                >
-                  {example}
-                </button>
-              ))}
+          {/* Prompt Examples con Rotación */}
+          <div className="space-y-2.5">
+            <div className="flex items-center gap-2 px-1">
+              <p className="text-xs text-muted-foreground/80 font-medium">
+                💡 try examples like:
+              </p>
+              <div className="flex gap-1">
+                {[0, 1, 2].map((dot) => (
+                  <div 
+                    key={dot}
+                    className={`h-1 w-1 rounded-full transition-all duration-300 ${
+                      Math.floor(exampleIndex / 3) === dot 
+                        ? 'bg-primary/60 w-3' 
+                        : 'bg-muted-foreground/30'
+                    }`}
+                  />
+                ))}
+              </div>
+            </div>
+            
+            <div className="flex flex-wrap gap-2 animate-fade-in">
+              {allExamples
+                .slice(exampleIndex, exampleIndex + 3)
+                .concat(
+                  exampleIndex + 3 > allExamples.length
+                    ? allExamples.slice(0, (exampleIndex + 3) % allExamples.length)
+                    : []
+                )
+                .slice(0, 3)
+                .map((example) => (
+                  <button
+                    key={`${example}-${exampleIndex}`}
+                    onClick={() => setVibeDescription(example)}
+                    className="group px-3.5 py-2 rounded-lg text-xs font-medium
+                             bg-card/60 border border-border/40
+                             hover:bg-card/90 hover:border-primary/40
+                             text-foreground/70 hover:text-foreground
+                             transition-all duration-300
+                             shadow-sm hover:shadow-md hover:shadow-primary/5
+                             animate-fade-in"
+                  >
+                    <span className="relative">
+                      {example}
+                      <span className="absolute inset-0 opacity-0 group-hover:opacity-100 
+                                   bg-gradient-to-r from-primary/10 to-transparent 
+                                   blur-xl transition-opacity duration-300" 
+                      />
+                    </span>
+                  </button>
+                ))}
             </div>
           </div>
 

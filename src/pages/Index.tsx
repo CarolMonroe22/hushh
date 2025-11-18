@@ -273,6 +273,7 @@ const Index = () => {
   const [isComplete, setIsComplete] = useState(false);
   const [generatedTitle, setGeneratedTitle] = useState("");
   const [vibeDescription, setVibeDescription] = useState("");
+  const [savedMessage, setSavedMessage] = useState<string | null>(null);
   const [currentTitleIndex, setCurrentTitleIndex] = useState(0);
   const [titleFade, setTitleFade] = useState(true);
   const [sessionFeedback, setSessionFeedback] = useState<'loved' | 'liked' | null>(null);
@@ -565,11 +566,8 @@ const Index = () => {
       if (error) throw error;
 
       if (data?.saved) {
-        toast({
-          title: "💾 Saved to Library",
-          description: "Your session is now in your collection",
-          duration: 2000,
-        });
+        setSavedMessage("session saved to library");
+        setTimeout(() => setSavedMessage(null), 2000);
       }
 
       if (data?.audioContent) {
@@ -728,11 +726,8 @@ const Index = () => {
       }
 
       if (asmrData?.saved) {
-        toast({
-          title: "💾 Saved to Library",
-          description: "Your custom vibe is now in your collection",
-          duration: 2000,
-        });
+        setSavedMessage("custom vibe saved to library");
+        setTimeout(() => setSavedMessage(null), 2000);
       }
 
       if (asmrData?.audioContent) {
@@ -856,11 +851,8 @@ const Index = () => {
       if (error) throw error;
 
       if (data?.saved) {
-        toast({
-          title: "💾 Saved to Library",
-          description: "Your 3D experience is now in your collection",
-          duration: 2000,
-        });
+        setSavedMessage("3D experience saved to library");
+        setTimeout(() => setSavedMessage(null), 2000);
       }
 
       if (data?.audioContent) {
@@ -1023,11 +1015,8 @@ const Index = () => {
       if (!audioData?.audioContent) throw new Error("No audio generated");
 
       if (audioData?.saved) {
-        toast({
-          title: "💾 Saved to Library",
-          description: "Your voice journey is now in your collection",
-          duration: 2000,
-        });
+        setSavedMessage("voice journey saved to library");
+        setTimeout(() => setSavedMessage(null), 2000);
       }
 
       // Step 3: Load ambient sound if enabled
@@ -2324,6 +2313,11 @@ const Index = () => {
             <p className="text-sm text-muted-foreground lowercase tracking-wide">
               building your vibe...
             </p>
+            {savedMessage && (
+              <p className="text-sm text-primary lowercase tracking-wide animate-pulse">
+                💾 {savedMessage}
+              </p>
+            )}
           </div>
         </div>
       )}

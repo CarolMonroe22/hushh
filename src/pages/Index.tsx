@@ -656,12 +656,6 @@ const Index = () => {
     setIsGenerating(true);
     setNeedsManualPlay(false);
 
-    toast({
-      title: "🗣️ preparing your voice journey",
-      description: `generating guided ${selectedJourney} meditation...`,
-      duration: 3000,
-    });
-
     try {
       console.log("Step 1: Generating voice journey script...");
       const { data: scriptData, error: scriptError } = await supabase.functions.invoke(

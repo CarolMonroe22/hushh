@@ -1,3 +1,4 @@
+import "https://deno.land/x/xhr@0.1.0/mod.ts";
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.38.4';
 
@@ -179,13 +180,20 @@ serve(async (req) => {
     console.log("[whisper-text] Success");
 
     // Save to user's personal library if requested
+    let saved = false;
+    let savedKey = '';
+    
     if (saveSession && userId && journey) {
+      console.log('[whisper-text] Saving to library', { saveSession, hasUserId: !!userId, journey });
       try {
         const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
         const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
         const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
         const userFileName = `${userId}/${Date.now()}_voice_${journey}.mp3`;
+        savedKey = userFileName;
+
+        console.log('[whisper-text] Uploading to user-sessions', { key: userFileName });
 
         // Upload to user-sessions bucket
         const { error: userUploadError } = await supabase.storage
@@ -196,8 +204,14 @@ serve(async (req) => {
           });
 
         if (userUploadError) {
-          console.error('User session upload error:', userUploadError);
+          console.error('[whisper-text] Upload error:', userUploadError);
         } else {
+          console.log('[whisper-text] Insert user_sessions', { 
+            user_id: userId, 
+            audio_url: userFileName, 
+            session_type: 'voice' 
+          });
+
           // Insert into user_sessions table
           const { error: dbError } = await supabase
             .from('user_sessions')
@@ -211,19 +225,24 @@ serve(async (req) => {
             });
 
           if (dbError) {
-            console.error('User session DB error:', dbError);
+            console.error('[whisper-text] DB insert error:', dbError);
           } else {
-            console.log('Successfully saved voice journey to user library');
+            console.log('[whisper-text] Saved OK');
+            saved = true;
           }
         }
       } catch (saveError) {
-        console.error('Error saving user session:', saveError);
+        console.error('[whisper-text] Error saving user session:', saveError);
         // Don't fail the request if saving to library fails
       }
     }
 
     return new Response(
-      JSON.stringify({ audioContent: base64Audio }),
+      JSON.stringify({ 
+        audioContent: base64Audio,
+        saved,
+        key: savedKey
+      }),
       {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       },

@@ -546,6 +546,14 @@ const Index = () => {
 
       if (error) throw error;
 
+      if (data?.saved) {
+        toast({
+          title: "💾 Saved to Library",
+          description: "Your session is now in your collection",
+          duration: 2000,
+        });
+      }
+
       if (data?.audioContent) {
         const audioBlob = base64ToBlob(data.audioContent);
         const audioUrl = URL.createObjectURL(audioBlob);
@@ -701,6 +709,14 @@ const Index = () => {
         throw asmrError;
       }
 
+      if (asmrData?.saved) {
+        toast({
+          title: "💾 Saved to Library",
+          description: "Your custom vibe is now in your collection",
+          duration: 2000,
+        });
+      }
+
       if (asmrData?.audioContent) {
         console.log("Step 3: Playing audio...");
         const audioBlob = base64ToBlob(asmrData.audioContent);
@@ -820,6 +836,14 @@ const Index = () => {
       });
 
       if (error) throw error;
+
+      if (data?.saved) {
+        toast({
+          title: "💾 Saved to Library",
+          description: "Your 3D experience is now in your collection",
+          duration: 2000,
+        });
+      }
 
       if (data?.audioContent) {
         const audioBlob = base64ToBlob(data.audioContent);
@@ -979,6 +1003,14 @@ const Index = () => {
 
       if (audioError) throw audioError;
       if (!audioData?.audioContent) throw new Error("No audio generated");
+
+      if (audioData?.saved) {
+        toast({
+          title: "💾 Saved to Library",
+          description: "Your voice journey is now in your collection",
+          duration: 2000,
+        });
+      }
 
       // Step 3: Load ambient sound if enabled
       if (withAmbient && ambientForJourney) {

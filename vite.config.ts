@@ -18,11 +18,17 @@ export default defineConfig(({ mode }) => {
         "@": path.resolve(__dirname, "./src"),
       },
     },
-    // Explicitly inline env vars needed by the app
-    define: {
-      'import.meta.env.VITE_SUPABASE_URL': JSON.stringify(env.VITE_SUPABASE_URL),
-      'import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY': JSON.stringify(env.VITE_SUPABASE_PUBLISHABLE_KEY),
-    },
+    // Inline only if values exist; otherwise let Vite handle import.meta.env
+    define: ((): Record<string, any> => {
+      const defs: Record<string, any> = {};
+      if (env.VITE_SUPABASE_URL) {
+        defs['import.meta.env.VITE_SUPABASE_URL'] = JSON.stringify(env.VITE_SUPABASE_URL);
+      }
+      if (env.VITE_SUPABASE_PUBLISHABLE_KEY) {
+        defs['import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY'] = JSON.stringify(env.VITE_SUPABASE_PUBLISHABLE_KEY);
+      }
+      return defs;
+    })(),
     build: {
       rollupOptions: {
         output: {

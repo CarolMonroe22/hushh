@@ -291,6 +291,7 @@ const Index = () => {
   const [saveSession, setSaveSession] = useState(true);
   const [showHistory, setShowHistory] = useState(false);
   const [showAuthModal, setShowAuthModal] = useState(false);
+  const [isScrolled, setIsScrolled] = useState(false);
   
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const timerRef = useRef<NodeJS.Timeout | null>(null);
@@ -310,6 +311,16 @@ const Index = () => {
         audioRef.current = null;
       }
     };
+  }, []);
+
+  // Scroll detection for header
+  useEffect(() => {
+    const handleScroll = () => {
+      setIsScrolled(window.scrollY > 20);
+    };
+    
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
   // Title rotation effect - MUST be before any conditional returns
@@ -1627,16 +1638,17 @@ const Index = () => {
       <AmbientBackground isPlaying={false} videoKey={getVideoKey()} />
       
       {/* Elegant Header */}
-      <header className="fixed top-0 w-full z-50 backdrop-blur-xl bg-background/90 border-b border-border/30 shadow-lg animate-fade-in transition-all duration-300">
-        <div className="container mx-auto px-4 h-16 flex items-center justify-between relative">
-          {/* Gradiente inferior para fundido suave */}
-          <div className="absolute bottom-0 left-0 right-0 h-8 bg-gradient-to-b from-transparent via-background/20 to-transparent pointer-events-none" />
-          
-          <div className="flex items-center gap-4 relative z-10">
+      <header className={`fixed top-0 w-full z-50 transition-all duration-700 ease-out ${
+        isScrolled 
+          ? 'backdrop-blur-md bg-background/40' 
+          : 'backdrop-blur-sm bg-background/5'
+      }`}>
+        <div className="container mx-auto px-4 h-20 flex items-center justify-between">
+          <div className="flex items-center gap-4">
             {/* Left side - could add logo here */}
           </div>
           
-          <div className="flex items-center gap-3 relative z-10">
+          <div className="flex items-center gap-3">
             {user ? (
               <>
                 {/* Library Icon with Tooltip */}
@@ -1741,7 +1753,7 @@ const Index = () => {
         }}
       />
 
-      <div className="container mx-auto px-4 pt-24 pb-12 md:pt-28 md:pb-20 max-w-4xl">
+      <div className="container mx-auto px-4 pt-28 pb-12 md:pt-32 md:pb-20 max-w-4xl">
         {/* Logo Header */}
         <header className="flex items-center justify-center mb-16">
           <div className="text-4xl md:text-5xl font-light lowercase tracking-wide" role="banner">

@@ -90,7 +90,7 @@ serve(async (req) => {
   console.log(`[generate-custom-asmr] Client: ${clientId}, Rate limit: ${rateLimit.remaining}/5`);
 
   try {
-    const { prompt, title } = await req.json();
+    const { prompt, title, saveSession, userId, vibeDescription } = await req.json();
     
     if (!prompt || typeof prompt !== 'string') {
       throw new Error('Prompt is required and must be a string');
@@ -170,22 +170,61 @@ serve(async (req) => {
     const uint8Array = new Uint8Array(audioArrayBuffer);
     let binaryString = '';
     const chunkSize = 8192; // Process in 8KB chunks to avoid stack overflow
-    
+
     for (let i = 0; i < uint8Array.length; i += chunkSize) {
       const chunk = uint8Array.slice(i, i + chunkSize);
       binaryString += String.fromCharCode(...chunk);
     }
-    
+
     const audioBase64 = btoa(binaryString);
 
     console.log(`Custom ASMR generated: ${audioBase64.length} bytes`);
 
+    // Save to user's personal library if requested
+    if (saveSession && userId) {
+      try {
+        const userFileName = `${userId}/${Date.now()}_custom_${sanitizedTitle.replace(/[^a-zA-Z0-9]/g, '_')}.mp3`;
+
+        // Upload to user-sessions bucket
+        const { error: userUploadError } = await supabase.storage
+          .from('user-sessions')
+          .upload(userFileName, audioArrayBuffer, {
+            contentType: 'audio/mpeg',
+            upsert: false,
+          });
+
+        if (userUploadError) {
+          console.error('User session upload error:', userUploadError);
+        } else {
+          // Insert into user_sessions table
+          const { error: dbError } = await supabase
+            .from('user_sessions')
+            .insert({
+              user_id: userId,
+              session_type: 'creator',
+              vibe_description: vibeDescription || sanitizedTitle,
+              audio_url: userFileName,
+              duration_seconds: 60,
+            });
+
+          if (dbError) {
+            console.error('User session DB error:', dbError);
+          } else {
+            console.log('Successfully saved custom vibe to user library');
+          }
+        }
+      } catch (saveError) {
+        console.error('Error saving user session:', saveError);
+        // Don't fail the request if saving to library fails
+      }
+    }
+
     return new Response(
-      JSON.stringify({ 
+      JSON.stringify({
         audioContent: audioBase64,
         title: sanitizedTitle
       }),
-      { 
+      {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' }
       }
     );

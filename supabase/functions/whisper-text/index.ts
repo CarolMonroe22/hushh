@@ -68,6 +68,10 @@ serve(async (req) => {
 
     const body = await req.json();
     const text = body.text;
+    const saveSession = body.saveSession;
+    const userId = body.userId;
+    const journey = body.journey;
+    const voiceGender = body.voiceGender;
     const ELEVENLABS_API_KEY = Deno.env.get('ELEVENLABS_API_KEY');
 
     if (!ELEVENLABS_API_KEY) {
@@ -159,20 +163,64 @@ serve(async (req) => {
 
     // Get audio as array buffer
     const audioBuffer = await response.arrayBuffer();
-    
+
     // Convert to base64 in chunks to avoid call stack issues
     const uint8Array = new Uint8Array(audioBuffer);
     const chunkSize = 8192;
     let binaryString = '';
-    
+
     for (let i = 0; i < uint8Array.length; i += chunkSize) {
       const chunk = uint8Array.subarray(i, Math.min(i + chunkSize, uint8Array.length));
       binaryString += String.fromCharCode.apply(null, Array.from(chunk));
     }
-    
+
     const base64Audio = btoa(binaryString);
 
     console.log("[whisper-text] Success");
+
+    // Save to user's personal library if requested
+    if (saveSession && userId && journey) {
+      try {
+        const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
+        const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
+        const supabase = createClient(supabaseUrl, supabaseServiceKey);
+
+        const userFileName = `${userId}/${Date.now()}_voice_${journey}.mp3`;
+
+        // Upload to user-sessions bucket
+        const { error: userUploadError } = await supabase.storage
+          .from('user-sessions')
+          .upload(userFileName, audioBuffer, {
+            contentType: 'audio/mpeg',
+            upsert: false,
+          });
+
+        if (userUploadError) {
+          console.error('User session upload error:', userUploadError);
+        } else {
+          // Insert into user_sessions table
+          const { error: dbError } = await supabase
+            .from('user_sessions')
+            .insert({
+              user_id: userId,
+              session_type: 'voice',
+              voice_journey: journey,
+              voice_gender: voiceGender || 'female',
+              audio_url: userFileName,
+              duration_seconds: 60,
+            });
+
+          if (dbError) {
+            console.error('User session DB error:', dbError);
+          } else {
+            console.log('Successfully saved voice journey to user library');
+          }
+        }
+      } catch (saveError) {
+        console.error('Error saving user session:', saveError);
+        // Don't fail the request if saving to library fails
+      }
+    }
 
     return new Response(
       JSON.stringify({ audioContent: base64Audio }),

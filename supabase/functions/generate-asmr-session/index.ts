@@ -156,7 +156,7 @@ serve(async (req) => {
   console.log(`[generate-asmr-session] Client: ${clientId}, Rate limit: ${10 - rateLimit.remaining}/10`);
 
   try {
-    const { mood, ambient } = await req.json();
+    const { mood, ambient, saveSession, userId } = await req.json();
     
     const validMoods = ['relax', 'sleep', 'focus', 'gratitude', 'boost', 'stoic'];
     const validAmbients = ['rain', 'ocean', 'forest', 'fireplace', 'whitenoise', 'city'];
@@ -186,7 +186,7 @@ serve(async (req) => {
 
     if (cached && cached.audio_url) {
       console.log('Cache hit! Returning cached audio');
-      
+
       // Fetch audio from storage
       const { data: audioData } = await supabase.storage
         .from('asmr-cache')
@@ -195,6 +195,39 @@ serve(async (req) => {
       if (audioData) {
         const arrayBuffer = await audioData.arrayBuffer();
         const base64Audio = base64Encode(arrayBuffer);
+
+        // Save to user's personal library if requested
+        if (saveSession && userId) {
+          try {
+            const userFileName = `${userId}/${Date.now()}_${mood}_${ambient}.mp3`;
+
+            // Upload to user-sessions bucket
+            const { error: userUploadError } = await supabase.storage
+              .from('user-sessions')
+              .upload(userFileName, arrayBuffer, {
+                contentType: 'audio/mpeg',
+                upsert: false,
+              });
+
+            if (!userUploadError) {
+              // Insert into user_sessions table
+              await supabase
+                .from('user_sessions')
+                .insert({
+                  user_id: userId,
+                  session_type: 'preset',
+                  mood,
+                  ambient,
+                  audio_url: userFileName,
+                  duration_seconds: 60,
+                });
+              console.log('Successfully saved cached audio to user library');
+            }
+          } catch (saveError) {
+            console.error('Error saving cached audio to user library:', saveError);
+          }
+        }
+
         return new Response(
           JSON.stringify({ audioContent: base64Audio, cached: true }),
           { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
@@ -283,8 +316,53 @@ serve(async (req) => {
           week_key: weekKey,
           times_played: 1,
         });
-      
+
       console.log('Successfully cached new ASMR session');
+    }
+
+    // Save to user's personal library if requested
+    if (saveSession && userId) {
+      try {
+        const userFileName = `${userId}/${Date.now()}_${mood}_${ambient}.mp3`;
+
+        // Upload to user-sessions bucket
+        const { error: userUploadError } = await supabase.storage
+          .from('user-sessions')
+          .upload(userFileName, audioBuffer, {
+            contentType: 'audio/mpeg',
+            upsert: false,
+          });
+
+        if (userUploadError) {
+          console.error('User session upload error:', userUploadError);
+        } else {
+          // Get public URL
+          const { data: { publicUrl } } = supabase.storage
+            .from('user-sessions')
+            .getPublicUrl(userFileName);
+
+          // Insert into user_sessions table
+          const { error: dbError } = await supabase
+            .from('user_sessions')
+            .insert({
+              user_id: userId,
+              session_type: 'preset',
+              mood,
+              ambient,
+              audio_url: userFileName,
+              duration_seconds: 60,
+            });
+
+          if (dbError) {
+            console.error('User session DB error:', dbError);
+          } else {
+            console.log('Successfully saved to user library');
+          }
+        }
+      } catch (saveError) {
+        console.error('Error saving user session:', saveError);
+        // Don't fail the request if saving to library fails
+      }
     }
 
     return new Response(

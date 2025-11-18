@@ -85,9 +85,9 @@ const Index = () => {
     const { error } = await signOut();
     if (error) {
       toast({
-        title: "❌ Error",
-        description: "Could not sign out",
-        variant: "destructive",
+        title: "🌊 gentle pause",
+        description: "having trouble signing out... let's try once more",
+        variant: "gentle",
       });
     } else {
       navigate('/auth');
@@ -98,8 +98,9 @@ const Index = () => {
     if (!user) {
       setShowAuthModal(true);
       toast({
-        title: "✨ Create Account",
-        description: "Sign up to generate your personalized audio experience",
+        title: "✨ create account",
+        description: "sign up to generate your personalized audio experience",
+        variant: "calm",
       });
       return;
     }
@@ -254,9 +255,9 @@ const Index = () => {
   const startSession = async () => {
     if (!selectedMood || !selectedAmbient) {
       toast({
-        title: "Selection Required",
-        description: "Please select both a mood and an ambient sound",
-        variant: "destructive",
+        title: "🌸 one moment",
+        description: "choose your mood and ambient sound to begin",
+        variant: "gentle",
       });
       return;
     }
@@ -302,8 +303,9 @@ const Index = () => {
               console.error('Play was prevented:', error);
               setNeedsManualPlay(true);
               toast({
-                title: "Tap to Play",
-                description: "Please tap the play button to start audio",
+                title: "🌸 ready to begin",
+                description: "tap the play button when you're ready",
+                variant: "calm",
               });
             });
         } else {
@@ -348,22 +350,22 @@ const Index = () => {
       
       if (error?.message?.includes('tokens') || error?.message?.includes('NO_TOKENS_AVAILABLE')) {
         toast({
-          title: "⚠️ No Tokens Available",
-          description: "Free session tokens are currently not available. Please try again later.",
-          variant: "destructive",
+          title: "✨ please wait a moment",
+          description: "taking a brief pause... free sessions will be available again soon",
+          variant: "notice",
           duration: 6000,
         });
       } else if (error?.message?.includes('AUTH_FAILED') || error?.message?.includes('Authentication')) {
         toast({
-          title: "🔑 Authentication Error",
-          description: "There was an authentication error. Please contact support.",
-          variant: "destructive",
+          title: "🌙 gentle reminder",
+          description: "let's reconnect... please reach out if you need support",
+          variant: "gentle",
         });
       } else {
         toast({
-          title: "❌ Generation Error",
-          description: error instanceof Error ? error.message : "Could not generate audio. Please try again.",
-          variant: "destructive",
+          title: "🌊 taking a breath",
+          description: error instanceof Error ? "something needs attention... let's try that again" : "let's take another approach... try once more when ready",
+          variant: "gentle",
         });
       }
     } finally {
@@ -374,9 +376,9 @@ const Index = () => {
   const startCreatorSession = async () => {
     if (!vibeDescription.trim() || vibeDescription.trim().length < 20) {
       toast({
-        title: "Description Required",
-        description: "Please describe your desired vibe (at least 20 characters)",
-        variant: "destructive",
+        title: "🌸 share your vision",
+        description: "describe your desired vibe with a few more words",
+        variant: "gentle",
       });
       return;
     }
@@ -458,8 +460,9 @@ const Index = () => {
               console.error('Play was prevented:', error);
               setNeedsManualPlay(true);
               toast({
-                title: "Tap to Play",
-                description: "Please tap the play button to start audio",
+                title: "🌸 ready to begin",
+                description: "tap the play button when you're ready",
+                variant: "calm",
               });
             });
         } else {
@@ -504,22 +507,22 @@ const Index = () => {
       
       if (error?.message?.includes('tokens') || error?.message?.includes('NO_TOKENS_AVAILABLE')) {
         toast({
-          title: "⚠️ No Tokens Available",
-          description: "Free session tokens are currently not available. Please try again later.",
-          variant: "destructive",
+          title: "✨ please wait a moment",
+          description: "taking a brief pause... free sessions will be available again soon",
+          variant: "notice",
           duration: 6000,
         });
       } else if (error?.message?.includes('AUTH_FAILED') || error?.message?.includes('Authentication')) {
         toast({
-          title: "🔑 Authentication Error",
-          description: "There was an authentication error. Please contact support.",
-          variant: "destructive",
+          title: "🌙 gentle reminder",
+          description: "let's reconnect... please reach out if you need support",
+          variant: "gentle",
         });
       } else {
         toast({
-          title: "❌ Generation Error",
-          description: error instanceof Error ? error.message : "Could not create your vibe. Please try again.",
-          variant: "destructive",
+          title: "🌊 taking a breath",
+          description: error instanceof Error ? "something needs attention... let's try that again" : "let's take another approach... try once more when ready",
+          variant: "gentle",
         });
       }
     } finally {
@@ -530,9 +533,9 @@ const Index = () => {
   const startBinauralExperience = async () => {
     if (!selectedExperience) {
       toast({
-        title: "Selection Required",
-        description: "Please select a 3D experience",
-        variant: "destructive",
+        title: "🌸 one moment",
+        description: "choose your 3d experience to begin",
+        variant: "gentle",
       });
       return;
     }
@@ -629,22 +632,22 @@ const Index = () => {
       
       if (error?.message?.includes('tokens') || error?.message?.includes('NO_TOKENS_AVAILABLE')) {
         toast({
-          title: "⚠️ No Tokens Available",
-          description: "Free session tokens are currently not available. Please try again later.",
-          variant: "destructive",
+          title: "✨ please wait a moment",
+          description: "taking a brief pause... free sessions will be available again soon",
+          variant: "notice",
           duration: 6000,
         });
       } else if (error?.message?.includes('AUTH_FAILED') || error?.message?.includes('Authentication')) {
         toast({
-          title: "🔑 Authentication Error",
-          description: "There was an authentication error. Please contact support.",
-          variant: "destructive",
+          title: "🌙 gentle reminder",
+          description: "let's reconnect... please reach out if you need support",
+          variant: "gentle",
         });
       } else {
         toast({
-          title: "❌ Generation Error",
-          description: error instanceof Error ? error.message : "Could not generate 3D experience. Please try again.",
-          variant: "destructive",
+          title: "🌊 taking a breath",
+          description: error instanceof Error ? "something needs attention... let's try that again" : "let's take another approach... try once more when ready",
+          variant: "gentle",
         });
       }
     } finally {
@@ -655,18 +658,18 @@ const Index = () => {
   const startVoiceJourney = async () => {
     if (!selectedJourney) {
       toast({
-        title: "Selection Required",
-        description: "Please select a voice journey",
-        variant: "destructive",
+        title: "🌸 one moment",
+        description: "choose your voice journey to begin",
+        variant: "gentle",
       });
       return;
     }
 
     if (withAmbient && !ambientForJourney) {
       toast({
-        title: "Ambient Sound Required",
-        description: "Please select an ambient sound or uncheck the option",
-        variant: "destructive",
+        title: "🌸 gentle reminder",
+        description: "select an ambient sound or turn off the option",
+        variant: "gentle",
       });
       return;
     }
@@ -818,22 +821,22 @@ const Index = () => {
       
       if (error?.message?.includes('tokens') || error?.message?.includes('NO_TOKENS_AVAILABLE')) {
         toast({
-          title: "⚠️ No Tokens Available",
-          description: "Free session tokens are currently not available. Please try again later.",
-          variant: "destructive",
+          title: "✨ please wait a moment",
+          description: "taking a brief pause... free sessions will be available again soon",
+          variant: "notice",
           duration: 6000,
         });
       } else if (error?.message?.includes('AUTH_FAILED') || error?.message?.includes('Authentication')) {
         toast({
-          title: "🔑 Authentication Error",
-          description: "There was an authentication error. Please contact support.",
-          variant: "destructive",
+          title: "🌙 gentle reminder",
+          description: "let's reconnect... please reach out if you need support",
+          variant: "gentle",
         });
       } else {
         toast({
-          title: "❌ Generation Error",
-          description: error instanceof Error ? error.message : "Could not generate voice journey. Please try again.",
-          variant: "destructive",
+          title: "🌊 taking a breath",
+          description: error instanceof Error ? "something needs attention... let's try that again" : "let's take another approach... try once more when ready",
+          variant: "gentle",
         });
       }
     } finally {
@@ -871,9 +874,9 @@ const Index = () => {
       if (!audioRef.current) {
         console.error('No audio reference available');
         toast({
-          title: "⚠️ Audio Error",
-          description: "Audio reference lost. Please start a new session.",
-          variant: "destructive",
+          title: "🌊 gentle reset",
+          description: "let's begin a fresh session together",
+          variant: "gentle",
         });
         return;
       }
@@ -896,9 +899,10 @@ const Index = () => {
         }, 1000);
         
         toast({
-          title: "▶️ Resumed",
-          description: "Playback resumed",
-          duration: 2000,
+          title: "🌿 continuing",
+          description: "flow resumes",
+          variant: "calm",
+          duration: 1500,
         });
       } else {
         // Pause
@@ -906,24 +910,25 @@ const Index = () => {
         audioRef.current.pause();
         setIsPaused(true);
         console.log('Audio paused successfully');
-        
+
         if (timerRef.current) {
           clearInterval(timerRef.current);
           timerRef.current = null;
         }
-        
+
         toast({
-          title: "⏸️ Paused",
-          description: "Playback paused",
-          duration: 2000,
+          title: "🍃 resting",
+          description: "take your time",
+          variant: "calm",
+          duration: 1500,
         });
       }
     } catch (error) {
       console.error('Error in handlePauseResume:', error);
       toast({
-        title: "❌ Playback Error",
-        description: error instanceof Error ? error.message : "Could not pause/resume audio",
-        variant: "destructive",
+        title: "🌊 gentle reset",
+        description: error instanceof Error ? "let's try that once more" : "taking a moment to reconnect",
+        variant: "gentle",
       });
     }
   };
@@ -954,16 +959,17 @@ const Index = () => {
       setTimeLeft(60);
       
       toast({
-        title: "⏹️ Stopped",
-        description: "Audio ready to play again",
+        title: "🌙 session ended",
+        description: "ready when you are",
+        variant: "calm",
         duration: 2000,
       });
     } catch (error) {
       console.error('Error in handleStop:', error);
       toast({
-        title: "⚠️ Stop Error", 
-        description: "Audio stopped but with errors",
-        variant: "destructive",
+        title: "🌊 gentle pause",
+        description: "session complete",
+        variant: "gentle",
       });
     }
   };
@@ -975,9 +981,9 @@ const Index = () => {
       if (!audioRef.current) {
         console.error('No audio reference in handlePlay');
         toast({
-          title: "⚠️ Audio Lost",
-          description: "Please generate a new session",
-          variant: "destructive",
+          title: "🌸 fresh start",
+          description: "let's create a new session together",
+          variant: "gentle",
         });
         return;
       }
@@ -1004,9 +1010,9 @@ const Index = () => {
     } catch (error) {
       console.error('Error in handlePlay:', error);
       toast({
-        title: "❌ Playback Error",
-        description: error instanceof Error ? error.message : "Could not start playback",
-        variant: "destructive",
+        title: "🌊 gentle pause",
+        description: error instanceof Error ? "let's try once more" : "taking a moment... try again when ready",
+        variant: "gentle",
       });
     }
   };
@@ -1014,17 +1020,18 @@ const Index = () => {
   const handleWaitlistSubmit = async () => {
     if (!waitlistEmail.trim() || !waitlistEmail.includes('@')) {
       toast({
-        title: "Invalid Email",
-        description: "Please enter a valid email address",
-        variant: "destructive",
+        title: "🌸 gentle reminder",
+        description: "please share a valid email address",
+        variant: "gentle",
       });
       return;
     }
 
     setEmailSubmitted(true);
     toast({
-      title: "You're on the list! 🎉",
-      description: "We'll let you know when extended sessions are ready",
+      title: "✨ you're on the list",
+      description: "we'll reach out when extended sessions are ready",
+      variant: "calm",
     });
   };
 

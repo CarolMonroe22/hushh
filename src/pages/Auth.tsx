@@ -48,17 +48,18 @@ const Auth = () => {
         if (error) {
           if (error.message.includes('Invalid login credentials')) {
             toast({
-              title: "Login Failed",
-              description: "Invalid email or password",
-              variant: "destructive",
+              title: "🌸 gentle reminder",
+              description: "let's try that email and password once more",
+              variant: "gentle",
             });
           } else {
             throw error;
           }
         } else {
           toast({
-            title: "Welcome back!",
-            description: "You've successfully logged in",
+            title: "✨ welcome back",
+            description: "you've successfully logged in",
+            variant: "calm",
           });
           navigate('/');
         }
@@ -67,17 +68,18 @@ const Auth = () => {
         if (error) {
           if (error.message.includes('User already registered')) {
             toast({
-              title: "Account Exists",
-              description: "This email is already registered. Please login instead.",
-              variant: "destructive",
+              title: "🌸 gentle reminder",
+              description: "this email is already registered... please login instead",
+              variant: "gentle",
             });
           } else {
             throw error;
           }
         } else {
           toast({
-            title: "✅ Account Created!",
-            description: "Please check your email to confirm your account. You may need to check your spam folder.",
+            title: "✨ account created",
+            description: "please check your email to confirm your account (including spam folder)",
+            variant: "calm",
             duration: 8000,
           });
           // Note: With email confirmation enabled, user won't be auto-logged in
@@ -87,15 +89,15 @@ const Auth = () => {
     } catch (error) {
       if (error instanceof z.ZodError) {
         toast({
-          title: "Validation Error",
+          title: "🌸 gentle reminder",
           description: error.errors[0].message,
-          variant: "destructive",
+          variant: "gentle",
         });
       } else {
         toast({
-          title: "Error",
-          description: error instanceof Error ? error.message : "Something went wrong",
-          variant: "destructive",
+          title: "🌊 taking a breath",
+          description: error instanceof Error ? error.message : "something needs attention... let's try once more",
+          variant: "gentle",
         });
       }
     } finally {

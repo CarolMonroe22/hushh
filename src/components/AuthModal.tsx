@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Dialog, DialogContent } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -18,16 +18,24 @@ interface AuthModalProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   onSuccess?: () => void;
+  initialMode?: 'login' | 'signup';
 }
 
-export const AuthModal = ({ open, onOpenChange, onSuccess }: AuthModalProps) => {
-  const [isLogin, setIsLogin] = useState(true);
+export const AuthModal = ({ open, onOpenChange, onSuccess, initialMode = 'login' }: AuthModalProps) => {
+  const [isLogin, setIsLogin] = useState(initialMode === 'login');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [fullName, setFullName] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { signUp, signIn } = useAuth();
   const { toast } = useToast();
+
+  // Reset to initial mode when modal opens
+  useEffect(() => {
+    if (open) {
+      setIsLogin(initialMode === 'login');
+    }
+  }, [open, initialMode]);
 
   const handleClose = () => {
     if (!isSubmitting) {

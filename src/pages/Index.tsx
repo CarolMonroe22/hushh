@@ -264,6 +264,7 @@ const Index = () => {
   const [isLoadingExample, setIsLoadingExample] = useState<string | null>(null);
   const [currentPlayingExample, setCurrentPlayingExample] = useState<string | null>(null);
   const [showHeadphoneModal, setShowHeadphoneModal] = useState(false);
+  const [authModalMode, setAuthModalMode] = useState<'login' | 'signup'>('login');
   
   // Rotation state for prompt examples
   const [exampleIndex, setExampleIndex] = useState(0);
@@ -401,6 +402,7 @@ const Index = () => {
 
   const requireAuth = (action: () => void) => {
     if (!user) {
+      setAuthModalMode('signup');
       setShowAuthModal(true);
       toast({
         title: "✨ Create Account",
@@ -1866,13 +1868,19 @@ const Index = () => {
               <div className="flex items-center gap-2">
                 <Button
                   variant="ghost"
-                  onClick={() => setShowAuthModal(true)}
+                  onClick={() => {
+                    setAuthModalMode('login');
+                    setShowAuthModal(true);
+                  }}
                   className="text-sm lowercase hover:bg-accent/50 transition-colors"
                 >
                   login
                 </Button>
                 <Button
-                  onClick={() => setShowAuthModal(true)}
+                  onClick={() => {
+                    setAuthModalMode('signup');
+                    setShowAuthModal(true);
+                  }}
                   className="text-sm lowercase bg-gradient-to-r from-primary to-primary/80 hover:from-primary/90 hover:to-primary/70 transition-all"
                 >
                   sign up
@@ -1896,6 +1904,7 @@ const Index = () => {
       <AuthModal 
         open={showAuthModal} 
         onOpenChange={setShowAuthModal}
+        initialMode={authModalMode}
         onSuccess={() => {
           setShowAuthModal(false);
           toast({

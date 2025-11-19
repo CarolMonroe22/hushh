@@ -38,7 +38,7 @@ serve(async (req) => {
     console.log('[setup-example-audios] Generating sleep audio...');
     const sleepResponse = await supabase.functions.invoke('generate-custom-asmr', {
       body: { 
-        prompt: 'Sleep Helper',
+        prompt: 'Create a gentle and soothing sleep helper audio with calming whispers, soft rain sounds, and peaceful ocean waves to help me drift into a deep restful sleep',
         title: 'Sleep Helper'
       }
     });

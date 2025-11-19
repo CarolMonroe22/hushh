@@ -1889,18 +1889,16 @@ const Index = () => {
           </div>
 
           {/* Loop Mode Toggle and Save Session */}
-          <div className="space-y-3">
-            <div className="flex items-center justify-between p-2.5 rounded-md bg-card/20 border border-border/20">
-              <div className="flex items-center gap-1.5">
-                <Switch 
-                  checked={loopEnabled} 
-                  onCheckedChange={setLoopEnabled}
-                  id="loop-creator"
-                />
-                <label htmlFor="loop-creator" className="text-xs lowercase tracking-wide cursor-pointer text-foreground/50 hover:text-foreground/70 transition-colors duration-500">
-                  loop mode
-                </label>
-              </div>
+          <div className="flex items-center gap-4 p-2.5 rounded-md bg-card/20 border border-border/20">
+            <div className="flex items-center gap-1.5">
+              <Switch 
+                checked={loopEnabled} 
+                onCheckedChange={setLoopEnabled}
+                id="loop-creator"
+              />
+              <label htmlFor="loop-creator" className="text-xs lowercase tracking-wide cursor-pointer text-foreground/50 hover:text-foreground/70 transition-colors duration-500">
+                loop mode
+              </label>
               <span className={`text-xs text-muted-foreground/50 transition-opacity duration-700 ${
                 isGenerating || loopEnabled ? "opacity-100" : "opacity-0"
               }`}>
@@ -1908,18 +1906,18 @@ const Index = () => {
               </span>
             </div>
             
+            {user && <div className="h-4 w-px bg-border/20" />}
+            
             {user && (
-              <div className="flex items-center justify-between p-2.5 rounded-md bg-card/20 border border-border/20">
-                <div className="flex items-center gap-1.5">
-                  <Switch 
-                    checked={saveSession} 
-                    onCheckedChange={setSaveSession}
-                    id="save-session-creator"
-                  />
-                  <label htmlFor="save-session-creator" className="text-xs lowercase tracking-wide cursor-pointer text-foreground/50 hover:text-foreground/70 transition-colors duration-500">
-                    save to library
-                  </label>
-                </div>
+              <div className="flex items-center gap-1.5">
+                <Switch 
+                  checked={saveSession} 
+                  onCheckedChange={setSaveSession}
+                  id="save-session-creator"
+                />
+                <label htmlFor="save-session-creator" className="text-xs lowercase tracking-wide cursor-pointer text-foreground/50 hover:text-foreground/70 transition-colors duration-500">
+                  save to library
+                </label>
                 <span className={`text-xs text-muted-foreground/50 transition-opacity duration-700 ${
                   isGenerating || saveSession ? "opacity-100" : "opacity-0"
                 }`}>
@@ -2019,18 +2017,16 @@ const Index = () => {
                 </div>
 
                 {/* Loop Mode Toggle and Save Session */}
-                <div className="space-y-3">
-                  <div className="flex items-center justify-between p-2.5 rounded-md bg-card/20 border border-border/20">
-                    <div className="flex items-center gap-1.5">
-                      <Switch 
-                        checked={loopEnabled} 
-                        onCheckedChange={setLoopEnabled}
-                        id="loop-preset"
-                      />
-                      <label htmlFor="loop-preset" className="text-xs lowercase tracking-wide cursor-pointer text-foreground/50 hover:text-foreground/70 transition-colors duration-500">
-                        loop mode
-                      </label>
-                    </div>
+                <div className="flex items-center gap-4 p-2.5 rounded-md bg-card/20 border border-border/20">
+                  <div className="flex items-center gap-1.5">
+                    <Switch 
+                      checked={loopEnabled} 
+                      onCheckedChange={setLoopEnabled}
+                      id="loop-preset"
+                    />
+                    <label htmlFor="loop-preset" className="text-xs lowercase tracking-wide cursor-pointer text-foreground/50 hover:text-foreground/70 transition-colors duration-500">
+                      loop mode
+                    </label>
                     <span className={`text-xs text-muted-foreground/50 transition-opacity duration-700 ${
                       isGenerating || loopEnabled ? "opacity-100" : "opacity-0"
                     }`}>
@@ -2038,18 +2034,18 @@ const Index = () => {
                     </span>
                   </div>
                   
+                  {user && <div className="h-4 w-px bg-border/20" />}
+                  
                   {user && (
-                    <div className="flex items-center justify-between p-2.5 rounded-md bg-card/20 border border-border/20">
-                      <div className="flex items-center gap-1.5">
-                        <Switch 
-                          checked={saveSession} 
-                          onCheckedChange={setSaveSession}
-                          id="save-session-preset"
-                        />
-                        <label htmlFor="save-session-preset" className="text-xs lowercase tracking-wide cursor-pointer text-foreground/50 hover:text-foreground/70 transition-colors duration-500">
-                          save to library
-                        </label>
-                      </div>
+                    <div className="flex items-center gap-1.5">
+                      <Switch 
+                        checked={saveSession} 
+                        onCheckedChange={setSaveSession}
+                        id="save-session-preset"
+                      />
+                      <label htmlFor="save-session-preset" className="text-xs lowercase tracking-wide cursor-pointer text-foreground/50 hover:text-foreground/70 transition-colors duration-500">
+                        save to library
+                      </label>
                       <span className={`text-xs text-muted-foreground/50 transition-opacity duration-700 ${
                         isGenerating || saveSession ? "opacity-100" : "opacity-0"
                       }`}>
@@ -2107,8 +2103,8 @@ const Index = () => {
             </div>
 
             {/* Loop Mode Toggle and Save Session */}
-            <div className="px-4 space-y-3">
-              <div className="flex items-center justify-between p-2.5 rounded-md bg-card/20 border border-border/20">
+            <div className="px-4">
+              <div className="flex items-center gap-4 p-2.5 rounded-md bg-card/20 border border-border/20">
                 <div className="flex items-center gap-1.5">
                   <Switch 
                     checked={loopEnabled} 
@@ -2118,16 +2114,16 @@ const Index = () => {
                   <label htmlFor="loop-binaural" className="text-xs lowercase tracking-wide cursor-pointer text-foreground/50 hover:text-foreground/70 transition-colors duration-500">
                     loop mode
                   </label>
+                  <span className={`text-xs text-muted-foreground/50 transition-opacity duration-700 ${
+                    isGenerating || loopEnabled ? "opacity-100" : "opacity-0"
+                  }`}>
+                    {loopEnabled ? "loop" : "once"}
+                  </span>
                 </div>
-                <span className={`text-xs text-muted-foreground/50 transition-opacity duration-700 ${
-                  isGenerating || loopEnabled ? "opacity-100" : "opacity-0"
-                }`}>
-                  {loopEnabled ? "loop" : "once"}
-                </span>
-              </div>
-              
-              {user && (
-                <div className="flex items-center justify-between p-2.5 rounded-md bg-card/20 border border-border/20">
+                
+                {user && <div className="h-4 w-px bg-border/20" />}
+                
+                {user && (
                   <div className="flex items-center gap-1.5">
                     <Switch 
                       checked={saveSession} 
@@ -2137,14 +2133,14 @@ const Index = () => {
                     <label htmlFor="save-session-binaural" className="text-xs lowercase tracking-wide cursor-pointer text-foreground/50 hover:text-foreground/70 transition-colors duration-500">
                       save to library
                     </label>
+                    <span className={`text-xs text-muted-foreground/50 transition-opacity duration-700 ${
+                      isGenerating || saveSession ? "opacity-100" : "opacity-0"
+                    }`}>
+                      {saveSession ? "saved" : "temp"}
+                    </span>
                   </div>
-                  <span className={`text-xs text-muted-foreground/50 transition-opacity duration-700 ${
-                    isGenerating || saveSession ? "opacity-100" : "opacity-0"
-                  }`}>
-                    {saveSession ? "saved" : "temp"}
-                  </span>
-                </div>
-              )}
+                )}
+              </div>
             </div>
 
             {/* Generate Button */}
@@ -2266,8 +2262,8 @@ const Index = () => {
             </div>
 
             {/* Loop Mode Toggle and Save Session */}
-            <div className="px-4 space-y-3">
-              <div className="flex items-center justify-between p-2.5 rounded-md bg-card/20 border border-border/20">
+            <div className="px-4">
+              <div className="flex items-center gap-4 p-2.5 rounded-md bg-card/20 border border-border/20">
                 <div className="flex items-center gap-1.5">
                   <Switch 
                     checked={loopEnabled} 
@@ -2277,16 +2273,16 @@ const Index = () => {
                   <label htmlFor="loop-voice" className="text-xs lowercase tracking-wide cursor-pointer text-foreground/50 hover:text-foreground/70 transition-colors duration-500">
                     loop mode
                   </label>
+                  <span className={`text-xs text-muted-foreground/50 transition-opacity duration-700 ${
+                    isGenerating || loopEnabled ? "opacity-100" : "opacity-0"
+                  }`}>
+                    {loopEnabled ? "loop" : "once"}
+                  </span>
                 </div>
-                <span className={`text-xs text-muted-foreground/50 transition-opacity duration-700 ${
-                  isGenerating || loopEnabled ? "opacity-100" : "opacity-0"
-                }`}>
-                  {loopEnabled ? "loop" : "once"}
-                </span>
-              </div>
-              
-              {user && (
-                <div className="flex items-center justify-between p-2.5 rounded-md bg-card/20 border border-border/20">
+                
+                {user && <div className="h-4 w-px bg-border/20" />}
+                
+                {user && (
                   <div className="flex items-center gap-1.5">
                     <Switch 
                       checked={saveSession} 
@@ -2296,14 +2292,14 @@ const Index = () => {
                     <label htmlFor="save-session-voice" className="text-xs lowercase tracking-wide cursor-pointer text-foreground/50 hover:text-foreground/70 transition-colors duration-500">
                       save to library
                     </label>
+                    <span className={`text-xs text-muted-foreground/50 transition-opacity duration-700 ${
+                      isGenerating || saveSession ? "opacity-100" : "opacity-0"
+                    }`}>
+                      {saveSession ? "saved" : "temp"}
+                    </span>
                   </div>
-                  <span className={`text-xs text-muted-foreground/50 transition-opacity duration-700 ${
-                    isGenerating || saveSession ? "opacity-100" : "opacity-0"
-                  }`}>
-                    {saveSession ? "saved" : "temp"}
-                  </span>
-                </div>
-              )}
+                )}
+              </div>
             </div>
 
             {/* Generate Button */}

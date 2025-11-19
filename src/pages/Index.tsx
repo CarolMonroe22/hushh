@@ -1901,7 +1901,9 @@ const Index = () => {
                   loop mode
                 </label>
               </div>
-              <span className="text-xs text-muted-foreground/50">
+              <span className={`text-xs text-muted-foreground/50 transition-opacity duration-700 ${
+                isGenerating || loopEnabled ? "opacity-100" : "opacity-0"
+              }`}>
                 {loopEnabled ? "loop" : "once"}
               </span>
             </div>
@@ -1918,7 +1920,9 @@ const Index = () => {
                     save to library
                   </label>
                 </div>
-                <span className="text-xs text-muted-foreground/50">
+                <span className={`text-xs text-muted-foreground/50 transition-opacity duration-700 ${
+                  isGenerating || saveSession ? "opacity-100" : "opacity-0"
+                }`}>
                   {saveSession ? "saved" : "temp"}
                 </span>
               </div>
@@ -2027,7 +2031,9 @@ const Index = () => {
                         loop mode
                       </label>
                     </div>
-                    <span className="text-xs text-muted-foreground/50">
+                    <span className={`text-xs text-muted-foreground/50 transition-opacity duration-700 ${
+                      isGenerating || loopEnabled ? "opacity-100" : "opacity-0"
+                    }`}>
                       {loopEnabled ? "loop" : "once"}
                     </span>
                   </div>
@@ -2044,7 +2050,9 @@ const Index = () => {
                           save to library
                         </label>
                       </div>
-                      <span className="text-xs text-muted-foreground/50">
+                      <span className={`text-xs text-muted-foreground/50 transition-opacity duration-700 ${
+                        isGenerating || saveSession ? "opacity-100" : "opacity-0"
+                      }`}>
                         {saveSession ? "saved" : "temp"}
                       </span>
                     </div>
@@ -2111,7 +2119,9 @@ const Index = () => {
                     loop mode
                   </label>
                 </div>
-                <span className="text-xs text-muted-foreground/50">
+                <span className={`text-xs text-muted-foreground/50 transition-opacity duration-700 ${
+                  isGenerating || loopEnabled ? "opacity-100" : "opacity-0"
+                }`}>
                   {loopEnabled ? "loop" : "once"}
                 </span>
               </div>
@@ -2128,7 +2138,9 @@ const Index = () => {
                       save to library
                     </label>
                   </div>
-                  <span className="text-xs text-muted-foreground/50">
+                  <span className={`text-xs text-muted-foreground/50 transition-opacity duration-700 ${
+                    isGenerating || saveSession ? "opacity-100" : "opacity-0"
+                  }`}>
                     {saveSession ? "saved" : "temp"}
                   </span>
                 </div>
@@ -2266,7 +2278,9 @@ const Index = () => {
                     loop mode
                   </label>
                 </div>
-                <span className="text-xs text-muted-foreground/50">
+                <span className={`text-xs text-muted-foreground/50 transition-opacity duration-700 ${
+                  isGenerating || loopEnabled ? "opacity-100" : "opacity-0"
+                }`}>
                   {loopEnabled ? "loop" : "once"}
                 </span>
               </div>
@@ -2283,7 +2297,9 @@ const Index = () => {
                       save to library
                     </label>
                   </div>
-                  <span className="text-xs text-muted-foreground/50">
+                  <span className={`text-xs text-muted-foreground/50 transition-opacity duration-700 ${
+                    isGenerating || saveSession ? "opacity-100" : "opacity-0"
+                  }`}>
                     {saveSession ? "saved" : "temp"}
                   </span>
                 </div>

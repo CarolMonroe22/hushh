@@ -299,7 +299,15 @@ const Index = () => {
   const [exampleIndex, setExampleIndex] = useState(0);
 
   const allExamples = [
-    "I need deep focus with rain sounds",
+    // Detailed prompts from VIBE_STARTERS
+    "I need to concentrate deeply on complex work. Create a focused atmosphere with subtle background sounds that help me stay in the zone without any distractions.",
+    "Help me wind down after a long day. I want gentle, soothing sounds that ease my mind and help me transition into a peaceful evening routine.",
+    "I'm working on something creative and need sounds that inspire without overwhelming. Something that keeps my energy up while letting my imagination flow.",
+    "Guide me into deep, restful sleep with calming sounds that quiet my racing thoughts and create a cocoon of tranquility around me.",
+    "Help me manifest my goals and dreams. I want powerful, affirming whispers that strengthen my belief in what I'm creating and fill me with confidence and clarity about my vision.",
+    "Create a sacred space for prayer and spiritual connection. I want gentle, reverent whispers that help me feel grounded, connected to something greater, and at peace in this moment of reflection.",
+    "I need strength and clarity rooted in ancient wisdom. Create a grounded atmosphere that reminds me to focus on what I can control, accept what I cannot change, and act with virtue and reason.",
+    // Conversational examples
     "Can you help me sleep?",
     "Confidence boost for my presentation",
     "How can I calm my anxiety with ocean?",
@@ -307,6 +315,7 @@ const Index = () => {
     "Help me meditate with singing bowls",
     "Study session with male voice and rain",
     "Can you create a peaceful lullaby?",
+    "I need deep focus with rain sounds",
   ];
   
   const audioRef = useRef<HTMLAudioElement | null>(null);
@@ -1994,7 +2003,7 @@ const Index = () => {
                 💡 try examples like:
               </p>
               <div className="flex gap-1">
-                {[0, 1, 2].map((dot) => (
+                {[0, 1, 2, 3, 4].map((dot) => (
                   <div 
                     key={dot}
                     className={`h-1 w-1 rounded-full transition-all duration-1000 ease-out ${
@@ -2026,7 +2035,8 @@ const Index = () => {
                              text-foreground/70 hover:text-foreground/90
                              transition-all duration-1000 ease-out
                              shadow-sm hover:shadow-md hover:shadow-primary/3
-                             animate-fade-in"
+                             animate-fade-in
+                             line-clamp-2 text-left max-w-md"
                   >
                     <span className="relative">
                       {example}
@@ -2051,26 +2061,6 @@ const Index = () => {
           </Button>
           </section>
 
-          {/* Vibe Starters - Quick Inspiration */}
-          <section className="max-w-2xl mx-auto space-y-4 mb-12" aria-labelledby="vibe-starters-heading">
-            <h2 id="vibe-starters-heading" className="sr-only">Vibe Starters</h2>
-          <p className="text-sm text-muted-foreground text-center">
-            or start from these →
-          </p>
-          <div className="flex flex-wrap gap-2 justify-center">
-            {VIBE_STARTERS.map((starter) => (
-              <button
-                key={starter.title}
-                onClick={() => {
-                  setVibeDescription(starter.description);
-                }}
-                className="px-4 py-2 rounded-full border border-border bg-card hover:bg-accent transition-all text-sm lowercase"
-              >
-                {starter.title}
-              </button>
-            ))}
-          </div>
-          </section>
 
           {/* Tabs System - Three Experiences */}
           <section className="max-w-2xl mx-auto mt-8" aria-labelledby="experiences-heading">

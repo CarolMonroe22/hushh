@@ -400,6 +400,93 @@ const Index = () => {
     }
   };
 
+  const handleLoadExample = async (exampleType: 'spa' | 'sleep') => {
+    if (!user) {
+      setShowAuthModal(true);
+      toast({
+        title: "✨ Create Account",
+        description: "Sign up to listen to examples",
+      });
+      return;
+    }
+
+    try {
+      // Fetch user sessions to find the example
+      const { data: sessions, error } = await supabase
+        .from('user_sessions')
+        .select('*')
+        .eq('user_id', user.id)
+        .order('created_at', { ascending: false });
+
+      if (error) throw error;
+
+      const userSessions = sessions as UserSession[];
+
+      let exampleSession: UserSession | null = null;
+
+      if (exampleType === 'spa') {
+        // Find spa binaural session
+        exampleSession = userSessions?.find(s => 
+          s.session_type === 'binaural' && 
+          s.binaural_experience?.toLowerCase().includes('spa')
+        ) || null;
+      } else if (exampleType === 'sleep') {
+        // Find "can you help me sleep" custom session
+        exampleSession = userSessions?.find(s => 
+          (s.session_type === 'creator' || s.session_type === 'preset') && 
+          s.vibe_description?.toLowerCase().includes('help me sleep')
+        ) || null;
+      }
+
+      if (!exampleSession) {
+        toast({
+          title: "💤 Example not available",
+          description: "This example hasn't been created in your library yet",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      // Pre-load the configuration based on session type
+      if (exampleSession.session_type === 'binaural' && exampleSession.binaural_experience) {
+        setSelectedExperience(exampleSession.binaural_experience as BinauralExperience);
+      } else if (exampleSession.session_type === 'creator' && exampleSession.vibe_description) {
+        setVibeDescription(exampleSession.vibe_description);
+      } else if (exampleSession.session_type === 'preset') {
+        if (exampleSession.mood) setSelectedMood(exampleSession.mood as Mood);
+        if (exampleSession.ambient) setSelectedAmbient(exampleSession.ambient as Ambient);
+      }
+
+      // Play the audio
+      await handlePlaySession(exampleSession);
+
+      // Scroll to relevant section
+      setTimeout(() => {
+        if (exampleType === 'spa') {
+          const binauralSection = document.querySelector('[aria-labelledby="binaural-heading"]');
+          binauralSection?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        } else if (exampleType === 'sleep') {
+          const creatorSection = document.querySelector('[aria-labelledby="create-vibe-heading"]');
+          creatorSection?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+      }, 500);
+
+      toast({
+        title: "✨ Example loaded",
+        description: "Configuration pre-loaded. You can modify and regenerate!",
+        duration: 3000,
+      });
+
+    } catch (error) {
+      console.error("Error loading example:", error);
+      toast({
+        title: "❌ Error",
+        description: "Could not load example",
+        variant: "destructive",
+      });
+    }
+  };
+
   const handlePlaySession = async (session: UserSession) => {
     console.log('Playing session from history:', session);
 
@@ -1803,6 +1890,39 @@ const Index = () => {
             <p className="text-lg md:text-xl text-muted-foreground tracking-wide">
               build beautiful feelings, in sound
             </p>
+          </section>
+
+          {/* Example Audio Buttons */}
+          <section className="max-w-2xl mx-auto mb-12 space-y-4" aria-labelledby="examples-heading">
+            <h2 id="examples-heading" className="sr-only">Audio Examples</h2>
+            <p className="text-xs text-muted-foreground uppercase tracking-wider text-center">
+              ✨ listen to examples
+            </p>
+            <div className="flex flex-wrap justify-center gap-3">
+              {/* Spa Example - Binaural */}
+              <button
+                onClick={() => handleLoadExample('spa')}
+                disabled={isGenerating}
+                className="group flex items-center gap-2 px-5 py-2.5 rounded-full border border-border/70 bg-card/50 hover:bg-accent hover:border-border transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                <span className="text-sm lowercase font-medium">spa vibes</span>
+                <span className="text-xs text-muted-foreground/70 opacity-0 group-hover:opacity-100 transition-opacity">
+                  (binaural)
+                </span>
+              </button>
+              
+              {/* Sleep Example - Creator */}
+              <button
+                onClick={() => handleLoadExample('sleep')}
+                disabled={isGenerating}
+                className="group flex items-center gap-2 px-5 py-2.5 rounded-full border border-border/70 bg-card/50 hover:bg-accent hover:border-border transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                <span className="text-sm lowercase font-medium">can you help me sleep</span>
+                <span className="text-xs text-muted-foreground/70 opacity-0 group-hover:opacity-100 transition-opacity">
+                  (custom)
+                </span>
+              </button>
+            </div>
           </section>
 
           {/* Main Input Area - Creator Mode */}

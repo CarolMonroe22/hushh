@@ -218,37 +218,6 @@ const JOURNEY_VOICE_SETTINGS: Record<VoiceJourney, {
   }
 };
 
-const VIBE_STARTERS = [
-  {
-    title: "deep focus",
-    description: "I need to concentrate deeply on complex work. Create a focused atmosphere with subtle background sounds that help me stay in the zone without any distractions.",
-  },
-  {
-    title: "calm evening",
-    description: "Help me wind down after a long day. I want gentle, soothing sounds that ease my mind and help me transition into a peaceful evening routine.",
-  },
-  {
-    title: "creative flow",
-    description: "I'm working on something creative and need sounds that inspire without overwhelming. Something that keeps my energy up while letting my imagination flow.",
-  },
-  {
-    title: "peaceful sleep",
-    description: "Guide me into deep, restful sleep with calming sounds that quiet my racing thoughts and create a cocoon of tranquility around me.",
-  },
-  {
-    title: "manifestation",
-    description: "Help me manifest my goals and dreams. I want powerful, affirming whispers that strengthen my belief in what I'm creating and fill me with confidence and clarity about my vision.",
-  },
-  {
-    title: "prayer",
-    description: "Create a sacred space for prayer and spiritual connection. I want gentle, reverent whispers that help me feel grounded, connected to something greater, and at peace in this moment of reflection.",
-  },
-  {
-    title: "stoic",
-    description: "I need strength and clarity rooted in ancient wisdom. Create a grounded atmosphere that reminds me to focus on what I can control, accept what I cannot change, and act with virtue and reason regardless of external circumstances.",
-  },
-];
-
 const TITLE_ROTATIONS = [
   "ASMR",
   "Meditation", 
@@ -299,23 +268,68 @@ const Index = () => {
   const [exampleIndex, setExampleIndex] = useState(0);
 
   const allExamples = [
-    // Detailed prompts from VIBE_STARTERS
-    "I need to concentrate deeply on complex work. Create a focused atmosphere with subtle background sounds that help me stay in the zone without any distractions.",
-    "Help me wind down after a long day. I want gentle, soothing sounds that ease my mind and help me transition into a peaceful evening routine.",
-    "I'm working on something creative and need sounds that inspire without overwhelming. Something that keeps my energy up while letting my imagination flow.",
-    "Guide me into deep, restful sleep with calming sounds that quiet my racing thoughts and create a cocoon of tranquility around me.",
-    "Help me manifest my goals and dreams. I want powerful, affirming whispers that strengthen my belief in what I'm creating and fill me with confidence and clarity about my vision.",
-    "Create a sacred space for prayer and spiritual connection. I want gentle, reverent whispers that help me feel grounded, connected to something greater, and at peace in this moment of reflection.",
-    "I need strength and clarity rooted in ancient wisdom. Create a grounded atmosphere that reminds me to focus on what I can control, accept what I cannot change, and act with virtue and reason.",
+    // Detailed prompts with short titles
+    {
+      title: "deep focus",
+      description: "I need to concentrate deeply on complex work. Create a focused atmosphere with subtle background sounds that help me stay in the zone without any distractions."
+    },
+    {
+      title: "calm evening",
+      description: "Help me wind down after a long day. I want gentle, soothing sounds that ease my mind and help me transition into a peaceful evening routine."
+    },
+    {
+      title: "creative flow",
+      description: "I'm working on something creative and need sounds that inspire without overwhelming. Something that keeps my energy up while letting my imagination flow."
+    },
+    {
+      title: "peaceful sleep",
+      description: "Guide me into deep, restful sleep with calming sounds that quiet my racing thoughts and create a cocoon of tranquility around me."
+    },
+    {
+      title: "manifestation",
+      description: "Help me manifest my goals and dreams. I want powerful, affirming whispers that strengthen my belief in what I'm creating and fill me with confidence and clarity about my vision."
+    },
+    {
+      title: "prayer",
+      description: "Create a sacred space for prayer and spiritual connection. I want gentle, reverent whispers that help me feel grounded, connected to something greater, and at peace in this moment of reflection."
+    },
+    {
+      title: "stoic wisdom",
+      description: "I need strength and clarity rooted in ancient wisdom. Create a grounded atmosphere that reminds me to focus on what I can control, accept what I cannot change, and act with virtue and reason."
+    },
     // Conversational examples
-    "Can you help me sleep?",
-    "Confidence boost for my presentation",
-    "How can I calm my anxiety with ocean?",
-    "Morning energy, no background music",
-    "Help me meditate with singing bowls",
-    "Study session with male voice and rain",
-    "Can you create a peaceful lullaby?",
-    "I need deep focus with rain sounds",
+    {
+      title: "help me sleep",
+      description: "Can you help me sleep?"
+    },
+    {
+      title: "confidence boost",
+      description: "Confidence boost for my presentation"
+    },
+    {
+      title: "calm anxiety",
+      description: "How can I calm my anxiety with ocean?"
+    },
+    {
+      title: "morning energy",
+      description: "Morning energy, no background music"
+    },
+    {
+      title: "meditation",
+      description: "Help me meditate with singing bowls"
+    },
+    {
+      title: "study session",
+      description: "Study session with male voice and rain"
+    },
+    {
+      title: "peaceful lullaby",
+      description: "Can you create a peaceful lullaby?"
+    },
+    {
+      title: "focus with rain",
+      description: "I need deep focus with rain sounds"
+    }
   ];
   
   const audioRef = useRef<HTMLAudioElement | null>(null);
@@ -2027,19 +2041,18 @@ const Index = () => {
                 .slice(0, 3)
                 .map((example) => (
                   <button
-                    key={`${example}-${exampleIndex}`}
-                    onClick={() => setVibeDescription(example)}
+                    key={`${example.title}-${exampleIndex}`}
+                    onClick={() => setVibeDescription(example.description)}
                     className="group px-3.5 py-2 rounded-lg text-xs font-medium
                              bg-card/60 border border-border/40
                              hover:bg-card/80 hover:border-primary/30
                              text-foreground/70 hover:text-foreground/90
                              transition-all duration-1000 ease-out
                              shadow-sm hover:shadow-md hover:shadow-primary/3
-                             animate-fade-in
-                             line-clamp-2 text-left max-w-md"
+                             animate-fade-in"
                   >
                     <span className="relative">
-                      {example}
+                      {example.title}
                       <span className="absolute inset-0 opacity-0 group-hover:opacity-30 
                                    bg-gradient-to-r from-primary/5 to-transparent 
                                    blur-2xl transition-opacity duration-1000 ease-out" 

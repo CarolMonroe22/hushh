@@ -2219,14 +2219,22 @@ const Index = () => {
                   className="w-full py-6 text-base lowercase tracking-wide bg-primary/90 hover:bg-primary transition-all"
                   size="lg"
                 >
-                  {isGenerating ? "creating 3D experience..." : "🎧 start 3D experience"}
+                  {isGenerating ? "🎧 creating 3D experience... put on your headphones!" : "🎧 start 3D experience"}
                 </Button>
 
-                {/* Tip sobre auriculares */}
-                <div className="text-center">
-                  <p className="text-xs text-muted-foreground/70 italic">
-                    💡 tip: use quality headphones for best spatial effect
-                  </p>
+                {/* Tip sobre auriculares - más prominente durante carga */}
+                <div className="text-center mt-6">
+                  {isGenerating ? (
+                    <div className="bg-primary/10 border border-primary/30 rounded-lg p-4 animate-pulse">
+                      <p className="text-sm font-medium text-primary">
+                        🎧 Put on your headphones now for the full 3D spatial audio experience
+                      </p>
+                    </div>
+                  ) : (
+                    <p className="text-xs text-muted-foreground/70 italic">
+                      💡 tip: use quality headphones for best spatial effect
+                    </p>
+                  )}
                 </div>
               </TabsContent>
 

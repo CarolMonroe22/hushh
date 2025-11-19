@@ -14,7 +14,7 @@ import AmbientBackground from "@/components/AmbientBackground";
 import { SessionHistory } from "@/components/SessionHistory";
 import { AuthModal } from "@/components/AuthModal";
 import { type UserSession } from "@/hooks/useUserSessions";
-import { History, LogOut, Archive, User, ChevronDown } from "lucide-react";
+import { History, LogOut, Archive, User, ChevronDown, Play, Loader2 } from "lucide-react";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
@@ -292,6 +292,8 @@ const Index = () => {
   const [showHistory, setShowHistory] = useState(false);
   const [showAuthModal, setShowAuthModal] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
+  const [isLoadingExample, setIsLoadingExample] = useState<string | null>(null);
+  const [currentPlayingExample, setCurrentPlayingExample] = useState<string | null>(null);
   
   // Rotation state for prompt examples
   const [exampleIndex, setExampleIndex] = useState(0);
@@ -410,6 +412,8 @@ const Index = () => {
       return;
     }
 
+    setIsLoadingExample(exampleType);
+
     try {
       // Fetch user sessions to find the example
       const { data: sessions, error } = await supabase
@@ -457,6 +461,9 @@ const Index = () => {
         if (exampleSession.ambient) setSelectedAmbient(exampleSession.ambient as Ambient);
       }
 
+      // Set current playing example
+      setCurrentPlayingExample(exampleType);
+
       // Play the audio
       await handlePlaySession(exampleSession);
 
@@ -484,6 +491,8 @@ const Index = () => {
         description: "Could not load example",
         variant: "destructive",
       });
+    } finally {
+      setIsLoadingExample(null);
     }
   };
 
@@ -746,6 +755,7 @@ const Index = () => {
               if (timerRef.current) clearInterval(timerRef.current);
               setIsPlaying(false);
               setIsComplete(true);
+              setCurrentPlayingExample(null);
             }
           };
         }
@@ -907,6 +917,7 @@ const Index = () => {
               if (timerRef.current) clearInterval(timerRef.current);
               setIsPlaying(false);
               setIsComplete(true);
+              setCurrentPlayingExample(null);
             }
           };
         }
@@ -1037,6 +1048,7 @@ const Index = () => {
               if (timerRef.current) clearInterval(timerRef.current);
               setIsPlaying(false);
               setIsComplete(true);
+              setCurrentPlayingExample(null);
             }
           };
         }
@@ -1226,6 +1238,7 @@ const Index = () => {
               ambientAudioRef.currentTime = 0;
             }
             setIsComplete(true);
+            setCurrentPlayingExample(null);
           }
         };
       }
@@ -1374,6 +1387,7 @@ const Index = () => {
       setIsPaused(false);
       setLoopCount(0);
       setTimeLeft(60);
+      setCurrentPlayingExample(null);
       
       toast({
         title: "⏹️ Stopped",
@@ -1902,24 +1916,42 @@ const Index = () => {
               {/* Spa Example - Binaural */}
               <button
                 onClick={() => handleLoadExample('spa')}
-                disabled={isGenerating}
-                className="group flex items-center gap-2 px-5 py-2.5 rounded-full border border-border/70 bg-card/50 hover:bg-accent hover:border-border transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                disabled={isGenerating || isLoadingExample !== null}
+                className={`group flex items-center gap-2 px-5 py-2.5 rounded-full border transition-all disabled:opacity-50 disabled:cursor-not-allowed ${
+                  currentPlayingExample === 'spa'
+                    ? 'bg-primary/20 border-primary shadow-lg shadow-primary/20'
+                    : 'border-border/70 bg-card/50 hover:bg-accent hover:border-border'
+                }`}
               >
+                {isLoadingExample === 'spa' ? (
+                  <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                ) : (
+                  <Play className="h-3.5 w-3.5 group-hover:scale-110 transition-transform" />
+                )}
                 <span className="text-sm lowercase font-medium">spa vibes</span>
                 <span className="text-xs text-muted-foreground/70 opacity-0 group-hover:opacity-100 transition-opacity">
-                  (binaural)
+                  (binaural · 5 min)
                 </span>
               </button>
               
               {/* Sleep Example - Creator */}
               <button
                 onClick={() => handleLoadExample('sleep')}
-                disabled={isGenerating}
-                className="group flex items-center gap-2 px-5 py-2.5 rounded-full border border-border/70 bg-card/50 hover:bg-accent hover:border-border transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                disabled={isGenerating || isLoadingExample !== null}
+                className={`group flex items-center gap-2 px-5 py-2.5 rounded-full border transition-all disabled:opacity-50 disabled:cursor-not-allowed ${
+                  currentPlayingExample === 'sleep'
+                    ? 'bg-primary/20 border-primary shadow-lg shadow-primary/20'
+                    : 'border-border/70 bg-card/50 hover:bg-accent hover:border-border'
+                }`}
               >
+                {isLoadingExample === 'sleep' ? (
+                  <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                ) : (
+                  <Play className="h-3.5 w-3.5 group-hover:scale-110 transition-transform" />
+                )}
                 <span className="text-sm lowercase font-medium">can you help me sleep</span>
                 <span className="text-xs text-muted-foreground/70 opacity-0 group-hover:opacity-100 transition-opacity">
-                  (custom)
+                  (custom · 3 min)
                 </span>
               </button>
             </div>

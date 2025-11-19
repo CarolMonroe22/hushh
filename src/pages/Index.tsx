@@ -284,7 +284,7 @@ const Index = () => {
   const [selectedJourney, setSelectedJourney] = useState<VoiceJourney | null>(null);
   const [withAmbient, setWithAmbient] = useState(false);
   const [ambientForJourney, setAmbientForJourney] = useState<Ambient | null>(null);
-  const [loopEnabled, setLoopEnabled] = useState(false);
+  const [loopEnabled, setLoopEnabled] = useState(true);
   const [loopCount, setLoopCount] = useState(0);
   const [voiceGender, setVoiceGender] = useState<"female" | "male">("female");
   const [isPaused, setIsPaused] = useState(false);
@@ -2040,45 +2040,6 @@ const Index = () => {
             </div>
           </div>
 
-          {/* Loop Mode Toggle and Save Session */}
-          <div className="flex items-center gap-4 p-2.5 rounded-md bg-card/20 border border-border/20">
-            <div className="flex items-center gap-1.5">
-              <Switch 
-                checked={loopEnabled} 
-                onCheckedChange={setLoopEnabled}
-                id="loop-creator"
-              />
-              <label htmlFor="loop-creator" className="text-xs lowercase tracking-wide cursor-pointer text-foreground/50 hover:text-foreground/70 transition-colors duration-500">
-                loop mode
-              </label>
-              <span className={`text-xs text-muted-foreground/50 transition-opacity duration-700 ${
-                isGenerating || loopEnabled ? "opacity-100" : "opacity-0"
-              }`}>
-                {loopEnabled ? "loop" : "once"}
-              </span>
-            </div>
-            
-            {user && <div className="h-4 w-px bg-border/20" />}
-            
-            {user && (
-              <div className="flex items-center gap-1.5">
-                <Switch 
-                  checked={saveSession} 
-                  onCheckedChange={setSaveSession}
-                  id="save-session-creator"
-                />
-                <label htmlFor="save-session-creator" className="text-xs lowercase tracking-wide cursor-pointer text-foreground/50 hover:text-foreground/70 transition-colors duration-500">
-                  save to library
-                </label>
-                <span className={`text-xs text-muted-foreground/50 transition-opacity duration-700 ${
-                  isGenerating || saveSession ? "opacity-100" : "opacity-0"
-                }`}>
-                  {saveSession ? "saved" : "temp"}
-                </span>
-              </div>
-            )}
-          </div>
-
           {/* Generate Button - Prominent */}
           <Button
             onClick={() => requireAuth(startCreatorSession)}
@@ -2195,130 +2156,6 @@ const Index = () => {
                   </div>
                 </div>
 
-                {/* Loop Mode Toggle and Save Session */}
-                <div className="flex items-center gap-4 p-2.5 rounded-md bg-card/20 border border-border/20">
-                  <div className="flex items-center gap-1.5">
-                    <Switch 
-                      checked={loopEnabled} 
-                      onCheckedChange={setLoopEnabled}
-                      id="loop-preset"
-                    />
-                    <label htmlFor="loop-preset" className="text-xs lowercase tracking-wide cursor-pointer text-foreground/50 hover:text-foreground/70 transition-colors duration-500">
-                      loop mode
-                    </label>
-                    <span className={`text-xs text-muted-foreground/50 transition-opacity duration-700 ${
-                      isGenerating || loopEnabled ? "opacity-100" : "opacity-0"
-                    }`}>
-                      {loopEnabled ? "loop" : "once"}
-                    </span>
-                  </div>
-                  
-                  {user && <div className="h-4 w-px bg-border/20" />}
-                  
-                  {user && (
-                    <div className="flex items-center gap-1.5">
-                      <Switch 
-                        checked={saveSession} 
-                        onCheckedChange={setSaveSession}
-                        id="save-session-preset"
-                      />
-                      <label htmlFor="save-session-preset" className="text-xs lowercase tracking-wide cursor-pointer text-foreground/50 hover:text-foreground/70 transition-colors duration-500">
-                        save to library
-                      </label>
-                      <span className={`text-xs text-muted-foreground/50 transition-opacity duration-700 ${
-                        isGenerating || saveSession ? "opacity-100" : "opacity-0"
-                      }`}>
-                        {saveSession ? "saved" : "temp"}
-                      </span>
-                    </div>
-                  )}
-                </div>
-
-                {/* Generate Preset Button */}
-                <Button
-                  onClick={() => requireAuth(startSession)}
-                  disabled={isGenerating || !selectedMood || !selectedAmbient}
-                  className="w-full py-6 text-base lowercase tracking-wide"
-                  size="lg"
-                >
-                  {isGenerating ? "creating..." : "generate preset"}
-                </Button>
-              </TabsContent>
-
-              {/* 3D Binaural Content */}
-              <TabsContent value="binaural" className="space-y-6 mt-0">
-                <div className="text-center space-y-2 mb-6">
-                  <p className="text-sm text-muted-foreground">
-                    immersive 3D spatial audio experiences
-                  </p>
-                </div>
-
-                {/* Binaural Experience Selection */}
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                  {BINAURAL_EXPERIENCES.map((exp) => (
-                    <button
-                      key={exp.value}
-                      onClick={() => setSelectedExperience(exp.value)}
-                      className={`p-4 rounded-lg border transition-all text-left ${
-                        selectedExperience === exp.value
-                          ? "border-primary bg-primary/10"
-                          : "border-border bg-card hover:bg-accent"
-                      }`}
-                    >
-                      <div className="flex items-start gap-3">
-                        <div className="text-3xl">{exp.emoji}</div>
-                        <div className="flex-1">
-                          <div className="text-sm font-medium lowercase mb-1">
-                            {exp.label}
-                          </div>
-                          <div className="text-xs text-muted-foreground leading-tight">
-                            {exp.shortDesc}
-                          </div>
-                        </div>
-                      </div>
-                    </button>
-                  ))}
-                </div>
-
-                {/* Loop Mode Toggle and Save Session */}
-                <div className="flex items-center gap-4 p-2.5 rounded-md bg-card/20 border border-border/20">
-                  <div className="flex items-center gap-1.5">
-                    <Switch 
-                      checked={loopEnabled} 
-                      onCheckedChange={setLoopEnabled}
-                      id="loop-binaural"
-                    />
-                    <label htmlFor="loop-binaural" className="text-xs lowercase tracking-wide cursor-pointer text-foreground/50 hover:text-foreground/70 transition-colors duration-500">
-                      loop mode
-                    </label>
-                    <span className={`text-xs text-muted-foreground/50 transition-opacity duration-700 ${
-                      isGenerating || loopEnabled ? "opacity-100" : "opacity-0"
-                    }`}>
-                      {loopEnabled ? "loop" : "once"}
-                    </span>
-                  </div>
-                  
-                  {user && <div className="h-4 w-px bg-border/20" />}
-                  
-                  {user && (
-                    <div className="flex items-center gap-1.5">
-                      <Switch 
-                        checked={saveSession} 
-                        onCheckedChange={setSaveSession}
-                        id="save-session-binaural"
-                      />
-                      <label htmlFor="save-session-binaural" className="text-xs lowercase tracking-wide cursor-pointer text-foreground/50 hover:text-foreground/70 transition-colors duration-500">
-                        save to library
-                      </label>
-                      <span className={`text-xs text-muted-foreground/50 transition-opacity duration-700 ${
-                        isGenerating || saveSession ? "opacity-100" : "opacity-0"
-                      }`}>
-                        {saveSession ? "saved" : "temp"}
-                      </span>
-                    </div>
-                  )}
-                </div>
-
                 {/* Generate Button */}
                 <Button
                   onClick={() => requireAuth(startBinauralExperience)}
@@ -2432,45 +2269,6 @@ const Index = () => {
                           </button>
                         ))}
                       </div>
-                    </div>
-                  )}
-                </div>
-
-                {/* Loop Mode Toggle and Save Session */}
-                <div className="flex items-center gap-4 p-2.5 rounded-md bg-card/20 border border-border/20">
-                  <div className="flex items-center gap-1.5">
-                    <Switch 
-                      checked={loopEnabled} 
-                      onCheckedChange={setLoopEnabled}
-                      id="loop-voice"
-                    />
-                    <label htmlFor="loop-voice" className="text-xs lowercase tracking-wide cursor-pointer text-foreground/50 hover:text-foreground/70 transition-colors duration-500">
-                      loop mode
-                    </label>
-                    <span className={`text-xs text-muted-foreground/50 transition-opacity duration-700 ${
-                      isGenerating || loopEnabled ? "opacity-100" : "opacity-0"
-                    }`}>
-                      {loopEnabled ? "loop" : "once"}
-                    </span>
-                  </div>
-                  
-                  {user && <div className="h-4 w-px bg-border/20" />}
-                  
-                  {user && (
-                    <div className="flex items-center gap-1.5">
-                      <Switch 
-                        checked={saveSession} 
-                        onCheckedChange={setSaveSession}
-                        id="save-session-voice"
-                      />
-                      <label htmlFor="save-session-voice" className="text-xs lowercase tracking-wide cursor-pointer text-foreground/50 hover:text-foreground/70 transition-colors duration-500">
-                        save to library
-                      </label>
-                      <span className={`text-xs text-muted-foreground/50 transition-opacity duration-700 ${
-                        isGenerating || saveSession ? "opacity-100" : "opacity-0"
-                      }`}>
-                        {saveSession ? "saved" : "temp"}
-                      </span>
                     </div>
                   )}
                 </div>

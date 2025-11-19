@@ -1901,9 +1901,9 @@ const Index = () => {
                 {TITLE_ROTATIONS[currentTitleIndex]}
               </span>
             </h1>
-            <p className="text-lg md:text-xl text-muted-foreground tracking-wide">
-              build beautiful feelings, in sound
-            </p>
+              <p className="text-lg md:text-xl text-muted-foreground tracking-wide">
+                personalized audio experiences for rest, focus & relaxation
+              </p>
           </section>
 
           {/* Example Audio Buttons */}

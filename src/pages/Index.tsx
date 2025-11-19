@@ -6,7 +6,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/useAuth";
@@ -263,6 +263,7 @@ const Index = () => {
   const [isScrolled, setIsScrolled] = useState(false);
   const [isLoadingExample, setIsLoadingExample] = useState<string | null>(null);
   const [currentPlayingExample, setCurrentPlayingExample] = useState<string | null>(null);
+  const [showHeadphoneModal, setShowHeadphoneModal] = useState(false);
   
   // Rotation state for prompt examples
   const [exampleIndex, setExampleIndex] = useState(0);
@@ -1102,6 +1103,11 @@ const Index = () => {
     } finally {
       setIsGenerating(false);
     }
+  };
+
+  const handleBinauralConfirm = () => {
+    setShowHeadphoneModal(false);
+    startBinauralExperience();
   };
 
   const startVoiceJourney = async () => {
@@ -2214,7 +2220,7 @@ const Index = () => {
 
                 {/* Botón de generación */}
                 <Button
-                  onClick={() => requireAuth(startBinauralExperience)}
+                  onClick={() => requireAuth(() => setShowHeadphoneModal(true))}
                   disabled={isGenerating || !selectedExperience}
                   className="w-full py-6 text-base lowercase tracking-wide bg-primary/90 hover:bg-primary transition-all"
                   size="lg"
@@ -2378,6 +2384,55 @@ const Index = () => {
           </div>
         </div>
       )}
+
+      {/* Modal de Confirmación de Audífonos para 3D Binaural */}
+      <Dialog open={showHeadphoneModal} onOpenChange={setShowHeadphoneModal}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle className="text-xl flex items-center gap-2">
+              <span>🎧</span>
+              <span className="lowercase">headphones required</span>
+            </DialogTitle>
+            <DialogDescription className="space-y-4 pt-4">
+              <div className="space-y-3 text-sm text-foreground/80">
+                <p>
+                  3D binaural audio creates an <strong>immersive spatial sound experience</strong> that 
+                  simulates real-world environments and positions.
+                </p>
+                
+                <div className="bg-muted/50 rounded-lg p-4 space-y-2">
+                  <p className="font-medium text-foreground">Why headphones are essential:</p>
+                  <ul className="space-y-1.5 text-xs list-disc list-inside">
+                    <li>Left and right channels deliver different audio signals</li>
+                    <li>Creates the illusion of 3D space and directionality</li>
+                    <li>Speakers cannot replicate the isolated channel effect</li>
+                    <li>Best experienced with quality over-ear or in-ear headphones</li>
+                  </ul>
+                </div>
+
+                <p className="text-muted-foreground italic text-xs">
+                  Without headphones, you'll hear a flat stereo mix that loses the 3D spatial magic.
+                </p>
+              </div>
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter className="flex-col sm:flex-row gap-2 sm:gap-0">
+            <Button
+              variant="outline"
+              onClick={() => setShowHeadphoneModal(false)}
+              className="lowercase tracking-wide"
+            >
+              cancel
+            </Button>
+            <Button
+              onClick={handleBinauralConfirm}
+              className="lowercase tracking-wide bg-primary hover:bg-primary/90"
+            >
+              🎧 I have headphones ready
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };

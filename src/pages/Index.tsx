@@ -429,71 +429,52 @@ const Index = () => {
   };
 
   const handleLoadExample = async (exampleType: 'spa' | 'sleep') => {
-    if (!user) {
-      setShowAuthModal(true);
-      toast({
-        title: "✨ Create Account",
-        description: "Sign up to listen to examples",
-      });
-      return;
-    }
-
     setIsLoadingExample(exampleType);
 
     try {
-      // Fetch user sessions to find the example
-      const { data: sessions, error } = await supabase
-        .from('user_sessions')
-        .select('*')
-        .eq('user_id', user.id)
-        .order('created_at', { ascending: false });
-
-      if (error) throw error;
-
-      const userSessions = sessions as UserSession[];
-
-      let exampleSession: UserSession | null = null;
-
+      // Configurar la UI según el tipo de ejemplo
       if (exampleType === 'spa') {
-        // Find spa binaural session
-        exampleSession = userSessions?.find(s => 
-          s.session_type === 'binaural' && 
-          s.binaural_experience?.toLowerCase().includes('spa')
-        ) || null;
+        setSelectedExperience('spa');
       } else if (exampleType === 'sleep') {
-        // Find "can you help me sleep" custom session
-        exampleSession = userSessions?.find(s => 
-          (s.session_type === 'creator' || s.session_type === 'preset') && 
-          s.vibe_description?.toLowerCase().includes('help me sleep')
-        ) || null;
+        setVibeDescription('help me fall asleep peacefully with calming ambience');
       }
 
-      if (!exampleSession) {
+      // Cargar audio desde archivos públicos
+      const audioUrl = `/examples/${exampleType}.mp3`;
+      
+      if (audioRef.current) {
+        audioRef.current.pause();
+        audioRef.current.currentTime = 0;
+      }
+
+      const audio = new Audio(audioUrl);
+      audioRef.current = audio;
+
+      audio.onloadedmetadata = () => {
+        setCurrentPlayingExample(exampleType);
+      };
+
+      audio.onended = () => {
+        setIsPlaying(false);
+        setCurrentPlayingExample(null);
+        setIsLoadingExample(null);
+      };
+
+      audio.onerror = () => {
         toast({
-          title: "💤 Example not available",
-          description: "This example hasn't been created in your library yet",
+          title: "❌ Error loading example",
+          description: "Could not load the example audio",
           variant: "destructive",
         });
-        return;
-      }
+        setIsLoadingExample(null);
+        setCurrentPlayingExample(null);
+      };
 
-      // Pre-load the configuration based on session type
-      if (exampleSession.session_type === 'binaural' && exampleSession.binaural_experience) {
-        setSelectedExperience(exampleSession.binaural_experience as BinauralExperience);
-      } else if (exampleSession.session_type === 'creator' && exampleSession.vibe_description) {
-        setVibeDescription(exampleSession.vibe_description);
-      } else if (exampleSession.session_type === 'preset') {
-        if (exampleSession.mood) setSelectedMood(exampleSession.mood as Mood);
-        if (exampleSession.ambient) setSelectedAmbient(exampleSession.ambient as Ambient);
-      }
+      await audio.play();
+      setIsPlaying(true);
+      setIsLoadingExample(null);
 
-      // Set current playing example
-      setCurrentPlayingExample(exampleType);
-
-      // Play the audio
-      await handlePlaySession(exampleSession);
-
-      // Scroll to relevant section
+      // Scroll a la sección relevante
       setTimeout(() => {
         if (exampleType === 'spa') {
           const binauralSection = document.querySelector('[aria-labelledby="binaural-heading"]');
@@ -502,21 +483,22 @@ const Index = () => {
           const creatorSection = document.querySelector('[aria-labelledby="create-vibe-heading"]');
           creatorSection?.scrollIntoView({ behavior: 'smooth', block: 'start' });
         }
-      }, 500);
+      }, 300);
 
       toast({
-        title: "✨ Example loaded",
-        description: "Configuration pre-loaded. You can modify and regenerate!",
-        duration: 3000,
+        title: "🎧 Example playing",
+        description: `Listening to ${exampleType === 'spa' ? 'spa vibes' : 'sleep helper'}`,
       });
 
     } catch (error) {
-      console.error("Error loading example:", error);
+      console.error('Error loading example:', error);
       toast({
         title: "❌ Error",
-        description: "Could not load example",
+        description: "Could not load example audio",
         variant: "destructive",
       });
+      setIsLoadingExample(null);
+      setCurrentPlayingExample(null);
     } finally {
       setIsLoadingExample(null);
     }

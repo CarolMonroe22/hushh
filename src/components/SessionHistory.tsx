@@ -140,7 +140,7 @@ export const SessionHistory = ({ open, onOpenChange, onPlaySession }: SessionHis
                 <div className="text-center py-12">
                   <p className="text-muted-foreground lowercase mb-2">no sessions yet</p>
                   <p className="text-sm text-muted-foreground lowercase">
-                    generate your first session and check "save to library"
+                    generate your first session to start your library
                   </p>
                 </div>
               ) : (

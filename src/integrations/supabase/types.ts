@@ -79,6 +79,60 @@ export type Database = {
           },
         ]
       }
+      example_sessions: {
+        Row: {
+          ambient: string | null
+          audio_url: string
+          binaural_experience: string | null
+          created_at: string | null
+          description: string | null
+          display_order: number | null
+          duration_seconds: number | null
+          example_key: string
+          id: string
+          is_featured: boolean | null
+          mood: string | null
+          session_type: string
+          title: string
+          updated_at: string | null
+          vibe_description: string | null
+        }
+        Insert: {
+          ambient?: string | null
+          audio_url?: string
+          binaural_experience?: string | null
+          created_at?: string | null
+          description?: string | null
+          display_order?: number | null
+          duration_seconds?: number | null
+          example_key: string
+          id?: string
+          is_featured?: boolean | null
+          mood?: string | null
+          session_type: string
+          title: string
+          updated_at?: string | null
+          vibe_description?: string | null
+        }
+        Update: {
+          ambient?: string | null
+          audio_url?: string
+          binaural_experience?: string | null
+          created_at?: string | null
+          description?: string | null
+          display_order?: number | null
+          duration_seconds?: number | null
+          example_key?: string
+          id?: string
+          is_featured?: boolean | null
+          mood?: string | null
+          session_type?: string
+          title?: string
+          updated_at?: string | null
+          vibe_description?: string | null
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           avatar_url: string | null

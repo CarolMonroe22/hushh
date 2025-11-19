@@ -432,22 +432,50 @@ const Index = () => {
     setIsLoadingExample(exampleType);
 
     try {
-      // Configurar la UI según el tipo de ejemplo
-      if (exampleType === 'spa') {
-        setSelectedExperience('spa');
-      } else if (exampleType === 'sleep') {
-        setVibeDescription('help me fall asleep peacefully with calming ambience');
+      // Obtener ejemplo de la tabla pública
+      const { data: example, error } = await supabase
+        .from('example_sessions')
+        .select('*')
+        .eq('example_key', exampleType)
+        .single();
+
+      if (error) throw error;
+
+      if (!example) {
+        toast({
+          title: "❌ Example not found",
+          description: "This example is not available",
+          variant: "destructive",
+        });
+        setIsLoadingExample(null);
+        return;
       }
 
-      // Cargar audio desde archivos públicos
-      const audioUrl = `/examples/${exampleType}.mp3`;
-      
+      // Verificar si hay audio disponible
+      if (!example.audio_url || example.audio_url === '') {
+        toast({
+          title: "⏳ Example not ready",
+          description: "This example audio hasn't been generated yet",
+          variant: "destructive",
+        });
+        setIsLoadingExample(null);
+        return;
+      }
+
+      // Configurar UI según el tipo de ejemplo
+      if (example.session_type === 'binaural' && example.binaural_experience) {
+        setSelectedExperience(example.binaural_experience as BinauralExperience);
+      } else if (example.session_type === 'creator' && example.vibe_description) {
+        setVibeDescription(example.vibe_description);
+      }
+
+      // Cargar y reproducir audio
       if (audioRef.current) {
         audioRef.current.pause();
         audioRef.current.currentTime = 0;
       }
 
-      const audio = new Audio(audioUrl);
+      const audio = new Audio(example.audio_url);
       audioRef.current = audio;
 
       audio.onloadedmetadata = () => {
@@ -476,18 +504,18 @@ const Index = () => {
 
       // Scroll a la sección relevante
       setTimeout(() => {
-        if (exampleType === 'spa') {
+        if (example.session_type === 'binaural') {
           const binauralSection = document.querySelector('[aria-labelledby="binaural-heading"]');
           binauralSection?.scrollIntoView({ behavior: 'smooth', block: 'center' });
-        } else if (exampleType === 'sleep') {
+        } else if (example.session_type === 'creator') {
           const creatorSection = document.querySelector('[aria-labelledby="create-vibe-heading"]');
           creatorSection?.scrollIntoView({ behavior: 'smooth', block: 'start' });
         }
       }, 300);
 
       toast({
-        title: "🎧 Example playing",
-        description: `Listening to ${exampleType === 'spa' ? 'spa vibes' : 'sleep helper'}`,
+        title: "🎧 " + example.title,
+        description: example.description || `Listening to ${exampleType} example`,
       });
 
     } catch (error) {
@@ -499,8 +527,6 @@ const Index = () => {
       });
       setIsLoadingExample(null);
       setCurrentPlayingExample(null);
-    } finally {
-      setIsLoadingExample(null);
     }
   };
 

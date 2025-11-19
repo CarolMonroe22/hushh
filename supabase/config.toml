@@ -24,3 +24,6 @@ verify_jwt = false
 [functions.generate-ambient-sound]
 verify_jwt = false
 
+[functions.setup-example-audios]
+verify_jwt = false
+

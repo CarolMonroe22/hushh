@@ -2097,7 +2097,7 @@ const Index = () => {
                 >
                   <span className="flex items-center gap-2">
                     <span>🎧</span>
-                    <span>3d binaural</span>
+                    <span>3D binaural</span>
                   </span>
                 </TabsTrigger>
                 <TabsTrigger 
@@ -2161,6 +2161,49 @@ const Index = () => {
 
                 {/* Generate Button */}
                 <Button
+                  onClick={() => requireAuth(startSession)}
+                  disabled={isGenerating || !selectedMood || !selectedAmbient}
+                  className="w-full py-6 text-base lowercase tracking-wide bg-primary/90 hover:bg-primary transition-all"
+                  size="lg"
+                >
+                  {isGenerating ? "generating your session..." : "✨ generate session"}
+                </Button>
+              </TabsContent>
+
+              {/* 3D Binaural Experiences Content */}
+              <TabsContent value="binaural" className="space-y-6 mt-0">
+                <div className="text-center space-y-2 mb-6">
+                  <p className="text-sm text-muted-foreground">
+                    immersive 3D audio scenarios with spatial sound
+                  </p>
+                </div>
+
+                {/* Grid de experiencias binaurales */}
+                <div className="space-y-3">
+                  <Label className="text-xs text-muted-foreground uppercase tracking-wider">
+                    select experience
+                  </Label>
+                  <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+                    {BINAURAL_EXPERIENCES.map((experience) => (
+                      <button
+                        key={experience.value}
+                        onClick={() => setSelectedExperience(experience.value)}
+                        className={`p-4 rounded-lg border transition-all text-left ${
+                          selectedExperience === experience.value
+                            ? "border-primary bg-primary/10"
+                            : "border-border bg-card hover:bg-accent"
+                        }`}
+                      >
+                        <div className="text-2xl mb-2">{experience.emoji}</div>
+                        <div className="text-sm font-medium lowercase mb-1">{experience.label}</div>
+                        <div className="text-xs text-muted-foreground">{experience.shortDesc}</div>
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Botón de generación */}
+                <Button
                   onClick={() => requireAuth(startBinauralExperience)}
                   disabled={isGenerating || !selectedExperience}
                   className="w-full py-6 text-base lowercase tracking-wide bg-primary/90 hover:bg-primary transition-all"
@@ -2169,7 +2212,7 @@ const Index = () => {
                   {isGenerating ? "creating 3D experience..." : "🎧 start 3D experience"}
                 </Button>
 
-                {/* Headphones Tip */}
+                {/* Tip sobre auriculares */}
                 <div className="text-center">
                   <p className="text-xs text-muted-foreground/70 italic">
                     💡 tip: use quality headphones for best spatial effect

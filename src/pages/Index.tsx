@@ -2079,6 +2079,16 @@ const Index = () => {
           <section className="max-w-2xl mx-auto mt-8" aria-labelledby="experiences-heading">
             <h2 id="experiences-heading" className="sr-only">Audio Experiences</h2>
             
+            {/* Intro para tabs - suaviza la transición */}
+            <div className="text-center space-y-2 mb-8 mt-12">
+              <h3 className="text-lg font-medium text-foreground/90 lowercase tracking-wide">
+                or explore curated experiences
+              </h3>
+              <p className="text-sm text-muted-foreground max-w-md mx-auto">
+                choose from pre-designed mood combinations, immersive 3D scenarios, or guided voice journeys
+              </p>
+            </div>
+            
             <Tabs defaultValue="presets" className="w-full">
               {/* Tab Navigation */}
               <TabsList className="grid w-full grid-cols-3 mb-8 bg-card/30 backdrop-blur-md p-1.5 rounded-xl border border-border/30">

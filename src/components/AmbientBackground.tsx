@@ -1,9 +1,12 @@
+import { useIsMobile } from "@/hooks/use-mobile";
+
 interface AmbientBackgroundProps {
   isPlaying: boolean;
   videoKey?: string;
 }
 
 const AmbientBackground = ({ isPlaying, videoKey = 'home' }: AmbientBackgroundProps) => {
+  const isMobile = useIsMobile();
   // Mapeo de experiencias a videos
   const videoMap: Record<string, string> = {
     // Home/Default
@@ -54,23 +57,29 @@ const AmbientBackground = ({ isPlaying, videoKey = 'home' }: AmbientBackgroundPr
 
   return (
     <div className="fixed inset-0 pointer-events-none z-0 overflow-hidden">
-      {/* Video background layer */}
-      <video
-        key={videoKey}
-        autoPlay
-        loop
-        muted
-        playsInline
-        className={`absolute inset-0 w-full h-full object-cover ${opacity} transition-opacity duration-1000`}
-        style={{
-          filter: 'hue-rotate(260deg) saturate(0.8) brightness(0.6)'
-        }}
-      >
-        <source src={videoSrc} type="video/mp4" />
-      </video>
+      {/* Video background layer - solo en desktop */}
+      {!isMobile && (
+        <video
+          key={videoKey}
+          autoPlay
+          loop
+          muted
+          playsInline
+          className={`absolute inset-0 w-full h-full object-cover ${opacity} transition-opacity duration-1000`}
+          style={{
+            filter: 'hue-rotate(260deg) saturate(0.8) brightness(0.6)'
+          }}
+          onError={(e) => {
+            console.error('Error loading video:', e);
+            e.currentTarget.style.display = 'none';
+          }}
+        >
+          <source src={videoSrc} type="video/mp4" />
+        </video>
+      )}
       
-      {/* Gradient overlay for blend */}
-      <div className="absolute inset-0 bg-gradient-to-br from-primary/10 via-transparent to-accent/10" />
+      {/* Gradient overlay for blend - más visible en móviles sin video */}
+      <div className={`absolute inset-0 ${isMobile ? 'bg-gradient-to-br from-primary/20 via-background/80 to-accent/20' : 'bg-gradient-to-br from-primary/10 via-transparent to-accent/10'}`} />
       
       {/* Floating particles - solo cuando está playing */}
       {isPlaying && (

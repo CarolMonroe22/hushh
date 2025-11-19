@@ -1922,7 +1922,7 @@ const Index = () => {
         }}
       />
 
-      <div className="container mx-auto px-4 pt-28 pb-12 md:pt-32 md:pb-20 max-w-4xl">
+      <div className="container mx-auto px-4 pt-32 pb-12 md:pt-36 md:pb-20 max-w-4xl min-h-[var(--real-vh)]">
         {/* Logo Header */}
         <header className="flex items-center justify-center mb-16">
           <div className="text-4xl md:text-5xl font-light lowercase tracking-wide" role="banner">

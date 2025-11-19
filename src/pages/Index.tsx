@@ -2017,11 +2017,11 @@ const Index = () => {
                 💡 try examples like:
               </p>
               <div className="flex gap-1">
-                {[0, 1, 2, 3, 4].map((dot) => (
+                {[0, 1, 2].map((dot) => (
                   <div 
                     key={dot}
                     className={`h-1 w-1 rounded-full transition-all duration-1000 ease-out ${
-                      Math.floor(exampleIndex / 3) === dot 
+                      Math.floor(exampleIndex / 5) === dot
                         ? 'bg-primary/40 w-2.5' 
                         : 'bg-muted-foreground/20'
                     }`}
@@ -2032,13 +2032,13 @@ const Index = () => {
             
             <div className="flex flex-wrap gap-2 animate-fade-in">
               {allExamples
-                .slice(exampleIndex, exampleIndex + 3)
+                .slice(exampleIndex, exampleIndex + 5)
                 .concat(
-                  exampleIndex + 3 > allExamples.length
-                    ? allExamples.slice(0, (exampleIndex + 3) % allExamples.length)
+                  exampleIndex + 5 > allExamples.length
+                    ? allExamples.slice(0, (exampleIndex + 5) % allExamples.length)
                     : []
                 )
-                .slice(0, 3)
+                .slice(0, 5)
                 .map((example) => (
                   <button
                     key={`${example.title}-${exampleIndex}`}

@@ -1,3 +1,4 @@
+import { useState, useEffect } from "react";
 import { useIsMobile } from "@/hooks/use-mobile";
 
 interface AmbientBackgroundProps {
@@ -7,6 +8,11 @@ interface AmbientBackgroundProps {
 
 const AmbientBackground = ({ isPlaying, videoKey = 'home' }: AmbientBackgroundProps) => {
   const isMobile = useIsMobile();
+  const [isReady, setIsReady] = useState(false);
+
+  useEffect(() => {
+    setIsReady(true);
+  }, []);
   // Mapeo de experiencias a videos
   const videoMap: Record<string, string> = {
     // Home/Default
@@ -54,6 +60,11 @@ const AmbientBackground = ({ isPlaying, videoKey = 'home' }: AmbientBackgroundPr
   
   // Opacidad más baja para home, normal para sesiones
   const opacity = videoKey === 'home' ? 'opacity-[0.15]' : 'opacity-30';
+
+  // Mostrar fondo simple mientras se inicializa
+  if (!isReady) {
+    return <div className="fixed inset-0 bg-background pointer-events-none z-0" />;
+  }
 
   return (
     <div className="fixed inset-0 pointer-events-none z-0 overflow-hidden">

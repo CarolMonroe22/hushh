@@ -8,10 +8,23 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
-function getClientId(req: Request): string {
-  const forwarded = req.headers.get('x-forwarded-for');
-  const ip = forwarded ? forwarded.split(',')[0].trim() : 'unknown';
-  return `ip_${ip}`;
+function getUserIdFromAuth(req: Request): string | null {
+  const authHeader = req.headers.get('Authorization');
+  if (!authHeader?.startsWith('Bearer ')) {
+    return null;
+  }
+  
+  try {
+    const token = authHeader.substring(7);
+    const parts = token.split('.');
+    if (parts.length !== 3) return null;
+    
+    const payload = JSON.parse(atob(parts[1]));
+    return payload.sub || null;
+  } catch (error) {
+    console.error('Error parsing JWT:', error);
+    return null;
+  }
 }
 
 async function checkPersistentRateLimit(
@@ -139,10 +152,18 @@ serve(async (req) => {
     return new Response(null, { headers: corsHeaders });
   }
 
-  const clientId = getClientId(req);
+  // Verify authentication
+  const userId = getUserIdFromAuth(req);
+  if (!userId) {
+    return new Response(
+      JSON.stringify({ error: 'Authentication required' }),
+      { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+    );
+  }
+
   const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
 
-  const rateLimit = await checkPersistentRateLimit(supabase, clientId, 'generate-asmr-session', 10);
+  const rateLimit = await checkPersistentRateLimit(supabase, userId, 'generate-asmr-session', 15);
   if (!rateLimit.allowed) {
     return new Response(
       JSON.stringify({ 
@@ -153,10 +174,10 @@ serve(async (req) => {
     );
   }
 
-  console.log(`[generate-asmr-session] Client: ${clientId}, Rate limit: ${10 - rateLimit.remaining}/10`);
+  console.log(`[generate-asmr-session] User: ${userId}, Rate limit: ${rateLimit.remaining}/15`);
 
   try {
-    const { mood, ambient, saveSession, userId } = await req.json();
+    const { mood, ambient, saveSession } = await req.json();
     
     const validMoods = ['relax', 'sleep', 'focus', 'gratitude', 'boost', 'stoic'];
     const validAmbients = ['rain', 'ocean', 'forest', 'fireplace', 'whitenoise', 'city'];

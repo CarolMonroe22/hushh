@@ -6,6 +6,25 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
+function getUserIdFromAuth(req: Request): string | null {
+  const authHeader = req.headers.get('Authorization');
+  if (!authHeader?.startsWith('Bearer ')) {
+    return null;
+  }
+  
+  try {
+    const token = authHeader.substring(7);
+    const parts = token.split('.');
+    if (parts.length !== 3) return null;
+    
+    const payload = JSON.parse(atob(parts[1]));
+    return payload.sub || null;
+  } catch (error) {
+    console.error('Error parsing JWT:', error);
+    return null;
+  }
+}
+
 const LOVABLE_API_KEY = Deno.env.get('LOVABLE_API_KEY');
 
 const JOURNEY_PROMPTS = {
@@ -108,6 +127,15 @@ serve(async (req) => {
     return new Response(null, { headers: corsHeaders });
   }
 
+  // Verify authentication
+  const userId = getUserIdFromAuth(req);
+  if (!userId) {
+    return new Response(
+      JSON.stringify({ error: 'Authentication required' }),
+      { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+    );
+  }
+
   try {
     const { category } = await req.json();
 
@@ -117,7 +145,7 @@ serve(async (req) => {
 
     const prompt = JOURNEY_PROMPTS[category as keyof typeof JOURNEY_PROMPTS];
 
-    console.log(`Generating ${category} voice journey...`);
+    console.log(`Generating ${category} voice journey for user ${userId}...`);
 
     // Call Lovable AI to generate the script
     const response = await fetch('https://ai.gateway.lovable.dev/v1/chat/completions', {

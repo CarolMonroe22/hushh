@@ -6,6 +6,25 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
 
+function getUserIdFromAuth(req: Request): string | null {
+  const authHeader = req.headers.get('Authorization');
+  if (!authHeader?.startsWith('Bearer ')) {
+    return null;
+  }
+  
+  try {
+    const token = authHeader.substring(7);
+    const parts = token.split('.');
+    if (parts.length !== 3) return null;
+    
+    const payload = JSON.parse(atob(parts[1]));
+    return payload.sub || null;
+  } catch (error) {
+    console.error('Error parsing JWT:', error);
+    return null;
+  }
+}
+
 const AMBIENT_PROMPTS: Record<string, string> = {
   rain: "Gentle rain falling steadily on leaves, calming rainfall ambience, natural water sounds, peaceful rain meditation background, 60 seconds loop",
   ocean: "Soft ocean waves lapping on shore, peaceful beach ambience, gentle water movement, calming sea sounds, 60 seconds loop",
@@ -20,9 +39,18 @@ serve(async (req) => {
     return new Response(null, { headers: corsHeaders });
   }
 
+  // Verify authentication
+  const userId = getUserIdFromAuth(req);
+  if (!userId) {
+    return new Response(
+      JSON.stringify({ error: 'Authentication required' }),
+      { status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+    );
+  }
+
   try {
     const { ambientType } = await req.json();
-    console.log("Requested ambient type:", ambientType);
+    console.log("Requested ambient type:", ambientType, "User:", userId);
 
     if (!ambientType || !AMBIENT_PROMPTS[ambientType]) {
       return new Response(

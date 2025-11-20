@@ -1,29 +1,2 @@
 project_id = "wpurfvvpxnhwuvmimhoi"
 
-[functions.test-music-api]
-verify_jwt = false
-
-[functions.interpret-vibe-prompt]
-verify_jwt = false
-
-[functions.generate-custom-asmr]
-verify_jwt = false
-
-[functions.generate-asmr-session]
-verify_jwt = false
-
-[functions.generate-binaural-experience]
-verify_jwt = false
-
-[functions.generate-voice-journey]
-verify_jwt = false
-
-[functions.whisper-text]
-verify_jwt = false
-
-[functions.generate-ambient-sound]
-verify_jwt = false
-
-[functions.setup-example-audios]
-verify_jwt = false
-

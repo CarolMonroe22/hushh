@@ -7,11 +7,23 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
-function getClientId(req: Request): string {
-  // Use IP address as identifier for public endpoints
-  const forwarded = req.headers.get('x-forwarded-for');
-  const ip = forwarded ? forwarded.split(',')[0] : 'unknown';
-  return `ip_${ip}`;
+function getUserIdFromAuth(req: Request): string | null {
+  const authHeader = req.headers.get('Authorization');
+  if (!authHeader?.startsWith('Bearer ')) {
+    return null;
+  }
+  
+  try {
+    const token = authHeader.substring(7);
+    const parts = token.split('.');
+    if (parts.length !== 3) return null;
+    
+    const payload = JSON.parse(atob(parts[1]));
+    return payload.sub || null;
+  } catch (error) {
+    console.error('Error parsing JWT:', error);
+    return null;
+  }
 }
 
 async function checkPersistentRateLimit(
@@ -71,13 +83,20 @@ serve(async (req) => {
     return new Response(null, { headers: corsHeaders });
   }
 
-  const clientId = getClientId(req);
+  // Verify authentication
+  const userId = getUserIdFromAuth(req);
+  if (!userId) {
+    return new Response(
+      JSON.stringify({ error: 'Authentication required' }),
+      { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+    );
+  }
 
   const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
   const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
   const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
-  const rateLimit = await checkPersistentRateLimit(supabase, clientId, 'generate-custom-asmr', 5);
+  const rateLimit = await checkPersistentRateLimit(supabase, userId, 'generate-custom-asmr', 15);
   if (!rateLimit.allowed) {
     return new Response(
       JSON.stringify({ 
@@ -88,10 +107,10 @@ serve(async (req) => {
     );
   }
 
-  console.log(`[generate-custom-asmr] Client: ${clientId}, Rate limit: ${rateLimit.remaining}/5`);
+  console.log(`[generate-custom-asmr] User: ${userId}, Rate limit: ${rateLimit.remaining}/15`);
 
   try {
-    const { prompt, title, saveSession, userId, vibeDescription } = await req.json();
+    const { prompt, title, saveSession, vibeDescription } = await req.json();
     
     if (!prompt || typeof prompt !== 'string') {
       throw new Error('Prompt is required and must be a string');

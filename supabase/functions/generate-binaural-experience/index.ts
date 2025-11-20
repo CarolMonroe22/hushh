@@ -7,6 +7,25 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
+function getUserIdFromAuth(req: Request): string | null {
+  const authHeader = req.headers.get('Authorization');
+  if (!authHeader?.startsWith('Bearer ')) {
+    return null;
+  }
+  
+  try {
+    const token = authHeader.substring(7);
+    const parts = token.split('.');
+    if (parts.length !== 3) return null;
+    
+    const payload = JSON.parse(atob(parts[1]));
+    return payload.sub || null;
+  } catch (error) {
+    console.error('Error parsing JWT:', error);
+    return null;
+  }
+}
+
 // Prompts optimizados para cada experiencia binaural (≤2000 chars)
 const BINAURAL_PROMPTS: Record<string, string> = {
   barbershop: `1 minute 3D binaural barbershop ASMR. Barber whispers left ear: "relax, I'll take care of you..." Scissors snip precisely left to right *snip snip*, voice circles: "looking good..." Scissors move right ear to behind. Clippers buzz from neck base traveling up right side then left, vibrating spatially. Spray bottle mists left *psst psst*, right *psst*, above. Voice whispers right ear: "almost done..." All sounds in precise 3D space—scissors at varying distances, clippers moving dynamically, whispers circling—immersive barbershop binaural audio.`,
@@ -27,8 +46,17 @@ serve(async (req) => {
     return new Response(null, { headers: corsHeaders });
   }
 
+  // Verify authentication
+  const userId = getUserIdFromAuth(req);
+  if (!userId) {
+    return new Response(
+      JSON.stringify({ error: 'Authentication required' }),
+      { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+    );
+  }
+
   try {
-    const { experience, saveSession, userId } = await req.json();
+    const { experience, saveSession } = await req.json();
 
     if (!experience || !BINAURAL_PROMPTS[experience]) {
       throw new Error('Invalid binaural experience selected');
@@ -41,7 +69,7 @@ serve(async (req) => {
     console.log(`ELEVENLABS key present, len=${ELEVENLABS_API_KEY.length}`);
 
     const prompt = BINAURAL_PROMPTS[experience];
-    console.log(`Generating binaural experience: ${experience}, promptLen=${prompt.length}`);
+    console.log(`Generating binaural experience: ${experience} for user ${userId}, promptLen=${prompt.length}`);
 
     const response = await fetch('https://api.elevenlabs.io/v1/music/compose', {
       method: 'POST',

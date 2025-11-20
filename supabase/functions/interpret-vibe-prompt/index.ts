@@ -6,11 +6,23 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
-function getClientId(req: Request): string {
-  // Use IP address as identifier for public endpoints
-  const forwarded = req.headers.get('x-forwarded-for');
-  const ip = forwarded ? forwarded.split(',')[0] : 'unknown';
-  return `ip_${ip}`;
+function getUserIdFromAuth(req: Request): string | null {
+  const authHeader = req.headers.get('Authorization');
+  if (!authHeader?.startsWith('Bearer ')) {
+    return null;
+  }
+  
+  try {
+    const token = authHeader.substring(7);
+    const parts = token.split('.');
+    if (parts.length !== 3) return null;
+    
+    const payload = JSON.parse(atob(parts[1]));
+    return payload.sub || null;
+  } catch (error) {
+    console.error('Error parsing JWT:', error);
+    return null;
+  }
 }
 
 async function checkPersistentRateLimit(
@@ -91,13 +103,20 @@ serve(async (req) => {
     return new Response(null, { headers: corsHeaders });
   }
 
-  const clientId = getClientId(req);
+  // Verify authentication
+  const userId = getUserIdFromAuth(req);
+  if (!userId) {
+    return new Response(
+      JSON.stringify({ error: 'Authentication required' }),
+      { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+    );
+  }
 
   const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
   const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
   const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
-  const rateLimit = await checkPersistentRateLimit(supabase, clientId, 'interpret-vibe-prompt', 10);
+  const rateLimit = await checkPersistentRateLimit(supabase, userId, 'interpret-vibe-prompt', 20);
   if (!rateLimit.allowed) {
     return new Response(
       JSON.stringify({ 
@@ -108,7 +127,7 @@ serve(async (req) => {
     );
   }
 
-  console.log(`[interpret-vibe-prompt] Client: ${clientId}, Rate limit: ${rateLimit.remaining}/10`);
+  console.log(`[interpret-vibe-prompt] User: ${userId}, Rate limit: ${rateLimit.remaining}/20`);
 
   try {
     const { description } = await req.json();

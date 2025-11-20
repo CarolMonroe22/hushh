@@ -63,14 +63,21 @@ serve(async (req) => {
     return new Response(null, { headers: corsHeaders });
   }
 
+  // Verify authentication
+  const userId = getUserIdFromAuth(req);
+  if (!userId) {
+    return new Response(
+      JSON.stringify({ error: 'Authentication required' }),
+      { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+    );
+  }
+
   try {
-    // Note: This function is public (verify_jwt = false) for anonymous access
-    console.log('[whisper-text] Processing request');
+    console.log('[whisper-text] Processing request for user:', userId);
 
     const body = await req.json();
     const text = body.text;
     const saveSession = body.saveSession;
-    const userId = body.userId;
     const journey = body.journey;
     const voiceGender = body.voiceGender;
     const ELEVENLABS_API_KEY = Deno.env.get('ELEVENLABS_API_KEY');

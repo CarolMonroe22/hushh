@@ -5,13 +5,42 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
+function getUserIdFromAuth(req: Request): string | null {
+  const authHeader = req.headers.get('Authorization');
+  if (!authHeader?.startsWith('Bearer ')) {
+    return null;
+  }
+  
+  try {
+    const token = authHeader.substring(7);
+    const parts = token.split('.');
+    if (parts.length !== 3) return null;
+    
+    const payload = JSON.parse(atob(parts[1]));
+    return payload.sub || null;
+  } catch (error) {
+    console.error('Error parsing JWT:', error);
+    return null;
+  }
+}
+
 serve(async (req) => {
   // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders });
   }
 
+  // Verify authentication (for admin/debugging use only)
+  const userId = getUserIdFromAuth(req);
+  if (!userId) {
+    return new Response(
+      JSON.stringify({ error: 'Authentication required. This endpoint is for testing only.' }),
+      { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+    );
+  }
+
   try {
+    console.log('[test-music-api] Testing API for user:', userId);
     const ELEVENLABS_API_KEY = Deno.env.get('ELEVENLABS_API_KEY');
 
     if (!ELEVENLABS_API_KEY) {

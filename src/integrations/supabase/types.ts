@@ -196,6 +196,33 @@ export type Database = {
         }
         Relationships: []
       }
+      system_flags: {
+        Row: {
+          completed_at: string | null
+          created_at: string | null
+          flag_key: string
+          is_completed: boolean | null
+          metadata: Json | null
+          updated_at: string | null
+        }
+        Insert: {
+          completed_at?: string | null
+          created_at?: string | null
+          flag_key: string
+          is_completed?: boolean | null
+          metadata?: Json | null
+          updated_at?: string | null
+        }
+        Update: {
+          completed_at?: string | null
+          created_at?: string | null
+          flag_key?: string
+          is_completed?: boolean | null
+          metadata?: Json | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
       usage_analytics: {
         Row: {
           created_at: string | null

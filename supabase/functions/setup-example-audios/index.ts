@@ -17,7 +17,41 @@ serve(async (req) => {
     const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
     const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
     
-    const supabase = createClient(supabaseUrl, supabaseServiceKey);
+    // Create supabase client with service role (bypass JWT auth)
+    const supabase = createClient(supabaseUrl, supabaseServiceKey, {
+      global: {
+        headers: {
+          Authorization: `Bearer ${supabaseServiceKey}`
+        }
+      }
+    });
+
+    // Check if setup already completed
+    console.log('[setup-example-audios] Checking if setup already completed...');
+    const { data: flag, error: flagError } = await supabase
+      .from('system_flags')
+      .select('is_completed')
+      .eq('flag_key', 'examples_audio_setup')
+      .single();
+
+    if (flagError) {
+      console.error('[setup-example-audios] Error checking flag:', flagError);
+      throw new Error(`Failed to check setup flag: ${flagError.message}`);
+    }
+
+    if (flag?.is_completed) {
+      console.log('[setup-example-audios] Setup already completed, skipping...');
+      return new Response(
+        JSON.stringify({
+          success: true,
+          message: 'Example audios already set up',
+          skipped: true
+        }),
+        {
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        }
+      );
+    }
 
     // 1. Generate spa audio (binaural experience)
     console.log('[setup-example-audios] Generating spa audio...');
@@ -59,10 +93,10 @@ serve(async (req) => {
     const spaBinary = Uint8Array.from(atob(spaData.audioContent), c => c.charCodeAt(0));
     const spaBlob = new Blob([spaBinary], { type: 'audio/mpeg' });
     
-    // Upload spa to storage
+    // Upload spa to new public bucket
     const { data: spaUpload, error: spaUploadError } = await supabase.storage
-      .from('user-sessions')
-      .upload('examples/spa.mp3', spaBlob, {
+      .from('asmr-examples')
+      .upload('spa.mp3', spaBlob, {
         contentType: 'audio/mpeg',
         upsert: true
       });
@@ -73,8 +107,8 @@ serve(async (req) => {
 
     // Get public URL for spa
     const { data: spaUrlData } = supabase.storage
-      .from('user-sessions')
-      .getPublicUrl('examples/spa.mp3');
+      .from('asmr-examples')
+      .getPublicUrl('spa.mp3');
     const spaUrl = spaUrlData.publicUrl;
 
     console.log('[setup-example-audios] Uploading sleep audio to storage...');
@@ -83,10 +117,10 @@ serve(async (req) => {
     const sleepBinary = Uint8Array.from(atob(sleepData.audioContent), c => c.charCodeAt(0));
     const sleepBlob = new Blob([sleepBinary], { type: 'audio/mpeg' });
     
-    // Upload sleep to storage
+    // Upload sleep to new public bucket
     const { data: sleepUpload, error: sleepUploadError } = await supabase.storage
-      .from('user-sessions')
-      .upload('examples/sleep.mp3', sleepBlob, {
+      .from('asmr-examples')
+      .upload('sleep.mp3', sleepBlob, {
         contentType: 'audio/mpeg',
         upsert: true
       });
@@ -97,8 +131,8 @@ serve(async (req) => {
 
     // Get public URL for sleep
     const { data: sleepUrlData } = supabase.storage
-      .from('user-sessions')
-      .getPublicUrl('examples/sleep.mp3');
+      .from('asmr-examples')
+      .getPublicUrl('sleep.mp3');
     const sleepUrl = sleepUrlData.publicUrl;
 
     // 4. Update example_sessions table with URLs
@@ -122,9 +156,32 @@ serve(async (req) => {
       throw new Error(`Failed to update sleep URL: ${sleepUpdateError.message}`);
     }
 
+    // 5. Mark setup as completed
+    console.log('[setup-example-audios] Marking setup as completed...');
+    const { error: flagUpdateError } = await supabase
+      .from('system_flags')
+      .update({ 
+        is_completed: true,
+        completed_at: new Date().toISOString(),
+        metadata: {
+          description: 'Setup example audio files in storage',
+          spa_url: spaUrl,
+          sleep_url: sleepUrl,
+          completed_by: 'setup-example-audios function',
+          spa_size: spaBinary.length,
+          sleep_size: sleepBinary.length
+        }
+      })
+      .eq('flag_key', 'examples_audio_setup');
+
+    if (flagUpdateError) {
+      console.error('[setup-example-audios] Error updating flag:', flagUpdateError);
+      // Don't throw here, setup was successful even if flag update fails
+    }
+
     console.log('[setup-example-audios] Setup completed successfully!');
 
-    // 5. Return success response
+    // 6. Return success response
     return new Response(
       JSON.stringify({
         success: true,

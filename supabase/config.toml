@@ -1,2 +1,4 @@
 project_id = "wpurfvvpxnhwuvmimhoi"
 
+[functions.setup-example-audios]
+verify_jwt = false

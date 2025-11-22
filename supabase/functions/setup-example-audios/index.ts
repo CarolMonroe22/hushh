@@ -55,33 +55,45 @@ serve(async (req) => {
 
     // 1. Generate spa audio (binaural experience)
     console.log('[setup-example-audios] Generating spa audio...');
-    const spaResponse = await supabase.functions.invoke('generate-binaural-experience', {
-      body: { experience: 'spa' }
+    const spaResponse = await fetch(`${supabaseUrl}/functions/v1/generate-binaural-experience`, {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${supabaseServiceKey}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ experience: 'spa' })
     });
 
-    if (spaResponse.error) {
-      throw new Error(`Failed to generate spa audio: ${spaResponse.error.message}`);
+    if (!spaResponse.ok) {
+      const errorText = await spaResponse.text();
+      throw new Error(`Failed to generate spa audio (${spaResponse.status}): ${errorText}`);
     }
 
-    const spaData = spaResponse.data;
+    const spaData = await spaResponse.json();
     if (!spaData?.audioContent) {
       throw new Error('No audio content received from spa generation');
     }
 
     // 2. Generate sleep audio (custom ASMR)
     console.log('[setup-example-audios] Generating sleep audio...');
-    const sleepResponse = await supabase.functions.invoke('generate-custom-asmr', {
-      body: { 
+    const sleepResponse = await fetch(`${supabaseUrl}/functions/v1/generate-custom-asmr`, {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${supabaseServiceKey}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ 
         prompt: 'Create a gentle and soothing sleep helper audio with calming whispers, soft rain sounds, and peaceful ocean waves to help me drift into a deep restful sleep',
         title: 'Sleep Helper'
-      }
+      })
     });
 
-    if (sleepResponse.error) {
-      throw new Error(`Failed to generate sleep audio: ${sleepResponse.error.message}`);
+    if (!sleepResponse.ok) {
+      const errorText = await sleepResponse.text();
+      throw new Error(`Failed to generate sleep audio (${sleepResponse.status}): ${errorText}`);
     }
 
-    const sleepData = sleepResponse.data;
+    const sleepData = await sleepResponse.json();
     if (!sleepData?.audioContent) {
       throw new Error('No audio content received from sleep generation');
     }

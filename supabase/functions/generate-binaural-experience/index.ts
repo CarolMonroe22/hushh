@@ -19,6 +19,12 @@ function getUserIdFromAuth(req: Request): string | null {
     if (parts.length !== 3) return null;
     
     const payload = JSON.parse(atob(parts[1]));
+    
+    // Allow service role for internal system calls
+    if (payload.role === 'service_role') {
+      return 'system';
+    }
+    
     return payload.sub || null;
   } catch (error) {
     console.error('Error parsing JWT:', error);
@@ -134,7 +140,7 @@ serve(async (req) => {
     let saved = false;
     let savedKey = '';
     
-    if (saveSession && userId) {
+    if (saveSession && userId && userId !== 'system') {
       console.log('[generate-binaural] Saving to library', { saveSession, hasUserId: !!userId });
       try {
         const supabaseUrl = Deno.env.get('SUPABASE_URL')!;

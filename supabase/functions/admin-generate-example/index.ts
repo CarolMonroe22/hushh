@@ -86,26 +86,79 @@ serve(async (req) => {
     let functionName: string;
     let requestBody: any;
 
+    console.log(`[admin-generate-example] Type: ${example.session_type}`);
+
     // Determine which generation function to call based on session type
-    if (example.session_type === 'binaural') {
+    if (example.session_type === 'preset') {
+      // Generate preset ASMR (mood + ambient)
+      functionName = 'generate-asmr-session';
+      requestBody = {
+        mood: example.mood,
+        ambient: example.ambient,
+        saveSession: false,
+      };
+      console.log(`[admin-generate-example] Preset: ${example.mood} + ${example.ambient}`);
+
+    } else if (example.session_type === 'creator') {
+      // Step 1: Reinterpret the vibe description with AI (same as user flow)
+      console.log('[admin-generate-example] Step 1: Interpreting vibe with AI...');
+      
+      const { data: interpretData, error: interpretError } = await supabase.functions.invoke(
+        'interpret-vibe-prompt',
+        {
+          body: {
+            description: example.vibe_description,
+          },
+          headers: {
+            Authorization: `Bearer ${supabaseServiceKey}`,
+          },
+        }
+      );
+
+      if (interpretError) {
+        console.error('[admin-generate-example] Interpretation failed:', interpretError);
+        throw new Error(`AI interpretation failed: ${interpretError.message}`);
+      }
+
+      console.log('[admin-generate-example] Step 2: Generating with interpreted prompt...');
+      console.log(`[admin-generate-example] Interpreted title: "${interpretData.title}"`);
+      
+      // Step 2: Use the interpreted prompt for generation
+      functionName = 'generate-custom-asmr';
+      requestBody = {
+        prompt: interpretData.prompt,  // Use AI-interpreted prompt
+        title: interpretData.title || example.title,
+        saveSession: false,
+      };
+
+    } else if (example.session_type === 'binaural') {
+      // Generate binaural experience
       functionName = 'generate-binaural-experience';
       requestBody = {
         experience: example.binaural_experience,
         saveSession: false,
       };
-    } else if (example.session_type === 'creator') {
-      functionName = 'generate-custom-asmr';
+      console.log(`[admin-generate-example] Binaural: ${example.binaural_experience}`);
+
+    } else if (example.session_type === 'voice') {
+      // Generate voice journey
+      functionName = 'generate-voice-journey';
       requestBody = {
-        prompt: example.vibe_description,
-        title: example.title,
+        category: example.voice_journey,
+        voiceGender: example.voice_gender || 'female',
+        ambientType: example.ambient || null,
         saveSession: false,
       };
+      console.log(`[admin-generate-example] Voice: ${example.voice_journey} (${example.voice_gender})`);
+
     } else {
       return new Response(
         JSON.stringify({ error: `Session type ${example.session_type} not supported for generation` }),
         { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
+
+    console.log(`[admin-generate-example] Calling: ${functionName}`);
 
     // Call the generation function with service role key
     const { data: generationData, error: generationError } = await supabase.functions.invoke(

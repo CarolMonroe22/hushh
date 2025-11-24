@@ -154,7 +154,7 @@ export const useCommunityPlayer = () => {
       audio.removeEventListener('durationchange', handleDurationChange);
       audio.removeEventListener('ended', handleEnded);
     };
-  }, [currentIndex, queue, repeatMode]);
+  }, [currentIndex, queue, repeatMode, currentAudio]);
 
   useEffect(() => {
     if (!audioRef.current || !currentAudio) {
@@ -162,29 +162,24 @@ export const useCommunityPlayer = () => {
       return;
     }
 
-    // Convert relative path to full URL
     const fullAudioUrl = getAudioUrl(currentAudio.audio_url);
     console.log('🎵 Loading audio:', fullAudioUrl);
     
-    audioRef.current.src = fullAudioUrl;
-    audioRef.current.load();
+    // Only reload if URL changed
+    if (audioRef.current.src !== fullAudioUrl) {
+      audioRef.current.src = fullAudioUrl;
+      audioRef.current.load();
+    }
     
+    // Control play/pause based on state
     if (isPlaying) {
       audioRef.current.play()
         .then(() => console.log('✅ Audio playing'))
         .catch(err => console.error('❌ Play failed:', err));
-    }
-  }, [currentAudio, getAudioUrl]);
-
-  useEffect(() => {
-    if (!audioRef.current) return;
-
-    if (isPlaying) {
-      audioRef.current.play().catch(console.error);
     } else {
       audioRef.current.pause();
     }
-  }, [isPlaying]);
+  }, [currentAudio, isPlaying, getAudioUrl]);
 
   return {
     queue,

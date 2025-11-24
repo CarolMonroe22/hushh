@@ -15,6 +15,7 @@ import AmbientBackground from "@/components/AmbientBackground";
 import { SessionHistory } from "@/components/SessionHistory";
 import { AuthModal } from "@/components/AuthModal";
 import { type UserSession } from "@/hooks/useUserSessions";
+import { useExampleSessions, type ExampleSession } from "@/hooks/useExampleSessions";
 import { History, LogOut, Archive, User, ChevronDown, Play, Loader2, Shield } from "lucide-react";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
@@ -236,6 +237,7 @@ const TITLE_ROTATIONS = [
 const Index = () => {
   const { user, loading, signOut } = useAuth();
   const { isAdmin } = useUserRole();
+  const { examples, isLoading: isLoadingExamples } = useExampleSessions();
   const [selectedMood, setSelectedMood] = useState<Mood | null>(null);
   const [selectedAmbient, setSelectedAmbient] = useState<Ambient | null>(null);
   const [isGenerating, setIsGenerating] = useState(false);
@@ -430,29 +432,10 @@ const Index = () => {
     }
   };
 
-  const handleLoadExample = async (exampleType: 'spa' | 'sleep') => {
-    setIsLoadingExample(exampleType);
+  const handleLoadExample = async (example: ExampleSession) => {
+    setIsLoadingExample(example.example_key);
 
     try {
-      // Obtener ejemplo de la tabla pública
-      const { data: example, error } = await supabase
-        .from('example_sessions')
-        .select('*')
-        .eq('example_key', exampleType)
-        .single();
-
-      if (error) throw error;
-
-      if (!example) {
-        toast({
-          title: "❌ Example not found",
-          description: "This example is not available",
-          variant: "destructive",
-        });
-        setIsLoadingExample(null);
-        return;
-      }
-
       // Verificar si hay audio disponible
       if (!example.audio_url || example.audio_url === '') {
         toast({
@@ -481,7 +464,7 @@ const Index = () => {
       audioRef.current = audio;
 
       audio.onloadedmetadata = () => {
-        setCurrentPlayingExample(exampleType);
+        setCurrentPlayingExample(example.example_key);
       };
 
       audio.onended = () => {
@@ -517,7 +500,7 @@ const Index = () => {
 
       toast({
         title: "🎧 " + example.title,
-        description: example.description || `Listening to ${exampleType} example`,
+        description: example.description || `Listening to ${example.title}`,
       });
 
     } catch (error) {
@@ -1970,47 +1953,38 @@ const Index = () => {
               ✨ listen to examples
             </p>
             <div className="flex flex-wrap justify-center gap-3">
-              {/* Spa Example - Binaural */}
-              <button
-                onClick={() => handleLoadExample('spa')}
-                disabled={isGenerating || isLoadingExample !== null}
-                className={`group flex items-center gap-2 px-5 py-2.5 rounded-full border transition-all disabled:opacity-50 disabled:cursor-not-allowed ${
-                  currentPlayingExample === 'spa'
-                    ? 'bg-primary/20 border-primary shadow-lg shadow-primary/20'
-                    : 'border-border/70 bg-card/50 hover:bg-accent hover:border-border'
-                }`}
-              >
-                {isLoadingExample === 'spa' ? (
-                  <Loader2 className="h-3.5 w-3.5 animate-spin" />
-                ) : (
-                  <Play className="h-3.5 w-3.5 group-hover:scale-110 transition-transform" />
-                )}
-                <span className="text-sm lowercase font-medium">spa vibes</span>
-                <span className="text-xs text-muted-foreground/70 opacity-0 group-hover:opacity-100 transition-opacity">
-                  (binaural · 5 min)
-                </span>
-              </button>
-              
-              {/* Sleep Example - Creator */}
-              <button
-                onClick={() => handleLoadExample('sleep')}
-                disabled={isGenerating || isLoadingExample !== null}
-                className={`group flex items-center gap-2 px-5 py-2.5 rounded-full border transition-all disabled:opacity-50 disabled:cursor-not-allowed ${
-                  currentPlayingExample === 'sleep'
-                    ? 'bg-primary/20 border-primary shadow-lg shadow-primary/20'
-                    : 'border-border/70 bg-card/50 hover:bg-accent hover:border-border'
-                }`}
-              >
-                {isLoadingExample === 'sleep' ? (
-                  <Loader2 className="h-3.5 w-3.5 animate-spin" />
-                ) : (
-                  <Play className="h-3.5 w-3.5 group-hover:scale-110 transition-transform" />
-                )}
-                <span className="text-sm lowercase font-medium">can you help me sleep</span>
-                <span className="text-xs text-muted-foreground/70 opacity-0 group-hover:opacity-100 transition-opacity">
-                  (custom · 3 min)
-                </span>
-              </button>
+              {isLoadingExamples ? (
+                <div className="text-muted-foreground text-sm">Loading examples...</div>
+              ) : examples.filter(ex => ex.audio_url && ex.audio_url !== '').length === 0 ? (
+                <div className="text-muted-foreground text-sm">No examples available yet</div>
+              ) : (
+                examples
+                  .filter(ex => ex.audio_url && ex.audio_url !== '')
+                  .map((example) => (
+                    <button
+                      key={example.id}
+                      onClick={() => handleLoadExample(example)}
+                      disabled={isGenerating || isLoadingExample !== null}
+                      className={`group flex items-center gap-2 px-5 py-2.5 rounded-full border transition-all disabled:opacity-50 disabled:cursor-not-allowed ${
+                        currentPlayingExample === example.example_key
+                          ? 'bg-primary/20 border-primary shadow-lg shadow-primary/20'
+                          : 'border-border/70 bg-card/50 hover:bg-accent hover:border-border'
+                      }`}
+                    >
+                      {isLoadingExample === example.example_key ? (
+                        <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                      ) : (
+                        <Play className="h-3.5 w-3.5 group-hover:scale-110 transition-transform" />
+                      )}
+                      <span className="text-sm lowercase font-medium">{example.title}</span>
+                      {example.description && (
+                        <span className="text-xs text-muted-foreground/70 opacity-0 group-hover:opacity-100 transition-opacity">
+                          ({example.description})
+                        </span>
+                      )}
+                    </button>
+                  ))
+              )}
             </div>
           </section>
 

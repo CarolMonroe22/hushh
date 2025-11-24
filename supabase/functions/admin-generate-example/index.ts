@@ -109,6 +109,9 @@ serve(async (req) => {
           body: {
             description: example.vibe_description,
           },
+          headers: {
+            Authorization: `Bearer ${supabaseServiceKey}`,
+          },
         }
       );
 
@@ -157,11 +160,14 @@ serve(async (req) => {
 
     console.log(`[admin-generate-example] Calling: ${functionName}`);
 
-    // Call the generation function (service role auth is automatic via the supabase client)
+    // Call the generation function with service role key for authentication
     const { data: generationData, error: generationError } = await supabase.functions.invoke(
       functionName,
       {
         body: requestBody,
+        headers: {
+          Authorization: `Bearer ${supabaseServiceKey}`,
+        },
       }
     );
 

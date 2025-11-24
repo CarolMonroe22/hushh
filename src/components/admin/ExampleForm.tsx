@@ -165,6 +165,22 @@ export const ExampleForm = ({ open, onOpenChange, example }: ExampleFormProps) =
     }
   };
 
+  // Auto-initialize values when modal opens
+  useEffect(() => {
+    if (open && !example) {
+      // Generar valores iniciales si hay opciones seleccionadas
+      const title = generateTitle();
+      const key = generateExampleKey();
+      
+      if (title && !formValues.title) {
+        setValue('title', title);
+      }
+      if (key && !formValues.example_key) {
+        setValue('example_key', key);
+      }
+    }
+  }, [open, example]);
+
   // Auto-update title and key when options change
   useEffect(() => {
     if (!example) {
@@ -208,6 +224,17 @@ export const ExampleForm = ({ open, onOpenChange, example }: ExampleFormProps) =
   });
 
   const onSubmit = (data: FormData) => {
+    // Validar que título y key existan
+    if (!data.title || data.title.trim() === '') {
+      toast.error('Title is required. Please select session options to generate it.');
+      return;
+    }
+    
+    if (!data.example_key || data.example_key.trim() === '') {
+      toast.error('Example key is required. Please select session options to generate it.');
+      return;
+    }
+    
     toast.info('Creating example...');
     mutation.mutate(data);
   };
@@ -414,13 +441,21 @@ export const ExampleForm = ({ open, onOpenChange, example }: ExampleFormProps) =
             
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
-                <Label htmlFor="title">Title *</Label>
-                <Input id="title" {...register('title', { required: true })} placeholder="Example title" />
+                <Label htmlFor="title">Title (auto-generated, editable)</Label>
+                <Input 
+                  id="title" 
+                  {...register('title')} 
+                  placeholder="Select options above to auto-generate..." 
+                />
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="example_key">Example Key *</Label>
-                <Input id="example_key" {...register('example_key', { required: true })} placeholder="unique-key" />
+                <Label htmlFor="example_key">Example Key (auto-generated, editable)</Label>
+                <Input 
+                  id="example_key" 
+                  {...register('example_key')} 
+                  placeholder="Will be generated automatically..." 
+                />
               </div>
             </div>
 

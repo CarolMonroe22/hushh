@@ -117,14 +117,6 @@ const Community = () => {
     <>
       <AmbientBackground isPlaying={isPlaying} videoKey={getVideoKey()} />
       
-      {currentAudio && (
-        <audio
-          ref={audioRef}
-          src={currentAudio.audio_url}
-          className="hidden"
-        />
-      )}
-      
       <div className="min-h-screen bg-background pb-32">
       <div className="container mx-auto px-4 py-8 space-y-8">
         <div className="flex items-center justify-between">

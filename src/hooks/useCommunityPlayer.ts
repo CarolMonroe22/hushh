@@ -20,7 +20,7 @@ export const useCommunityPlayer = () => {
   const [repeatMode, setRepeatMode] = useState<RepeatMode>('off');
   const [currentTime, setCurrentTime] = useState(0);
   const [duration, setDuration] = useState(0);
-  const audioRef = useRef<HTMLAudioElement | null>(null);
+  const audioRef = useRef<HTMLAudioElement>(new Audio());
 
   const currentAudio = queue[currentIndex];
 
@@ -34,6 +34,7 @@ export const useCommunityPlayer = () => {
   };
 
   const loadPlaylist = (audios: CommunitySession[]) => {
+    console.log('📋 Loading playlist with', audios.length, 'audios');
     setOriginalQueue(audios);
     const playQueue = isShuffle ? shuffleArray(audios) : audios;
     setQueue(playQueue);
@@ -130,11 +131,8 @@ export const useCommunityPlayer = () => {
   };
 
   useEffect(() => {
-    if (!audioRef.current) {
-      audioRef.current = new Audio();
-    }
-
     const audio = audioRef.current;
+    console.log('🔧 Setting up audio listeners');
 
     const handleTimeUpdate = () => setCurrentTime(audio.currentTime);
     const handleDurationChange = () => setDuration(audio.duration);
@@ -157,10 +155,15 @@ export const useCommunityPlayer = () => {
   }, [currentIndex, queue, repeatMode]);
 
   useEffect(() => {
-    if (!audioRef.current || !currentAudio) return;
+    if (!audioRef.current || !currentAudio) {
+      console.log('⚠️ No audioRef or currentAudio');
+      return;
+    }
 
     console.log('🎵 Loading audio:', currentAudio.audio_url);
     audioRef.current.src = currentAudio.audio_url;
+    audioRef.current.load();
+    
     if (isPlaying) {
       audioRef.current.play()
         .then(() => console.log('✅ Audio playing'))

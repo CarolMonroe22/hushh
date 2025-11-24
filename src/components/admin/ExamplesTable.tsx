@@ -7,7 +7,7 @@ import { Switch } from '@/components/ui/switch';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { Edit, Trash2, Plus, Music } from 'lucide-react';
+import { Edit, Trash2, Plus, Music, Play, Pause, AlertCircle } from 'lucide-react';
 import { ExampleForm } from './ExampleForm';
 import { toast } from 'sonner';
 import type { ExampleSession } from '@/hooks/useExampleSessions';
@@ -26,6 +26,7 @@ export const ExamplesTable = () => {
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [selectedExample, setSelectedExample] = useState<ExampleSession | null>(null);
   const [deleteId, setDeleteId] = useState<string | null>(null);
+  const [playingId, setPlayingId] = useState<string | null>(null);
   const queryClient = useQueryClient();
 
   const { data: examples, isLoading } = useQuery({
@@ -116,6 +117,23 @@ export const ExamplesTable = () => {
     }
   };
 
+  const togglePlay = (id: string) => {
+    const audio = document.getElementById(`audio-${id}`) as HTMLAudioElement;
+    
+    if (playingId === id) {
+      audio?.pause();
+      setPlayingId(null);
+    } else {
+      // Pause any currently playing audio
+      if (playingId) {
+        const currentAudio = document.getElementById(`audio-${playingId}`) as HTMLAudioElement;
+        currentAudio?.pause();
+      }
+      audio?.play();
+      setPlayingId(id);
+    }
+  };
+
   const filteredExamples = useMemo(() => {
     if (!examples) return { all: [], published: [], drafts: [], pending: [] };
     
@@ -139,6 +157,7 @@ export const ExamplesTable = () => {
             <TableHead>Title</TableHead>
             <TableHead>Type</TableHead>
             <TableHead>Estado</TableHead>
+            <TableHead>Audio</TableHead>
             <TableHead>Publicado</TableHead>
             <TableHead>Order</TableHead>
             <TableHead className="text-right">Actions</TableHead>
@@ -147,7 +166,7 @@ export const ExamplesTable = () => {
         <TableBody>
           {data.length === 0 ? (
             <TableRow>
-              <TableCell colSpan={6} className="text-center text-muted-foreground py-8">
+              <TableCell colSpan={7} className="text-center text-muted-foreground py-8">
                 No hay ejemplos en esta categoría
               </TableCell>
             </TableRow>
@@ -173,6 +192,41 @@ export const ExamplesTable = () => {
                     <Badge className="bg-red-500/10 text-red-500 border-red-500/20">
                       Sin Audio
                     </Badge>
+                  )}
+                </TableCell>
+                <TableCell>
+                  {example.audio_url ? (
+                    <div className="flex items-center gap-2">
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => togglePlay(example.id)}
+                        className="h-8 w-8 p-0"
+                      >
+                        {playingId === example.id ? (
+                          <Pause className="h-4 w-4" />
+                        ) : (
+                          <Play className="h-4 w-4" />
+                        )}
+                      </Button>
+                      <audio
+                        id={`audio-${example.id}`}
+                        src={example.audio_url}
+                        onEnded={() => setPlayingId(null)}
+                        className="hidden"
+                      />
+                    </div>
+                  ) : (
+                    <TooltipProvider>
+                      <Tooltip>
+                        <TooltipTrigger>
+                          <AlertCircle className="h-4 w-4 text-red-500" />
+                        </TooltipTrigger>
+                        <TooltipContent>
+                          <p>No audio generated yet</p>
+                        </TooltipContent>
+                      </Tooltip>
+                    </TooltipProvider>
                   )}
                 </TableCell>
                 <TableCell>

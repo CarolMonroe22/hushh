@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect } from 'react';
 import { type UserSession } from './useUserSessions';
 import { supabase } from '@/integrations/supabase/client';
+import { useAudioUrl } from './useAudioUrl';
 
 type CommunitySession = UserSession & {
   profiles: {
@@ -12,6 +13,7 @@ type CommunitySession = UserSession & {
 type RepeatMode = 'off' | 'all' | 'one';
 
 export const useCommunityPlayer = () => {
+  const { getAudioUrl } = useAudioUrl();
   const [queue, setQueue] = useState<CommunitySession[]>([]);
   const [originalQueue, setOriginalQueue] = useState<CommunitySession[]>([]);
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -160,8 +162,11 @@ export const useCommunityPlayer = () => {
       return;
     }
 
-    console.log('🎵 Loading audio:', currentAudio.audio_url);
-    audioRef.current.src = currentAudio.audio_url;
+    // Convert relative path to full URL
+    const fullAudioUrl = getAudioUrl(currentAudio.audio_url);
+    console.log('🎵 Loading audio:', fullAudioUrl);
+    
+    audioRef.current.src = fullAudioUrl;
     audioRef.current.load();
     
     if (isPlaying) {
@@ -169,7 +174,7 @@ export const useCommunityPlayer = () => {
         .then(() => console.log('✅ Audio playing'))
         .catch(err => console.error('❌ Play failed:', err));
     }
-  }, [currentAudio]);
+  }, [currentAudio, getAudioUrl]);
 
   useEffect(() => {
     if (!audioRef.current) return;

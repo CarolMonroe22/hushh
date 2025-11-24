@@ -6,22 +6,31 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
-function getUserIdFromAuth(req: Request): string | null {
+function getAuthContext(req: Request): { userId: string | null; isServiceRole: boolean } {
   const authHeader = req.headers.get('Authorization');
+  
   if (!authHeader?.startsWith('Bearer ')) {
-    return null;
+    return { userId: null, isServiceRole: false };
   }
   
+  const token = authHeader.substring(7);
+  
+  // Check if it's the service role key
+  const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY');
+  if (token === SUPABASE_SERVICE_ROLE_KEY) {
+    return { userId: null, isServiceRole: true };
+  }
+  
+  // Otherwise try to parse as user JWT
   try {
-    const token = authHeader.substring(7);
     const parts = token.split('.');
-    if (parts.length !== 3) return null;
+    if (parts.length !== 3) return { userId: null, isServiceRole: false };
     
     const payload = JSON.parse(atob(parts[1]));
-    return payload.sub || null;
+    return { userId: payload.sub || null, isServiceRole: false };
   } catch (error) {
     console.error('Error parsing JWT:', error);
-    return null;
+    return { userId: null, isServiceRole: false };
   }
 }
 
@@ -104,8 +113,10 @@ serve(async (req) => {
   }
 
   // Verify authentication
-  const userId = getUserIdFromAuth(req);
-  if (!userId) {
+  const { userId, isServiceRole } = getAuthContext(req);
+  
+  // Require either user auth OR service role
+  if (!userId && !isServiceRole) {
     return new Response(
       JSON.stringify({ error: 'Authentication required' }),
       { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
@@ -116,18 +127,22 @@ serve(async (req) => {
   const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
   const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
-  const rateLimit = await checkPersistentRateLimit(supabase, userId, 'interpret-vibe-prompt', 20);
-  if (!rateLimit.allowed) {
-    return new Response(
-      JSON.stringify({ 
-        error: 'Rate limit exceeded. Please try again later.',
-        remaining: rateLimit.remaining 
-      }),
-      { status: 429, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-    );
+  // Only check rate limit for regular users, not service role calls
+  if (!isServiceRole && userId) {
+    const rateLimit = await checkPersistentRateLimit(supabase, userId, 'interpret-vibe-prompt', 20);
+    if (!rateLimit.allowed) {
+      return new Response(
+        JSON.stringify({ 
+          error: 'Rate limit exceeded. Please try again later.',
+          remaining: rateLimit.remaining 
+        }),
+        { status: 429, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+    console.log(`[interpret-vibe-prompt] User: ${userId}, Rate limit: ${rateLimit.remaining}/20`);
+  } else {
+    console.log(`[interpret-vibe-prompt] Service role call (admin)`);
   }
-
-  console.log(`[interpret-vibe-prompt] User: ${userId}, Rate limit: ${rateLimit.remaining}/20`);
 
   try {
     const { description } = await req.json();

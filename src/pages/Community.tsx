@@ -7,6 +7,7 @@ import { PlaylistQueue } from '@/components/community/PlaylistQueue';
 import { Button } from '@/components/ui/button';
 import { ArrowLeft } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import AmbientBackground from '@/components/AmbientBackground';
 
 const Community = () => {
   const navigate = useNavigate();
@@ -55,6 +56,7 @@ const Community = () => {
     seekTo,
     selectAudio,
     clearQueue,
+    audioRef,
   } = useCommunityPlayer();
 
   const handlePlayCategory = (category: 'all' | 'preset' | 'creator' | 'binaural' | 'voice') => {
@@ -84,8 +86,46 @@ const Community = () => {
     }
   };
 
+  const getVideoKey = (): string => {
+    if (!currentAudio) return 'home';
+    
+    // Para sesiones preset: usar mood o ambient
+    if (currentAudio.session_type === 'preset') {
+      if (currentAudio.mood) return currentAudio.mood;
+      if (currentAudio.ambient) return currentAudio.ambient;
+    }
+    
+    // Para sesiones binaural: usar binaural_experience
+    if (currentAudio.session_type === 'binaural' && currentAudio.binaural_experience) {
+      return currentAudio.binaural_experience;
+    }
+    
+    // Para voice journeys: usar voice_journey
+    if (currentAudio.session_type === 'voice' && currentAudio.voice_journey) {
+      return currentAudio.voice_journey;
+    }
+    
+    // Para creator sessions: usar video genérico
+    if (currentAudio.session_type === 'creator') {
+      return 'creator';
+    }
+    
+    return 'home';
+  };
+
   return (
-    <div className="min-h-screen bg-background pb-32">
+    <>
+      <AmbientBackground isPlaying={isPlaying} videoKey={getVideoKey()} />
+      
+      {currentAudio && (
+        <audio
+          ref={audioRef}
+          src={currentAudio.audio_url}
+          className="hidden"
+        />
+      )}
+      
+      <div className="min-h-screen bg-background pb-32">
       <div className="container mx-auto px-4 py-8 space-y-8">
         <div className="flex items-center justify-between">
           <Button
@@ -171,7 +211,8 @@ const Community = () => {
           />
         </>
       )}
-    </div>
+      </div>
+    </>
   );
 };
 

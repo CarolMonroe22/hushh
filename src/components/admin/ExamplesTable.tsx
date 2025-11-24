@@ -7,6 +7,7 @@ import { Switch } from '@/components/ui/switch';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { Input } from '@/components/ui/input';
 import { Edit, Trash2, Plus, Music, Play, Pause, AlertCircle } from 'lucide-react';
 import { ExampleForm } from './ExampleForm';
 import { toast } from 'sonner';
@@ -93,6 +94,24 @@ export const ExamplesTable = () => {
     },
     onError: (error) => {
       toast.error(`Failed to generate audio: ${error.message}`);
+    },
+  });
+
+  const updateDisplayOrderMutation = useMutation({
+    mutationFn: async ({ id, display_order }: { id: string; display_order: number }) => {
+      const { error } = await supabase
+        .from('example_sessions')
+        .update({ display_order })
+        .eq('id', id);
+      
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['admin-examples'] });
+      toast.success('Order actualizado');
+    },
+    onError: (error) => {
+      toast.error(`Error al actualizar order: ${error.message}`);
     },
   });
 
@@ -254,7 +273,21 @@ export const ExamplesTable = () => {
                     </Tooltip>
                   </TooltipProvider>
                 </TableCell>
-                <TableCell>{example.display_order}</TableCell>
+                <TableCell>
+                  <Input
+                    type="number"
+                    value={example.display_order ?? 0}
+                    onChange={(e) => {
+                      const newOrder = parseInt(e.target.value) || 0;
+                      updateDisplayOrderMutation.mutate({
+                        id: example.id,
+                        display_order: newOrder,
+                      });
+                    }}
+                    className="w-20 h-8"
+                    disabled={updateDisplayOrderMutation.isPending}
+                  />
+                </TableCell>
                 <TableCell className="text-right space-x-2">
                   <Button
                     variant="ghost"

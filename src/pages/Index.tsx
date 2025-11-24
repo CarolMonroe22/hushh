@@ -18,7 +18,7 @@ import { SessionHistory } from "@/components/SessionHistory";
 import { AuthModal } from "@/components/AuthModal";
 import { type UserSession } from "@/hooks/useUserSessions";
 import { useExampleSessions, type ExampleSession } from "@/hooks/useExampleSessions";
-import { History, LogOut, Archive, User, ChevronDown, Play, Loader2, Shield, Sparkles } from "lucide-react";
+import { History, LogOut, Archive, User, ChevronDown, Play, Loader2, Shield, Sparkles, Users } from "lucide-react";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
@@ -1845,6 +1845,10 @@ const Index = () => {
                       </div>
                     </DropdownMenuLabel>
                     <DropdownMenuSeparator />
+                    <DropdownMenuItem onClick={() => navigate('/community')} className="lowercase cursor-pointer">
+                      <Users className="mr-2 h-4 w-4" />
+                      <span>community</span>
+                    </DropdownMenuItem>
                     <DropdownMenuItem onClick={() => navigate('/account')} className="lowercase cursor-pointer">
                       <User className="mr-2 h-4 w-4" />
                       <span>my account</span>

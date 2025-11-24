@@ -8,6 +8,8 @@ import Auth from "./pages/Auth";
 import Account from "./pages/Account";
 import Admin from "./pages/Admin";
 import Premium from "./pages/Premium";
+import Community from "./pages/Community";
+import UserProfile from "./pages/UserProfile";
 import NotFound from "./pages/NotFound";
 import EnvBanner from "@/components/EnvBanner";
 import useConnectivity from "@/hooks/useConnectivity";
@@ -30,6 +32,8 @@ const App = () => {
             <Route path="/account" element={<Account />} />
             <Route path="/admin" element={<Admin />} />
             <Route path="/premium" element={<Premium />} />
+            <Route path="/community" element={<Community />} />
+            <Route path="/profile/:userId" element={<UserProfile />} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>

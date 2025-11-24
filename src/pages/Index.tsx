@@ -10,11 +10,12 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/useAuth";
+import { useUserRole } from "@/hooks/useUserRole";
 import AmbientBackground from "@/components/AmbientBackground";
 import { SessionHistory } from "@/components/SessionHistory";
 import { AuthModal } from "@/components/AuthModal";
 import { type UserSession } from "@/hooks/useUserSessions";
-import { History, LogOut, Archive, User, ChevronDown, Play, Loader2 } from "lucide-react";
+import { History, LogOut, Archive, User, ChevronDown, Play, Loader2, Shield } from "lucide-react";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
@@ -234,6 +235,7 @@ const TITLE_ROTATIONS = [
 
 const Index = () => {
   const { user, loading, signOut } = useAuth();
+  const { isAdmin } = useUserRole();
   const [selectedMood, setSelectedMood] = useState<Mood | null>(null);
   const [selectedAmbient, setSelectedAmbient] = useState<Ambient | null>(null);
   const [isGenerating, setIsGenerating] = useState(false);
@@ -1864,6 +1866,15 @@ const Index = () => {
                       <Archive className="mr-2 h-4 w-4" />
                       <span>library</span>
                     </DropdownMenuItem>
+                    {isAdmin && (
+                      <>
+                        <DropdownMenuSeparator />
+                        <DropdownMenuItem onClick={() => navigate('/admin')} className="lowercase cursor-pointer">
+                          <Shield className="mr-2 h-4 w-4" />
+                          <span>admin panel</span>
+                        </DropdownMenuItem>
+                      </>
+                    )}
                     <DropdownMenuSeparator />
                     <DropdownMenuItem onClick={handleSignOut} className="text-destructive lowercase cursor-pointer">
                       <LogOut className="mr-2 h-4 w-4" />

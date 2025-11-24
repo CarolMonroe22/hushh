@@ -16,28 +16,33 @@ import useConnectivity from "@/hooks/useConnectivity";
 
 const queryClient = new QueryClient();
 
-const App = () => {
+const ConnectivityWrapper = ({ children }: { children: React.ReactNode }) => {
   useConnectivity();
+  return <>{children}</>;
+};
 
+const App = () => {
   return (
     <QueryClientProvider client={queryClient}>
       <TooltipProvider>
-        <Toaster />
-        <Sonner />
-        <EnvBanner />
-        <BrowserRouter>
-          <Routes>
-            <Route path="/" element={<Index />} />
-            <Route path="/auth" element={<Auth />} />
-            <Route path="/account" element={<Account />} />
-            <Route path="/admin" element={<Admin />} />
-            <Route path="/premium" element={<Premium />} />
-            <Route path="/community" element={<Community />} />
-            <Route path="/profile/:userId" element={<UserProfile />} />
-            {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
-            <Route path="*" element={<NotFound />} />
-          </Routes>
-        </BrowserRouter>
+        <ConnectivityWrapper>
+          <Toaster />
+          <Sonner />
+          <EnvBanner />
+          <BrowserRouter>
+            <Routes>
+              <Route path="/" element={<Index />} />
+              <Route path="/auth" element={<Auth />} />
+              <Route path="/account" element={<Account />} />
+              <Route path="/admin" element={<Admin />} />
+              <Route path="/premium" element={<Premium />} />
+              <Route path="/community" element={<Community />} />
+              <Route path="/profile/:userId" element={<UserProfile />} />
+              {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
+              <Route path="*" element={<NotFound />} />
+            </Routes>
+          </BrowserRouter>
+        </ConnectivityWrapper>
       </TooltipProvider>
     </QueryClientProvider>
   );

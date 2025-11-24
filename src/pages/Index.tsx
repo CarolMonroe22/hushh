@@ -1976,13 +1976,8 @@ const Index = () => {
                       ) : (
                         <Play className="h-3.5 w-3.5 group-hover:scale-110 transition-transform" />
                       )}
-                      <span className="text-sm lowercase font-medium">{example.title}</span>
-                      {example.description && (
-                        <span className="text-xs text-muted-foreground/70 opacity-0 group-hover:opacity-100 transition-opacity">
-                          ({example.description})
-                        </span>
-                      )}
-                    </button>
+                  <span className="text-sm lowercase font-medium">{example.title}</span>
+                </button>
                   ))
               )}
             </div>

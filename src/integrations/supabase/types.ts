@@ -44,6 +44,35 @@ export type Database = {
         }
         Relationships: []
       }
+      community_likes: {
+        Row: {
+          created_at: string | null
+          id: string
+          session_id: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          session_id: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          session_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "community_likes_session_id_fkey"
+            columns: ["session_id"]
+            isOneToOne: false
+            referencedRelation: "user_sessions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       early_access_emails: {
         Row: {
           created_at: string | null
@@ -288,6 +317,7 @@ export type Database = {
           is_favorite: boolean | null
           is_public: boolean | null
           last_played_at: string | null
+          likes_count: number | null
           mood: string | null
           session_type: string
           times_played: number | null
@@ -307,6 +337,7 @@ export type Database = {
           is_favorite?: boolean | null
           is_public?: boolean | null
           last_played_at?: string | null
+          likes_count?: number | null
           mood?: string | null
           session_type: string
           times_played?: number | null
@@ -326,6 +357,7 @@ export type Database = {
           is_favorite?: boolean | null
           is_public?: boolean | null
           last_played_at?: string | null
+          likes_count?: number | null
           mood?: string | null
           session_type?: string
           times_played?: number | null

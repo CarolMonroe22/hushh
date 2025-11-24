@@ -1,6 +1,7 @@
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { type UserSession } from './useUserSessions';
+import { useAudioUrl } from './useAudioUrl';
 
 type CommunitySession = UserSession & {
   profiles: {
@@ -18,6 +19,7 @@ interface UseCommunityAudiosOptions {
 
 export const useCommunityAudios = (options: UseCommunityAudiosOptions = {}) => {
   const { search = '', sessionType = 'all', sortBy = 'newest', limit = 50 } = options;
+  const { getAudioUrl } = useAudioUrl();
 
   const { data, isLoading } = useQuery({
     queryKey: ['community-audios', search, sessionType, sortBy, limit],
@@ -74,9 +76,10 @@ export const useCommunityAudios = (options: UseCommunityAudiosOptions = {}) => {
         profiles?.map(p => [p.user_id, p]) || []
       );
       
-      // Combine sessions with their profiles
+      // Combine sessions with their profiles and convert audio URLs
       const communityData: CommunitySession[] = sessions.map(session => ({
         ...session,
+        audio_url: getAudioUrl(session.audio_url),
         session_type: session.session_type as 'preset' | 'creator' | 'binaural' | 'voice',
         profiles: profileMap.get(session.user_id) || null,
       }));

@@ -3,9 +3,9 @@ import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from './useAuth';
 
 export const useUserRole = () => {
-  const { user } = useAuth();
+  const { user, loading: authLoading } = useAuth();
   
-  const { data: role, isLoading } = useQuery({
+  const { data: role, isLoading: queryLoading } = useQuery({
     queryKey: ['user-role', user?.id],
     queryFn: async () => {
       if (!user?.id) return null;
@@ -29,6 +29,6 @@ export const useUserRole = () => {
   return {
     role: role || 'user',
     isAdmin: role === 'admin',
-    isLoading,
+    isLoading: authLoading || queryLoading,
   };
 };

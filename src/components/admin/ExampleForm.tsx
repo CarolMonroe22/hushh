@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
@@ -12,9 +12,12 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Card } from '@/components/ui/card';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
-import { ChevronDown } from 'lucide-react';
+import { ScrollArea } from '@/components/ui/scroll-area';
+import { Separator } from '@/components/ui/separator';
+import { ChevronDown, Loader2, Sparkles } from 'lucide-react';
 import { toast } from 'sonner';
 import type { ExampleSession } from '@/hooks/useExampleSessions';
+import { ASMR_PROMPTS, BINAURAL_PROMPTS, JOURNEY_PROMPTS } from '@/lib/generationPrompts';
 
 interface ExampleFormProps {
   open: boolean;
@@ -84,7 +87,7 @@ const SUGGESTED_VIBES = [
 
 export const ExampleForm = ({ open, onOpenChange, example }: ExampleFormProps) => {
   const queryClient = useQueryClient();
-  const [showPreview, setShowPreview] = useState(false);
+  const [isPreviewOpen, setIsPreviewOpen] = useState(false);
   
   const { register, handleSubmit, watch, setValue, reset } = useForm<FormData>({
     defaultValues: example || {
@@ -106,6 +109,76 @@ export const ExampleForm = ({ open, onOpenChange, example }: ExampleFormProps) =
   const voiceJourney = formValues.voice_journey;
   const voiceGender = formValues.voice_gender;
 
+  // Auto-generate title and key
+  const generateTitle = (): string => {
+    switch (sessionType) {
+      case 'preset':
+        if (mood && ambient) {
+          return `${mood.charAt(0).toUpperCase() + mood.slice(1)} with ${ambient.charAt(0).toUpperCase() + ambient.slice(1)}`;
+        }
+        return 'Preset Session';
+        
+      case 'binaural':
+        if (binauralExp) {
+          const exp = BINAURAL_EXPERIENCES.find(e => e.value === binauralExp);
+          return exp ? `${exp.label} Experience` : 'Binaural Experience';
+        }
+        return 'Binaural Experience';
+        
+      case 'voice':
+        if (voiceJourney) {
+          const journey = VOICE_JOURNEYS.find(j => j.value === voiceJourney);
+          return journey ? `${journey.label} (${voiceGender || 'female'} voice)` : 'Voice Journey';
+        }
+        return 'Voice Journey';
+        
+      case 'creator':
+        if (vibeDesc) {
+          const words = vibeDesc.split(' ').filter(w => w.length > 3).slice(0, 4).join(' ');
+          return words || 'Custom Vibe';
+        }
+        return 'Custom Vibe';
+        
+      default:
+        return 'Example Session';
+    }
+  };
+
+  const generateExampleKey = (): string => {
+    const timestamp = Date.now().toString().slice(-4);
+    
+    switch (sessionType) {
+      case 'preset':
+        return mood && ambient ? `preset-${mood}-${ambient}` : `preset-${timestamp}`;
+        
+      case 'binaural':
+        return binauralExp ? `binaural-${binauralExp}` : `binaural-${timestamp}`;
+        
+      case 'voice':
+        return voiceJourney ? `voice-${voiceJourney}-${voiceGender || 'female'}` : `voice-${timestamp}`;
+        
+      case 'creator':
+        return `creator-${timestamp}`;
+        
+      default:
+        return `example-${timestamp}`;
+    }
+  };
+
+  // Auto-update title and key when options change
+  useEffect(() => {
+    if (!example) {
+      const subscription = watch((value, { name }) => {
+        if (['mood', 'ambient', 'binaural_experience', 'voice_journey', 'voice_gender', 'vibe_description', 'session_type'].includes(name || '')) {
+          setValue('title', generateTitle());
+          setValue('example_key', generateExampleKey());
+        }
+      });
+      
+      return () => subscription.unsubscribe();
+    }
+  }, [watch, setValue, sessionType, mood, ambient, binauralExp, voiceJourney, voiceGender, vibeDesc, example]);
+
   const mutation = useMutation({
     mutationFn: async (data: FormData) => {
       if (example) {
@@ -125,7 +198,7 @@ export const ExampleForm = ({ open, onOpenChange, example }: ExampleFormProps) =
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['admin-examples'] });
-      toast.success(example ? 'Example updated' : 'Example created');
+      toast.success(example ? 'Example updated!' : '✅ Example created! Generate audio from the table.');
       reset();
       onOpenChange(false);
     },
@@ -135,21 +208,42 @@ export const ExampleForm = ({ open, onOpenChange, example }: ExampleFormProps) =
   });
 
   const onSubmit = (data: FormData) => {
+    toast.info('Creating example...');
     mutation.mutate(data);
   };
 
-  const getPreviewPrompt = () => {
+  const getGenerationPrompt = (): string => {
     switch (sessionType) {
       case 'preset':
-        return `Generate ASMR session with mood: ${mood || 'not set'}, ambient: ${ambient || 'not set'}`;
-      case 'creator':
-        return `Generate custom vibe: "${vibeDesc || 'not set'}"`;
+        if (mood && ambient) {
+          const key = `${mood}_${ambient}`;
+          return ASMR_PROMPTS[key] || '⚠️ Prompt not found for this combination';
+        }
+        return '👆 Select mood and ambient to see the real prompt that will be used for generation';
+        
       case 'binaural':
-        return `Generate binaural experience: ${binauralExp || 'not set'}`;
+        if (binauralExp) {
+          return BINAURAL_PROMPTS[binauralExp] || '⚠️ Prompt not found for this experience';
+        }
+        return '👆 Select an experience to see the real prompt that will be used for generation';
+        
       case 'voice':
-        return `Generate voice journey: ${voiceJourney || 'not set'}, voice: ${voiceGender || 'not set'}`;
+        if (voiceJourney) {
+          const prompt = JOURNEY_PROMPTS[voiceJourney] || '⚠️ Prompt not found';
+          return `🎤 Voice Journey Prompt:\n\n${prompt}\n\n📊 Configuration:\n- Gender: ${voiceGender || 'female'}\n- Ambient: ${ambient || 'none'}`;
+        }
+        return '👆 Select a journey type to see the real prompt that will be used for generation';
+        
+      case 'creator':
+        if (vibeDesc && vibeDesc.length >= 20) {
+          return `📝 Your Input:\n"${vibeDesc}"\n\n⚡ AI Reinterpretation Flow (same as users):\n\n1. Your description is sent to AI\n2. AI analyzes and optimizes it\n3. Chooses appropriate voice gender\n4. Selects matching ambient sound\n5. Generates professional 100-150 word ASMR prompt\n6. Creates catchy 2-4 word title\n\nThe AI transforms your input into a professional prompt automatically.`;
+        }
+        return vibeDesc 
+          ? '⚠️ Description must be at least 20 characters' 
+          : '👆 Write your vibe description to see what will happen';
+        
       default:
-        return 'Select a session type';
+        return '👆 Select a session type to begin';
     }
   };
 
@@ -373,27 +467,75 @@ export const ExampleForm = ({ open, onOpenChange, example }: ExampleFormProps) =
             </div>
           </div>
 
-          {/* Preview Prompt */}
-          <Collapsible open={showPreview} onOpenChange={setShowPreview}>
-            <CollapsibleTrigger asChild>
-              <Button type="button" variant="ghost" className="w-full justify-between">
-                <span className="text-sm font-medium">Preview Generation Prompt</span>
-                <ChevronDown className={`h-4 w-4 transition-transform ${showPreview ? 'rotate-180' : ''}`} />
-              </Button>
-            </CollapsibleTrigger>
-            <CollapsibleContent>
-              <Card className="p-4 bg-muted/50">
-                <code className="text-xs">{getPreviewPrompt()}</code>
-              </Card>
-            </CollapsibleContent>
-          </Collapsible>
+          {/* Preview Section */}
+          <div className="border-t pt-4">
+            <Collapsible open={isPreviewOpen} onOpenChange={setIsPreviewOpen}>
+              <CollapsibleTrigger asChild>
+                <Button type="button" variant="ghost" className="w-full justify-between hover:bg-primary/5">
+                  <div className="flex items-center gap-2">
+                    <Sparkles className="h-4 w-4" />
+                    <span className="font-semibold">Example Preview & Generation Prompt</span>
+                  </div>
+                  <ChevronDown className={`h-5 w-5 transition-transform ${isPreviewOpen ? 'rotate-180' : ''}`} />
+                </Button>
+              </CollapsibleTrigger>
+              <CollapsibleContent className="pt-4">
+                <div className="space-y-4 p-4 border rounded-lg bg-muted/30">
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <p className="text-sm font-semibold text-muted-foreground mb-1">✨ Title:</p>
+                      <p className="font-bold">{formValues.title || '(auto-generated)'}</p>
+                    </div>
+                    
+                    <div>
+                      <p className="text-sm font-semibold text-muted-foreground mb-1">🔑 Example Key:</p>
+                      <p className="font-mono text-sm">{formValues.example_key || '(auto-generated)'}</p>
+                    </div>
+                  </div>
+                  
+                  <Separator />
+                  
+                  <div>
+                    <div className="flex items-center gap-2 mb-2">
+                      <p className="text-sm font-semibold text-muted-foreground">🎯 Real Generation Prompt:</p>
+                      <span className="text-xs bg-primary/10 text-primary px-2 py-0.5 rounded">60 seconds</span>
+                    </div>
+                    <ScrollArea className="h-[250px] w-full rounded border bg-background/50 p-4">
+                      <pre className="text-xs whitespace-pre-wrap font-mono">{getGenerationPrompt()}</pre>
+                    </ScrollArea>
+                  </div>
+                  
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    className="w-full"
+                    onClick={() => {
+                      setValue('title', generateTitle());
+                      setValue('example_key', generateExampleKey());
+                      toast.success('Title and key regenerated!');
+                    }}
+                  >
+                    🔄 Regenerate Title & Key
+                  </Button>
+                </div>
+              </CollapsibleContent>
+            </Collapsible>
+          </div>
 
-          <div className="flex justify-end space-x-2 pt-4">
+          <div className="flex justify-end space-x-2 pt-4 border-t">
             <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
               Cancel
             </Button>
             <Button type="submit" disabled={mutation.isPending}>
-              {mutation.isPending ? 'Saving...' : 'Save'}
+              {mutation.isPending ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Creating example...
+                </>
+              ) : (
+                '💾 Save Example'
+              )}
             </Button>
           </div>
         </form>

@@ -1,38 +1,91 @@
 import { useState } from 'react';
 import { useCommunityAudios } from '@/hooks/useCommunityAudios';
-import { CommunitySearch } from '@/components/community/CommunitySearch';
-import { CommunityFilters } from '@/components/community/CommunityFilters';
-import { CommunityAudioCard } from '@/components/community/CommunityAudioCard';
-import { AudioGrid } from '@/components/community/AudioGrid';
+import { useCommunityPlayer } from '@/hooks/useCommunityPlayer';
+import { CategoryCard } from '@/components/community/CategoryCard';
+import { CommunityPlayer } from '@/components/community/CommunityPlayer';
+import { PlaylistQueue } from '@/components/community/PlaylistQueue';
 import { Button } from '@/components/ui/button';
 import { ArrowLeft } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
 const Community = () => {
   const navigate = useNavigate();
-  const [search, setSearch] = useState('');
-  const [sessionType, setSessionType] = useState<'all' | 'preset' | 'creator' | 'binaural' | 'voice'>('all');
-  const [sortBy, setSortBy] = useState<'newest' | 'oldest' | 'most-played'>('newest');
-  const [currentAudio, setCurrentAudio] = useState<HTMLAudioElement | null>(null);
+  const [isQueueOpen, setIsQueueOpen] = useState(false);
 
-  const { communityAudios, isLoading } = useCommunityAudios({
-    search,
-    sessionType,
-    sortBy,
-    limit: 50,
+  const { communityAudios: allAudios, isLoading: isLoadingAll } = useCommunityAudios({
+    sessionType: 'all',
+    limit: 100,
   });
 
-  const handlePlay = (audioUrl: string) => {
-    if (currentAudio) {
-      currentAudio.pause();
+  const { communityAudios: presetAudios, isLoading: isLoadingPreset } = useCommunityAudios({
+    sessionType: 'preset',
+    limit: 100,
+  });
+
+  const { communityAudios: creatorAudios, isLoading: isLoadingCreator } = useCommunityAudios({
+    sessionType: 'creator',
+    limit: 100,
+  });
+
+  const { communityAudios: binauralAudios, isLoading: isLoadingBinaural } = useCommunityAudios({
+    sessionType: 'binaural',
+    limit: 100,
+  });
+
+  const { communityAudios: voiceAudios, isLoading: isLoadingVoice } = useCommunityAudios({
+    sessionType: 'voice',
+    limit: 100,
+  });
+
+  const {
+    queue,
+    currentIndex,
+    currentAudio,
+    isPlaying,
+    isShuffle,
+    repeatMode,
+    currentTime,
+    duration,
+    loadPlaylist,
+    playNext,
+    playPrevious,
+    togglePlay,
+    toggleShuffle,
+    cycleRepeat,
+    seekTo,
+    selectAudio,
+    clearQueue,
+  } = useCommunityPlayer();
+
+  const handlePlayCategory = (category: 'all' | 'preset' | 'creator' | 'binaural' | 'voice') => {
+    let audios;
+    switch (category) {
+      case 'all':
+        audios = allAudios;
+        break;
+      case 'preset':
+        audios = presetAudios;
+        break;
+      case 'creator':
+        audios = creatorAudios;
+        break;
+      case 'binaural':
+        audios = binauralAudios;
+        break;
+      case 'voice':
+        audios = voiceAudios;
+        break;
+      default:
+        audios = [];
     }
-    const audio = new Audio(audioUrl);
-    audio.play();
-    setCurrentAudio(audio);
+
+    if (audios.length > 0) {
+      loadPlaylist(audios);
+    }
   };
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-background pb-32">
       <div className="container mx-auto px-4 py-8 space-y-8">
         <div className="flex items-center justify-between">
           <Button
@@ -48,41 +101,76 @@ const Community = () => {
 
         <div className="space-y-4">
           <div className="space-y-2">
-            <h1 className="text-4xl font-bold lowercase">community audios</h1>
+            <h1 className="text-4xl font-bold lowercase">community playlists</h1>
             <p className="text-muted-foreground lowercase">
-              discover and play public sessions created by the community
+              select a category and play all audios continuously
             </p>
-          </div>
-
-          <div className="flex items-center gap-2 text-sm text-muted-foreground lowercase">
-            <span>{communityAudios.length} public audios</span>
           </div>
         </div>
 
-        <CommunitySearch value={search} onChange={setSearch} />
-
-        <CommunityFilters
-          sessionType={sessionType}
-          sortBy={sortBy}
-          onSessionTypeChange={setSessionType}
-          onSortByChange={setSortBy}
-        />
-
-        <AudioGrid
-          isLoading={isLoading}
-          isEmpty={communityAudios.length === 0}
-          emptyMessage={search || sessionType !== 'all' ? 'no matching audios found' : 'no public audios yet'}
-        >
-          {communityAudios.map((session) => (
-            <CommunityAudioCard
-              key={session.id}
-              session={session}
-              profile={session.profiles}
-              onPlay={() => handlePlay(session.audio_url)}
-            />
-          ))}
-        </AudioGrid>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-6">
+          <CategoryCard
+            category="all"
+            audioCount={allAudios.length}
+            onPlayAll={() => handlePlayCategory('all')}
+            isLoading={isLoadingAll}
+          />
+          <CategoryCard
+            category="preset"
+            audioCount={presetAudios.length}
+            onPlayAll={() => handlePlayCategory('preset')}
+            isLoading={isLoadingPreset}
+          />
+          <CategoryCard
+            category="creator"
+            audioCount={creatorAudios.length}
+            onPlayAll={() => handlePlayCategory('creator')}
+            isLoading={isLoadingCreator}
+          />
+          <CategoryCard
+            category="binaural"
+            audioCount={binauralAudios.length}
+            onPlayAll={() => handlePlayCategory('binaural')}
+            isLoading={isLoadingBinaural}
+          />
+          <CategoryCard
+            category="voice"
+            audioCount={voiceAudios.length}
+            onPlayAll={() => handlePlayCategory('voice')}
+            isLoading={isLoadingVoice}
+          />
+        </div>
       </div>
+
+      {currentAudio && (
+        <>
+          <CommunityPlayer
+            currentAudio={currentAudio}
+            isPlaying={isPlaying}
+            isShuffle={isShuffle}
+            repeatMode={repeatMode}
+            currentTime={currentTime}
+            duration={duration}
+            onTogglePlay={togglePlay}
+            onNext={playNext}
+            onPrevious={playPrevious}
+            onToggleShuffle={toggleShuffle}
+            onCycleRepeat={cycleRepeat}
+            onSeek={seekTo}
+            onToggleQueue={() => setIsQueueOpen(!isQueueOpen)}
+            onClose={clearQueue}
+            isQueueOpen={isQueueOpen}
+          />
+
+          <PlaylistQueue
+            queue={queue}
+            currentIndex={currentIndex}
+            onSelectAudio={selectAudio}
+            isExpanded={isQueueOpen}
+            onClose={() => setIsQueueOpen(false)}
+          />
+        </>
+      )}
     </div>
   );
 };

@@ -159,9 +159,12 @@ export const useCommunityPlayer = () => {
   useEffect(() => {
     if (!audioRef.current || !currentAudio) return;
 
+    console.log('🎵 Loading audio:', currentAudio.audio_url);
     audioRef.current.src = currentAudio.audio_url;
     if (isPlaying) {
-      audioRef.current.play().catch(console.error);
+      audioRef.current.play()
+        .then(() => console.log('✅ Audio playing'))
+        .catch(err => console.error('❌ Play failed:', err));
     }
   }, [currentAudio]);
 
@@ -193,5 +196,6 @@ export const useCommunityPlayer = () => {
     seekTo,
     selectAudio,
     clearQueue,
+    audioRef,
   };
 };

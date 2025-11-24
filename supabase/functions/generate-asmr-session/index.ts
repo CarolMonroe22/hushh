@@ -187,6 +187,33 @@ serve(async (req) => {
       );
     }
     console.log(`[generate-asmr-session] User: ${userId}, Rate limit: ${rateLimit.remaining}/15`);
+
+    // Check generation limit
+    const { data: limitCheck, error: limitError } = await supabase
+      .rpc('check_generation_limit', { p_user_id: userId });
+
+    if (limitError) {
+      console.error('Error checking limit:', limitError);
+      return new Response(
+        JSON.stringify({ error: 'Failed to check generation limit' }),
+        { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
+    if (!limitCheck.allowed) {
+      return new Response(
+        JSON.stringify({ 
+          error: 'Generation limit reached',
+          message: `You've reached your weekly limit of ${limitCheck.limit} generations. Upgrade to premium for unlimited access.`,
+          tier: limitCheck.tier,
+          limit: limitCheck.limit,
+          remaining: limitCheck.remaining
+        }),
+        { status: 403, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
+    console.log(`[generate-asmr-session] User can generate. Tier: ${limitCheck.tier}, Remaining: ${limitCheck.remaining}`);
   } else {
     console.log(`[generate-asmr-session] Service role call (admin)`);
   }
@@ -246,8 +273,17 @@ serve(async (req) => {
               });
 
             if (!userUploadError) {
+              // Check user's subscription tier to determine if public
+              const { data: subscription } = await supabase
+                .from('user_subscriptions')
+                .select('tier')
+                .eq('user_id', userId)
+                .single();
+              
+              const isPublic = subscription?.tier === 'free';
+
               // Insert into user_sessions table
-              await supabase
+              const { error: dbError } = await supabase
                 .from('user_sessions')
                 .insert({
                   user_id: userId,
@@ -256,8 +292,14 @@ serve(async (req) => {
                   ambient,
                   audio_url: userFileName,
                   duration_seconds: 60,
+                  is_public: isPublic,
                 });
-              console.log('Successfully saved cached audio to user library');
+
+              if (!dbError) {
+                console.log('Successfully saved cached audio to user library');
+                // Increment usage counter
+                await supabase.rpc('increment_weekly_usage', { p_user_id: userId });
+              }
             }
           } catch (saveError) {
             console.error('Error saving cached audio to user library:', saveError);
@@ -377,6 +419,15 @@ serve(async (req) => {
             .from('user-sessions')
             .getPublicUrl(userFileName);
 
+          // Check user's subscription tier to determine if public
+          const { data: subscription } = await supabase
+            .from('user_subscriptions')
+            .select('tier')
+            .eq('user_id', userId)
+            .single();
+          
+          const isPublic = subscription?.tier === 'free';
+
           // Insert into user_sessions table
           const { error: dbError } = await supabase
             .from('user_sessions')
@@ -387,12 +438,15 @@ serve(async (req) => {
               ambient,
               audio_url: userFileName,
               duration_seconds: 60,
+              is_public: isPublic,
             });
 
           if (dbError) {
             console.error('User session DB error:', dbError);
           } else {
             console.log('Successfully saved to user library');
+            // Increment usage counter
+            await supabase.rpc('increment_weekly_usage', { p_user_id: userId });
           }
         }
       } catch (saveError) {

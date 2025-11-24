@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from "react";
-import { Navigate, useNavigate } from "react-router-dom";
+import { Navigate, useNavigate, Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -11,12 +11,14 @@ import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/useAuth";
 import { useUserRole } from "@/hooks/useUserRole";
+import { useGenerationLimit } from "@/hooks/useGenerationLimit";
+import { useSubscription } from "@/hooks/useSubscription";
 import AmbientBackground from "@/components/AmbientBackground";
 import { SessionHistory } from "@/components/SessionHistory";
 import { AuthModal } from "@/components/AuthModal";
 import { type UserSession } from "@/hooks/useUserSessions";
 import { useExampleSessions, type ExampleSession } from "@/hooks/useExampleSessions";
-import { History, LogOut, Archive, User, ChevronDown, Play, Loader2, Shield } from "lucide-react";
+import { History, LogOut, Archive, User, ChevronDown, Play, Loader2, Shield, Sparkles } from "lucide-react";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
@@ -238,6 +240,8 @@ const Index = () => {
   const { user, loading, signOut } = useAuth();
   const { isAdmin } = useUserRole();
   const { examples, isLoading: isLoadingExamples } = useExampleSessions();
+  const { limitInfo, canGenerate, remaining, refetch: refetchLimit } = useGenerationLimit();
+  const { isPremium } = useSubscription();
   const [selectedMood, setSelectedMood] = useState<Mood | null>(null);
   const [selectedAmbient, setSelectedAmbient] = useState<Ambient | null>(null);
   const [isGenerating, setIsGenerating] = useState(false);
@@ -2078,6 +2082,36 @@ const Index = () => {
           </section>
 
 
+          {/* Generation Limit Banner */}
+          {user && !isPremium && limitInfo && (
+            <div className="mb-6 p-4 rounded-lg bg-gradient-to-r from-primary/10 to-accent/10 border border-primary/20">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <Sparkles className="h-5 w-5 text-primary" />
+                  <div>
+                    <p className="text-sm font-medium lowercase">
+                      {(remaining ?? 0) > 0 
+                        ? `${remaining} of ${(limitInfo as any).limit} generations remaining this week` 
+                        : 'weekly limit reached'}
+                    </p>
+                    {(remaining ?? 0) === 0 && (
+                      <p className="text-xs text-muted-foreground mt-1 lowercase">
+                        resets every monday
+                      </p>
+                    )}
+                  </div>
+                </div>
+                {(remaining ?? 0) === 0 && (
+                  <Link to="/premium">
+                    <Button size="sm" variant="default" className="lowercase">
+                      learn about premium
+                    </Button>
+                  </Link>
+                )}
+              </div>
+            </div>
+          )}
+
           {/* Tabs System - Three Experiences */}
           <section className="max-w-2xl mx-auto mt-8" aria-labelledby="experiences-heading">
             <h2 id="experiences-heading" className="sr-only">Audio Experiences</h2>
@@ -2175,11 +2209,11 @@ const Index = () => {
                 {/* Generate Button */}
                 <Button
                   onClick={() => requireAuth(startSession)}
-                  disabled={isGenerating || !selectedMood || !selectedAmbient}
+                  disabled={isGenerating || !selectedMood || !selectedAmbient || (user && !canGenerate)}
                   className="w-full py-6 text-base lowercase tracking-wide bg-primary/90 hover:bg-primary transition-all"
                   size="lg"
                 >
-                  {isGenerating ? "generating your session..." : "✨ generate session"}
+                  {!canGenerate && user && !isPremium ? 'limit reached' : isGenerating ? "generating your session..." : "✨ generate session"}
                 </Button>
               </TabsContent>
 

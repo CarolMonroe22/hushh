@@ -4,8 +4,9 @@ import { Button } from '@/components/ui/button';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useUserSessions, type UserSession } from '@/hooks/useUserSessions';
+import { useCommunityAudios } from '@/hooks/useCommunityAudios';
 import { formatDistanceToNow } from 'date-fns';
-import { Heart, Play, Trash2, Clock } from 'lucide-react';
+import { Heart, Play, Trash2, Clock, Users } from 'lucide-react';
 
 type SessionHistoryProps = {
   open: boolean;
@@ -15,11 +16,12 @@ type SessionHistoryProps = {
 
 export const SessionHistory = ({ open, onOpenChange, onPlaySession }: SessionHistoryProps) => {
   const { sessions, isLoading, toggleFavorite, deleteSession } = useUserSessions();
-  const [filter, setFilter] = useState<'all' | 'preset' | 'creator' | 'binaural' | 'voice'>('all');
+  const { communityAudios, isLoading: isLoadingCommunity } = useCommunityAudios();
+  const [filter, setFilter] = useState<'all' | 'preset' | 'creator' | 'binaural' | 'voice' | 'community'>('all');
 
-  const filteredSessions = sessions.filter(
-    (s) => filter === 'all' || s.session_type === filter
-  );
+  const filteredSessions = filter === 'community' 
+    ? communityAudios 
+    : sessions.filter((s) => filter === 'all' || s.session_type === filter);
 
   const favorites = sessions.filter((s) => s.is_favorite);
 
@@ -128,24 +130,32 @@ export const SessionHistory = ({ open, onOpenChange, onPlaySession }: SessionHis
             <TabsTrigger value="creator" className="lowercase">creator</TabsTrigger>
             <TabsTrigger value="binaural" className="lowercase">binaural</TabsTrigger>
             <TabsTrigger value="voice" className="lowercase">voice</TabsTrigger>
+            <TabsTrigger value="community" className="lowercase">
+              <Users className="h-4 w-4 mr-1" />
+              community
+            </TabsTrigger>
           </TabsList>
 
           <TabsContent value={filter} className="mt-0">
             <ScrollArea className="h-[50vh] px-6 py-4">
-              {isLoading ? (
+              {(filter === 'community' ? isLoadingCommunity : isLoading) ? (
                 <div className="text-center py-12 text-muted-foreground lowercase">
-                  loading your sessions...
+                  loading sessions...
                 </div>
               ) : filteredSessions.length === 0 ? (
                 <div className="text-center py-12">
-                  <p className="text-muted-foreground lowercase mb-2">no sessions yet</p>
+                  <p className="text-muted-foreground lowercase mb-2">
+                    {filter === 'community' ? 'no public sessions yet' : 'no sessions yet'}
+                  </p>
                   <p className="text-sm text-muted-foreground lowercase">
-                    generate your first session to start your library
+                    {filter === 'community' 
+                      ? 'public sessions from other users will appear here' 
+                      : 'generate your first session to start your library'}
                   </p>
                 </div>
               ) : (
                 <div className="space-y-3">
-                  {favorites.length > 0 && filter === 'all' && (
+                  {filter === 'all' && favorites.length > 0 && (
                     <>
                       <h4 className="text-sm font-medium lowercase text-muted-foreground mb-2">
                         ⭐ favorites
@@ -161,10 +171,20 @@ export const SessionHistory = ({ open, onOpenChange, onPlaySession }: SessionHis
                   )}
                   
                   {filteredSessions
-                    .filter((s) => filter !== 'all' || !s.is_favorite)
-                    .map((session) => (
-                      <SessionCard key={session.id} session={session} />
-                    ))}
+                    .filter((s) => filter === 'community' || filter !== 'all' || !s.is_favorite)
+                    .map((session) => {
+                      const communitySession = 'profiles' in session ? session as any : null;
+                      return (
+                        <div key={session.id}>
+                          {filter === 'community' && communitySession?.profiles && (
+                            <div className="text-xs text-muted-foreground mb-1 lowercase">
+                              by {communitySession.profiles.full_name || 'anonymous'}
+                            </div>
+                          )}
+                          <SessionCard session={session} />
+                        </div>
+                      );
+                    })}
                 </div>
               )}
             </ScrollArea>

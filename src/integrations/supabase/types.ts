@@ -286,6 +286,7 @@ export type Database = {
           duration_seconds: number | null
           id: string
           is_favorite: boolean | null
+          is_public: boolean | null
           last_played_at: string | null
           mood: string | null
           session_type: string
@@ -304,6 +305,7 @@ export type Database = {
           duration_seconds?: number | null
           id?: string
           is_favorite?: boolean | null
+          is_public?: boolean | null
           last_played_at?: string | null
           mood?: string | null
           session_type: string
@@ -322,6 +324,7 @@ export type Database = {
           duration_seconds?: number | null
           id?: string
           is_favorite?: boolean | null
+          is_public?: boolean | null
           last_played_at?: string | null
           mood?: string | null
           session_type?: string
@@ -331,6 +334,30 @@ export type Database = {
           vibe_description?: string | null
           voice_gender?: string | null
           voice_journey?: string | null
+        }
+        Relationships: []
+      }
+      user_subscriptions: {
+        Row: {
+          created_at: string | null
+          id: string
+          tier: Database["public"]["Enums"]["subscription_tier"]
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          tier?: Database["public"]["Enums"]["subscription_tier"]
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          tier?: Database["public"]["Enums"]["subscription_tier"]
+          updated_at?: string | null
+          user_id?: string
         }
         Relationships: []
       }
@@ -364,11 +391,39 @@ export type Database = {
         }
         Relationships: []
       }
+      weekly_usage: {
+        Row: {
+          created_at: string | null
+          generations_count: number | null
+          id: string
+          updated_at: string | null
+          user_id: string
+          week_start: string
+        }
+        Insert: {
+          created_at?: string | null
+          generations_count?: number | null
+          id?: string
+          updated_at?: string | null
+          user_id: string
+          week_start: string
+        }
+        Update: {
+          created_at?: string | null
+          generations_count?: number | null
+          id?: string
+          updated_at?: string | null
+          user_id?: string
+          week_start?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
+      check_generation_limit: { Args: { p_user_id: string }; Returns: Json }
       cleanup_old_rate_limits: { Args: never; Returns: undefined }
       has_role: {
         Args: {
@@ -398,10 +453,15 @@ export type Database = {
         Args: { session_id: string }
         Returns: undefined
       }
+      increment_weekly_usage: {
+        Args: { p_user_id: string }
+        Returns: undefined
+      }
       is_admin: { Args: { _user_id: string }; Returns: boolean }
     }
     Enums: {
       app_role: "admin" | "user"
+      subscription_tier: "free" | "premium"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -530,6 +590,7 @@ export const Constants = {
   public: {
     Enums: {
       app_role: ["admin", "user"],
+      subscription_tier: ["free", "premium"],
     },
   },
 } as const

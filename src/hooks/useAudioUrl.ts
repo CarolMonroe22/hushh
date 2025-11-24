@@ -1,7 +1,8 @@
+import { useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 
 export const useAudioUrl = () => {
-  const getAudioUrl = (relativePath: string): string => {
+  const getAudioUrl = useCallback((relativePath: string): string => {
     if (!relativePath) return '';
     
     // If already a full URL (blob: or https:), return as is
@@ -15,7 +16,7 @@ export const useAudioUrl = () => {
       .getPublicUrl(relativePath);
     
     return data.publicUrl;
-  };
+  }, []);
 
   return { getAudioUrl };
 };

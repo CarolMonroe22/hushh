@@ -72,6 +72,32 @@ serve(async (req) => {
     );
   }
 
+  const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
+  const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
+  const supabase = createClient(supabaseUrl, supabaseServiceKey);
+
+  // Check generation limit
+  const { data: limitCheck, error: limitError } = await supabase
+    .rpc('check_generation_limit', { p_user_id: userId });
+
+  if (limitError) {
+    console.error('Error checking limit:', limitError);
+    return new Response(
+      JSON.stringify({ error: 'Failed to check generation limit' }),
+      { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+    );
+  }
+
+  if (!limitCheck.allowed) {
+    return new Response(
+      JSON.stringify({ 
+        error: 'Generation limit reached',
+        message: `You've reached your weekly limit of ${limitCheck.limit} generations. Upgrade to premium for unlimited access.`,
+      }),
+      { status: 403, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+    );
+  }
+
   try {
     console.log('[whisper-text] Processing request for user:', userId);
 
@@ -219,6 +245,15 @@ serve(async (req) => {
             session_type: 'voice' 
           });
 
+          // Check user's subscription tier
+          const { data: subscription } = await supabase
+            .from('user_subscriptions')
+            .select('tier')
+            .eq('user_id', userId)
+            .single();
+          
+          const isPublic = subscription?.tier === 'free';
+
           // Insert into user_sessions table
           const { error: dbError } = await supabase
             .from('user_sessions')
@@ -229,6 +264,7 @@ serve(async (req) => {
               voice_gender: voiceGender || 'female',
               audio_url: userFileName,
               duration_seconds: 60,
+              is_public: isPublic,
             });
 
           if (dbError) {
@@ -236,6 +272,7 @@ serve(async (req) => {
           } else {
             console.log('[whisper-text] Saved OK');
             saved = true;
+            await supabase.rpc('increment_weekly_usage', { p_user_id: userId });
           }
         }
       } catch (saveError) {

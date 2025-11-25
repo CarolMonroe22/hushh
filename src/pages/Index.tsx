@@ -16,7 +16,7 @@ import { useSubscription } from "@/hooks/useSubscription";
 import AmbientBackground from "@/components/AmbientBackground";
 import { SessionHistory } from "@/components/SessionHistory";
 import { AuthModal } from "@/components/AuthModal";
-import { GenerationLimitBanner } from "@/components/GenerationLimitBanner";
+
 import { type UserSession } from "@/hooks/useUserSessions";
 import { useExampleSessions, type ExampleSession } from "@/hooks/useExampleSessions";
 import { History, LogOut, Archive, User, ChevronDown, Play, Loader2, Shield, Sparkles, Users } from "lucide-react";
@@ -1913,14 +1913,6 @@ const Index = () => {
         </div>
       </header>
 
-      {/* Generation Limit Banner */}
-      {user && (
-        <GenerationLimitBanner 
-          remaining={remaining}
-          limit={limit}
-          tier={tier}
-        />
-      )}
 
       {/* Session History Modal */}
       {user && (

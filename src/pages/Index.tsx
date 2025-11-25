@@ -1553,8 +1553,13 @@ const Index = () => {
       return 'creator'; // Video para custom vibes
     }
     
+    if (selectedMood && selectedAmbient) {
+      // Para presets, priorizar el video del ambiente
+      return selectedAmbient; // 'rain', 'ocean', 'forest', 'fireplace'
+    }
+    
     if (selectedMood) {
-      // Para presets, usar el mood como video
+      // Si solo hay mood, usar su video
       return selectedMood; // 'relax', 'sleep', 'focus', etc.
     }
     

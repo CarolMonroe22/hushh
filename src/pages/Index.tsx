@@ -7,6 +7,7 @@ import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/useAuth";
@@ -748,6 +749,25 @@ const Index = () => {
               console.log('Audio started playing successfully');
               setIsPlaying(true);
               setNeedsManualPlay(false);
+              
+              // Setup timer based on actual audio progress
+              setTimeLeft(60);
+              
+              const updateTimer = () => {
+                if (audioRef.current) {
+                  const remaining = Math.ceil(audioRef.current.duration - audioRef.current.currentTime);
+                  setTimeLeft(remaining > 0 ? remaining : 0);
+                  
+                  if (remaining <= 0) {
+                    setIsPlaying(false);
+                    setIsComplete(true);
+                  }
+                }
+              };
+              
+              if (audioRef.current) {
+                audioRef.current.addEventListener('timeupdate', updateTimer);
+              }
             })
             .catch((error) => {
               console.error('Play was prevented:', error);
@@ -760,20 +780,6 @@ const Index = () => {
         } else {
           setIsPlaying(true);
         }
-
-        setTimeLeft(60);
-
-        timerRef.current = setInterval(() => {
-          setTimeLeft((prev) => {
-            if (prev <= 1) {
-              if (timerRef.current) clearInterval(timerRef.current);
-              setIsPlaying(false);
-              setIsComplete(true);
-              return 0;
-            }
-            return prev - 1;
-          });
-        }, 1000);
 
         if (audioRef.current) {
           audioRef.current.onended = () => {
@@ -918,24 +924,29 @@ const Index = () => {
                 title: "Tap to Play",
                 description: "Please tap the play button to start audio",
               });
+              
+              // Setup timer based on actual audio progress
+              setTimeLeft(60);
+              
+              const updateTimer = () => {
+                if (audioRef.current) {
+                  const remaining = Math.ceil(audioRef.current.duration - audioRef.current.currentTime);
+                  setTimeLeft(remaining > 0 ? remaining : 0);
+                  
+                  if (remaining <= 0) {
+                    setIsPlaying(false);
+                    setIsComplete(true);
+                  }
+                }
+              };
+              
+              if (audioRef.current) {
+                audioRef.current.addEventListener('timeupdate', updateTimer);
+              }
             });
         } else {
           setIsPlaying(true);
         }
-
-        setTimeLeft(60);
-
-        timerRef.current = setInterval(() => {
-          setTimeLeft((prev) => {
-            if (prev <= 1) {
-              if (timerRef.current) clearInterval(timerRef.current);
-              setIsPlaying(false);
-              setIsComplete(true);
-              return 0;
-            }
-            return prev - 1;
-          });
-        }, 1000);
 
         if (audioRef.current) {
           audioRef.current.onended = () => {
@@ -1038,6 +1049,25 @@ const Index = () => {
               console.log('3D Audio started playing');
               setIsPlaying(true);
               setNeedsManualPlay(false);
+              
+              // Setup timer based on actual audio progress
+              setTimeLeft(60);
+              
+              const updateTimer = () => {
+                if (audioRef.current) {
+                  const remaining = Math.ceil(audioRef.current.duration - audioRef.current.currentTime);
+                  setTimeLeft(remaining > 0 ? remaining : 0);
+                  
+                  if (remaining <= 0) {
+                    setIsPlaying(false);
+                    setIsComplete(true);
+                  }
+                }
+              };
+              
+              if (audioRef.current) {
+                audioRef.current.addEventListener('timeupdate', updateTimer);
+              }
             })
             .catch((error) => {
               console.error('Play prevented:', error);
@@ -1054,19 +1084,6 @@ const Index = () => {
         setGeneratedTitle(
           BINAURAL_EXPERIENCES.find(exp => exp.value === selectedExperience)?.label || "3D Experience"
         );
-        setTimeLeft(60);
-
-        timerRef.current = setInterval(() => {
-          setTimeLeft((prev) => {
-            if (prev <= 1) {
-              if (timerRef.current) clearInterval(timerRef.current);
-              setIsPlaying(false);
-              setIsComplete(true);
-              return 0;
-            }
-            return prev - 1;
-          });
-        }, 1000);
 
         if (audioRef.current) {
           audioRef.current.onended = () => {
@@ -1319,23 +1336,32 @@ const Index = () => {
   const handleReplay = () => {
     if (audioRef.current) {
       audioRef.current.currentTime = 0;
-      audioRef.current.play();
+      const playPromise = audioRef.current.play();
       setIsComplete(false);
-      setIsPlaying(true);
       setIsPaused(false);
-      setTimeLeft(60);
-
-      timerRef.current = setInterval(() => {
-        setTimeLeft((prev) => {
-          if (prev <= 1) {
-            if (timerRef.current) clearInterval(timerRef.current);
-            setIsPlaying(false);
-            setIsComplete(true);
-            return 0;
+      
+      if (playPromise !== undefined) {
+        playPromise.then(() => {
+          setIsPlaying(true);
+          setTimeLeft(60);
+          
+          const updateTimer = () => {
+            if (audioRef.current) {
+              const remaining = Math.ceil(audioRef.current.duration - audioRef.current.currentTime);
+              setTimeLeft(remaining > 0 ? remaining : 0);
+              
+              if (remaining <= 0) {
+                setIsPlaying(false);
+                setIsComplete(true);
+              }
+            }
+          };
+          
+          if (audioRef.current) {
+            audioRef.current.addEventListener('timeupdate', updateTimer);
           }
-          return prev - 1;
         });
-      }, 1000);
+      }
     }
   };
 
@@ -1408,6 +1434,8 @@ const Index = () => {
     
     try {
       if (audioRef.current) {
+        // Remove all event listeners before stopping
+        audioRef.current.removeEventListener('timeupdate', () => {});
         audioRef.current.pause();
         audioRef.current.currentTime = 0;
         console.log('Audio stopped successfully');
@@ -1601,26 +1629,53 @@ const Index = () => {
           </div>
 
           {needsManualPlay && audioRef.current && (
-            <Button 
-              onClick={() => {
-                audioRef.current?.play().then(() => {
-                  setNeedsManualPlay(false);
-                  setIsPlaying(true);
-                  console.log('Manual play successful');
-                }).catch((error) => {
-                  console.error('Manual play failed:', error);
-                  toast({
-                    title: "Playback Error",
-                    description: "Unable to play audio. Please try again.",
-                    variant: "destructive",
+            <div className="mt-8 space-y-4">
+              <Alert className="bg-primary/10 border-primary">
+                <AlertDescription className="text-center">
+                  Tu navegador requiere interacción para reproducir audio. 
+                  Haz clic en el botón para iniciar.
+                </AlertDescription>
+              </Alert>
+              <Button 
+                onClick={() => {
+                  audioRef.current?.play().then(() => {
+                    setNeedsManualPlay(false);
+                    setIsPlaying(true);
+                    setTimeLeft(60);
+                    
+                    // Setup timer when manually started
+                    const updateTimer = () => {
+                      if (audioRef.current) {
+                        const remaining = Math.ceil(audioRef.current.duration - audioRef.current.currentTime);
+                        setTimeLeft(remaining > 0 ? remaining : 0);
+                        
+                        if (remaining <= 0) {
+                          setIsPlaying(false);
+                          setIsComplete(true);
+                        }
+                      }
+                    };
+                    
+                    if (audioRef.current) {
+                      audioRef.current.addEventListener('timeupdate', updateTimer);
+                    }
+                    
+                    console.log('Manual play successful');
+                  }).catch((error) => {
+                    console.error('Manual play failed:', error);
+                    toast({
+                      title: "Playback Error",
+                      description: "Unable to play audio. Please try again.",
+                      variant: "destructive",
+                    });
                   });
-                });
-              }}
-              size="lg"
-              className="lowercase tracking-wide"
-            >
-              ▶️ tap to play audio
-            </Button>
+                }}
+                size="lg"
+                className="lowercase tracking-wide w-full"
+              >
+                ▶️ iniciar audio
+              </Button>
+            </div>
           )}
 
           {/* Play button when audio is stopped but still available */}

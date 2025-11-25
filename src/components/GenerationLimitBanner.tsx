@@ -39,7 +39,7 @@ export const GenerationLimitBanner = ({ remaining, limit, tier }: GenerationLimi
 
   return (
     <div className={`
-      absolute top-4 left-0 right-0 z-40 flex justify-center px-4
+      fixed top-20 left-0 right-0 z-40 flex justify-center px-4
       transition-all duration-500
       ${isVisible ? 'animate-fade-in opacity-100' : 'opacity-0 -translate-y-2'}
     `}>

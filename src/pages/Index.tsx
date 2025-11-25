@@ -451,6 +451,17 @@ const Index = () => {
         return;
       }
 
+      // Configurar título según el tipo de ejemplo
+      if (example.session_type === 'preset') {
+        // Para preset: usar mood y ambient del ejemplo
+        if (example.mood) setSelectedMood(example.mood as Mood);
+        if (example.ambient) setSelectedAmbient(example.ambient as Ambient);
+        setGeneratedTitle(''); // Limpiar para que use mood + ambient
+      } else {
+        // Para otros tipos: usar el título de la BD
+        setGeneratedTitle(example.title);
+      }
+
       // Configurar UI según el tipo de ejemplo
       if (example.session_type === 'binaural' && example.binaural_experience) {
         setSelectedExperience(example.binaural_experience as BinauralExperience);

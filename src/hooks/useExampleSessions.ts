@@ -36,6 +36,7 @@ export const useExampleSessions = () => {
       
       return data as ExampleSession[];
     },
+    staleTime: 0, // Always fetch fresh data from database
   });
 
   return {

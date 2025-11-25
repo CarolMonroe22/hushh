@@ -9,14 +9,23 @@ interface GenerationLimitBannerProps {
 
 export const GenerationLimitBanner = ({ remaining, limit, tier }: GenerationLimitBannerProps) => {
   const [isVisible, setIsVisible] = useState(true);
+  const [shouldRender, setShouldRender] = useState(true);
 
   useEffect(() => {
-    // Auto-ocultar después de 10 segundos
-    const timer = setTimeout(() => {
+    // Iniciar fade-out a los 9.5 segundos
+    const fadeOutTimer = setTimeout(() => {
       setIsVisible(false);
+    }, 9500);
+
+    // Remover del DOM a los 10 segundos (después del fade-out)
+    const removeTimer = setTimeout(() => {
+      setShouldRender(false);
     }, 10000);
 
-    return () => clearTimeout(timer);
+    return () => {
+      clearTimeout(fadeOutTimer);
+      clearTimeout(removeTimer);
+    };
   }, []);
 
   // Solo mostrar para usuarios free con datos válidos
@@ -24,15 +33,15 @@ export const GenerationLimitBanner = ({ remaining, limit, tier }: GenerationLimi
     return null;
   }
 
-  if (!isVisible) {
+  if (!shouldRender) {
     return null;
   }
 
   return (
     <div className={`
-      fixed top-20 left-0 right-0 z-40 flex justify-center px-4
+      absolute top-4 left-0 right-0 z-40 flex justify-center px-4
       transition-all duration-500
-      ${isVisible ? 'animate-fade-in opacity-100' : 'opacity-0 translate-y-2'}
+      ${isVisible ? 'animate-fade-in opacity-100' : 'opacity-0 -translate-y-2'}
     `}>
       <div className="bg-card/80 backdrop-blur-md border border-border/50 rounded-lg px-4 py-3 shadow-lg">
         <div className="flex items-center gap-2 text-sm text-muted-foreground">

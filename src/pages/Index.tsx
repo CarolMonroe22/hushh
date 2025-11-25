@@ -16,6 +16,7 @@ import { useSubscription } from "@/hooks/useSubscription";
 import AmbientBackground from "@/components/AmbientBackground";
 import { SessionHistory } from "@/components/SessionHistory";
 import { AuthModal } from "@/components/AuthModal";
+import { GenerationLimitBanner } from "@/components/GenerationLimitBanner";
 import { type UserSession } from "@/hooks/useUserSessions";
 import { useExampleSessions, type ExampleSession } from "@/hooks/useExampleSessions";
 import { History, LogOut, Archive, User, ChevronDown, Play, Loader2, Shield, Sparkles, Users } from "lucide-react";
@@ -240,7 +241,7 @@ const Index = () => {
   const { user, loading, signOut } = useAuth();
   const { isAdmin } = useUserRole();
   const { examples, isLoading: isLoadingExamples } = useExampleSessions();
-  const { limitInfo, canGenerate, remaining, refetch: refetchLimit } = useGenerationLimit();
+  const { limitInfo, canGenerate, remaining, limit, tier, refetch: refetchLimit } = useGenerationLimit();
   const { isPremium } = useSubscription();
   const [selectedMood, setSelectedMood] = useState<Mood | null>(null);
   const [selectedAmbient, setSelectedAmbient] = useState<Ambient | null>(null);
@@ -1911,6 +1912,15 @@ const Index = () => {
           </div>
         </div>
       </header>
+
+      {/* Generation Limit Banner */}
+      {user && (
+        <GenerationLimitBanner 
+          remaining={remaining}
+          limit={limit}
+          tier={tier}
+        />
+      )}
 
       {/* Session History Modal */}
       {user && (

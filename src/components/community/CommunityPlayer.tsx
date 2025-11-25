@@ -17,6 +17,7 @@ import { useCommunityLikes } from '@/hooks/useCommunityLikes';
 import { useSaveToCollection } from '@/hooks/useSaveToCollection';
 import { type UserSession } from '@/hooks/useUserSessions';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { useIsMobile } from '@/hooks/use-mobile';
 
 type CommunitySession = UserSession & {
   profiles: {
@@ -69,6 +70,7 @@ export const CommunityPlayer = ({
 }: CommunityPlayerProps) => {
   const { isLiked, toggleLike } = useCommunityLikes(currentAudio?.id || '');
   const { saveToCollection } = useSaveToCollection();
+  const isMobile = useIsMobile();
 
   if (!currentAudio) return null;
 
@@ -88,6 +90,116 @@ export const CommunityPlayer = ({
     return 'audio session';
   };
 
+  // Mobile Layout
+  if (isMobile) {
+    return (
+      <div className="fixed bottom-0 left-0 right-0 bg-background/95 backdrop-blur-lg border-t border-border z-50">
+        {/* Row 1: Progress Bar */}
+        <div className="px-4 pt-3">
+          <div className="flex items-center gap-2">
+            <span className="text-xs text-muted-foreground w-10 text-right">
+              {formatTime(currentTime)}
+            </span>
+            <Slider
+              value={[currentTime]}
+              max={duration || 100}
+              step={1}
+              onValueChange={(value) => onSeek(value[0])}
+              className="flex-1"
+            />
+            <span className="text-xs text-muted-foreground w-10">
+              {formatTime(duration)}
+            </span>
+          </div>
+        </div>
+
+        {/* Row 2: Info + Founder */}
+        <div className="flex items-center gap-3 px-4 py-3">
+          <Avatar className="h-12 w-12">
+            <AvatarImage src={currentAudio.profiles?.avatar_url || ''} />
+            <AvatarFallback>
+              {currentAudio.profiles?.full_name?.[0] || '?'}
+            </AvatarFallback>
+          </Avatar>
+          <div className="flex-1 min-w-0">
+            <p className="text-sm font-medium lowercase truncate">
+              {getSessionTitle()}
+            </p>
+            <p className="text-xs text-muted-foreground lowercase truncate">
+              by <span className="text-foreground font-medium">{currentAudio.profiles?.full_name || 'anonymous'}</span>
+            </p>
+          </div>
+          <Button variant="ghost" size="icon" onClick={onClose}>
+            <X className="h-5 w-5" />
+          </Button>
+        </div>
+
+        {/* Row 3: Controls */}
+        <div className="flex items-center justify-between px-4 pb-4">
+          <div className="flex gap-1">
+            <Button
+              variant="ghost"
+              size="icon"
+              className={`h-9 w-9 ${isShuffle ? 'text-primary' : 'text-muted-foreground'}`}
+              onClick={onToggleShuffle}
+            >
+              <Shuffle className="h-4 w-4" />
+            </Button>
+            <Button
+              variant="ghost"
+              size="icon"
+              className={`h-9 w-9 ${repeatMode !== 'off' ? 'text-primary' : 'text-muted-foreground'}`}
+              onClick={onCycleRepeat}
+            >
+              {repeatMode === 'one' ? (
+                <Repeat1 className="h-4 w-4" />
+              ) : (
+                <Repeat className="h-4 w-4" />
+              )}
+            </Button>
+          </div>
+
+          <div className="flex gap-3">
+            <Button variant="ghost" size="icon" className="h-11 w-11" onClick={onPrevious}>
+              <SkipBack className="h-5 w-5" />
+            </Button>
+            <Button 
+              variant="default" 
+              size="icon" 
+              onClick={onTogglePlay}
+              className="h-12 w-12"
+            >
+              {isPlaying ? <Pause className="h-6 w-6" /> : <Play className="h-6 w-6" />}
+            </Button>
+            <Button variant="ghost" size="icon" className="h-11 w-11" onClick={onNext}>
+              <SkipForward className="h-5 w-5" />
+            </Button>
+          </div>
+
+          <div className="flex gap-1">
+            <Button
+              variant="ghost"
+              size="icon"
+              className={`h-9 w-9 ${isLiked ? 'text-red-500' : 'text-muted-foreground'}`}
+              onClick={toggleLike}
+            >
+              <Heart className={`h-4 w-4 ${isLiked ? 'fill-current' : ''}`} />
+            </Button>
+            <Button
+              variant="ghost"
+              size="icon"
+              className={`h-9 w-9 ${isQueueOpen ? 'text-primary' : 'text-muted-foreground'}`}
+              onClick={onToggleQueue}
+            >
+              <List className="h-4 w-4" />
+            </Button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // Desktop Layout
   return (
     <div className="fixed bottom-0 left-0 right-0 bg-background/95 backdrop-blur-lg border-t border-border z-50">
       <div className="container mx-auto px-4 py-4">
@@ -105,7 +217,7 @@ export const CommunityPlayer = ({
                 {getSessionTitle()}
               </p>
               <p className="text-xs text-muted-foreground lowercase truncate">
-                {currentAudio.profiles?.full_name || 'anonymous'}
+                by <span className="text-foreground font-medium">{currentAudio.profiles?.full_name || 'anonymous'}</span>
               </p>
             </div>
           </div>

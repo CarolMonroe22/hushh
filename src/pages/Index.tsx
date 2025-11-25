@@ -2099,35 +2099,6 @@ const Index = () => {
           </section>
 
 
-          {/* Generation Limit Banner */}
-          {user && !isPremium && limitInfo && (
-            <div className="mb-6 p-4 rounded-lg bg-gradient-to-r from-primary/10 to-accent/10 border border-primary/20">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                  <Sparkles className="h-5 w-5 text-primary" />
-                  <div>
-                    <p className="text-sm font-medium lowercase">
-                      {(remaining ?? 0) > 0 
-                        ? `${remaining} of ${(limitInfo as any).limit} generations remaining this week` 
-                        : 'weekly limit reached'}
-                    </p>
-                    {(remaining ?? 0) === 0 && (
-                      <p className="text-xs text-muted-foreground mt-1 lowercase">
-                        resets every monday
-                      </p>
-                    )}
-                  </div>
-                </div>
-                {(remaining ?? 0) === 0 && (
-                  <Link to="/premium">
-                    <Button size="sm" variant="default" className="lowercase">
-                      learn about premium
-                    </Button>
-                  </Link>
-                )}
-              </div>
-            </div>
-          )}
 
           {/* Tabs System - Three Experiences */}
           <section className="max-w-2xl mx-auto mt-8" aria-labelledby="experiences-heading">

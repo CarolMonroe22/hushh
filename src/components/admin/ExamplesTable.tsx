@@ -54,6 +54,7 @@ export const ExamplesTable = () => {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['admin-examples'] });
+      queryClient.invalidateQueries({ queryKey: ['example-sessions'] });
       toast.success('Estado actualizado');
     },
     onError: (error) => {
@@ -72,6 +73,7 @@ export const ExamplesTable = () => {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['admin-examples'] });
+      queryClient.invalidateQueries({ queryKey: ['example-sessions'] });
       toast.success('Example deleted successfully');
     },
     onError: (error) => {
@@ -90,6 +92,7 @@ export const ExamplesTable = () => {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['admin-examples'] });
+      queryClient.invalidateQueries({ queryKey: ['example-sessions'] });
       toast.success('Audio generated successfully');
     },
     onError: (error) => {
@@ -108,6 +111,7 @@ export const ExamplesTable = () => {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['admin-examples'] });
+      queryClient.invalidateQueries({ queryKey: ['example-sessions'] });
       toast.success('Order actualizado');
     },
     onError: (error) => {

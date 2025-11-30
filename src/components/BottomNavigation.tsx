@@ -1,4 +1,4 @@
-import { Home, Users, Archive, User } from "lucide-react";
+import { Home, Users, Sparkles, User } from "lucide-react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { cn } from "@/lib/utils";
 
@@ -20,7 +20,7 @@ export const BottomNavigation = ({ onOpenLibrary }: BottomNavigationProps) => {
   const navItems: NavItem[] = [
     { icon: <Home className="h-5 w-5" />, label: "home", path: "/" },
     { icon: <Users className="h-5 w-5" />, label: "community", path: "/community" },
-    { icon: <Archive className="h-5 w-5" />, label: "library", path: "#library", onClick: onOpenLibrary },
+    { icon: <Sparkles className="h-5 w-5" />, label: "vibes", path: "#library", onClick: onOpenLibrary },
     { icon: <User className="h-5 w-5" />, label: "account", path: "/account" },
   ];
 

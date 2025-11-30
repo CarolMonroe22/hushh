@@ -85,4 +85,9 @@ All colors MUST be HSL.
       --real-vh: 100dvh;
     }
   }
+
+  /* Safe area for mobile devices with notches */
+  .safe-area-bottom {
+    padding-bottom: max(env(safe-area-inset-bottom), 0px);
+  }
 }

@@ -4,10 +4,9 @@ import { useCommunityPlayer } from '@/hooks/useCommunityPlayer';
 import { CategoryCard } from '@/components/community/CategoryCard';
 import { CommunityPlayer } from '@/components/community/CommunityPlayer';
 import { PlaylistQueue } from '@/components/community/PlaylistQueue';
-import { Button } from '@/components/ui/button';
-import { ArrowLeft } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import AmbientBackground from '@/components/AmbientBackground';
+import { BottomNavigation } from '@/components/BottomNavigation';
 
 const Community = () => {
   const navigate = useNavigate();
@@ -119,17 +118,6 @@ const Community = () => {
       
       <div className="min-h-screen bg-background pb-32">
       <div className="container mx-auto px-4 py-8 space-y-8">
-        <div className="flex items-center justify-between">
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => navigate('/')}
-            className="lowercase"
-          >
-            <ArrowLeft className="h-4 w-4 mr-2" />
-            back to home
-          </Button>
-        </div>
 
         <div className="space-y-4">
           <div className="space-y-2">
@@ -204,6 +192,9 @@ const Community = () => {
         </>
       )}
       </div>
+
+      {/* Bottom Navigation */}
+      <BottomNavigation />
     </>
   );
 };

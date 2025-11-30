@@ -20,10 +20,11 @@ import { AuthModal } from "@/components/AuthModal";
 
 import { type UserSession } from "@/hooks/useUserSessions";
 import { useExampleSessions, type ExampleSession } from "@/hooks/useExampleSessions";
-import { History, LogOut, Archive, User, ChevronDown, Play, Loader2, Shield, Sparkles, Users } from "lucide-react";
+import { LogOut, Play, Loader2, Shield } from "lucide-react";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import { Badge } from "@/components/ui/badge";
+import { BottomNavigation } from "@/components/BottomNavigation";
 
 type Mood = "relax" | "sleep" | "focus" | "gratitude" | "boost" | "stoic";
 type Ambient = "rain" | "ocean" | "forest" | "fireplace" | "whitenoise" | "city";
@@ -1860,116 +1861,65 @@ const Index = () => {
     <div className="min-h-screen bg-background text-foreground">
       <AmbientBackground isPlaying={false} videoKey={getVideoKey()} />
       
-      {/* Elegant Header */}
+      {/* Simplified Header */}
       <header className={`fixed top-0 w-full z-50 transition-all duration-700 ease-out ${
         isScrolled 
           ? 'backdrop-blur-md bg-background/40' 
           : 'backdrop-blur-sm bg-background/5'
       }`}>
-        <div className="container mx-auto px-4 h-20 flex items-center justify-between">
-          <div className="flex items-center gap-4">
-            {/* Left side - could add logo here */}
-          </div>
-          
-          <div className="flex items-center gap-3">
-            {user ? (
-              <>
-                {/* Library Icon with Tooltip */}
-                <TooltipProvider>
-                  <Tooltip>
-                    <TooltipTrigger asChild>
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        onClick={() => setShowHistory(true)}
-                        className="relative hover:scale-110 transition-transform"
-                      >
-                        <Archive className="h-5 w-5" />
-                      </Button>
-                    </TooltipTrigger>
-                    <TooltipContent>
-                      <p>Library</p>
-                    </TooltipContent>
-                  </Tooltip>
-                </TooltipProvider>
-                
-                {/* User Dropdown */}
-                <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                    <Button variant="ghost" className="flex items-center gap-2 hover:bg-accent/50 transition-colors">
-                      <Avatar className="h-8 w-8">
-                        <AvatarFallback className="bg-primary/10 text-primary">
-                          {user.email?.charAt(0).toUpperCase()}
-                        </AvatarFallback>
-                      </Avatar>
-                      <ChevronDown className="h-4 w-4 text-muted-foreground" />
-                    </Button>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent align="end" className="w-56 bg-background/95 backdrop-blur-md">
-                    <DropdownMenuLabel>
-                      <div className="flex flex-col space-y-1">
-                        <p className="text-sm font-medium lowercase">
-                          {user.user_metadata?.full_name || 'user'}
-                        </p>
-                        <p className="text-xs text-muted-foreground truncate lowercase">
-                          {user.email}
-                        </p>
-                      </div>
-                    </DropdownMenuLabel>
-                    <DropdownMenuSeparator />
-                    <DropdownMenuItem onClick={() => navigate('/community')} className="lowercase cursor-pointer">
-                      <Users className="mr-2 h-4 w-4" />
-                      <span>community</span>
-                    </DropdownMenuItem>
-                    <DropdownMenuItem onClick={() => navigate('/account')} className="lowercase cursor-pointer">
-                      <User className="mr-2 h-4 w-4" />
-                      <span>my account</span>
-                    </DropdownMenuItem>
-                    <DropdownMenuItem onClick={() => setShowHistory(true)} className="lowercase cursor-pointer">
-                      <Archive className="mr-2 h-4 w-4" />
-                      <span>library</span>
-                    </DropdownMenuItem>
-                    {isAdmin && (
-                      <>
-                        <DropdownMenuSeparator />
-                        <DropdownMenuItem onClick={() => navigate('/admin')} className="lowercase cursor-pointer">
-                          <Shield className="mr-2 h-4 w-4" />
-                          <span>admin panel</span>
-                        </DropdownMenuItem>
-                      </>
-                    )}
-                    <DropdownMenuSeparator />
-                    <DropdownMenuItem onClick={handleSignOut} className="text-destructive lowercase cursor-pointer">
-                      <LogOut className="mr-2 h-4 w-4" />
-                      <span>logout</span>
-                    </DropdownMenuItem>
-                  </DropdownMenuContent>
-                </DropdownMenu>
-              </>
-            ) : (
-              <div className="flex items-center gap-2">
-                <Button
-                  variant="ghost"
-                  onClick={() => {
-                    setAuthModalMode('login');
-                    setShowAuthModal(true);
-                  }}
-                  className="text-sm lowercase hover:bg-accent/50 transition-colors"
-                >
-                  login
-                </Button>
-                <Button
-                  onClick={() => {
-                    setAuthModalMode('signup');
-                    setShowAuthModal(true);
-                  }}
-                  className="text-sm lowercase bg-gradient-to-r from-primary to-primary/80 hover:from-primary/90 hover:to-primary/70 transition-all"
-                >
-                  sign up
-                </Button>
-              </div>
-            )}
-          </div>
+        <div className="container mx-auto px-4 h-16 flex items-center justify-end">
+          {user ? (
+            <div className="flex items-center gap-2">
+              {isPremium && <Badge variant="secondary" className="lowercase">✨ premium</Badge>}
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="ghost" size="icon" className="hover:bg-accent/50 transition-colors">
+                    <Avatar className="h-8 w-8">
+                      <AvatarFallback className="bg-primary/10 text-primary">
+                        {user.email?.charAt(0).toUpperCase()}
+                      </AvatarFallback>
+                    </Avatar>
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end" className="w-56 bg-background/95 backdrop-blur-md">
+                  <DropdownMenuLabel>
+                    <div className="flex flex-col space-y-1">
+                      <p className="text-sm font-medium lowercase">
+                        {user.user_metadata?.full_name || 'user'}
+                      </p>
+                      <p className="text-xs text-muted-foreground truncate lowercase">
+                        {user.email}
+                      </p>
+                    </div>
+                  </DropdownMenuLabel>
+                  {isAdmin && (
+                    <>
+                      <DropdownMenuSeparator />
+                      <DropdownMenuItem onClick={() => navigate('/admin')} className="lowercase cursor-pointer">
+                        <Shield className="mr-2 h-4 w-4" />
+                        <span>admin panel</span>
+                      </DropdownMenuItem>
+                    </>
+                  )}
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem onClick={handleSignOut} className="text-destructive lowercase cursor-pointer">
+                    <LogOut className="mr-2 h-4 w-4" />
+                    <span>logout</span>
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            </div>
+          ) : (
+            <Button
+              onClick={() => {
+                setAuthModalMode('signup');
+                setShowAuthModal(true);
+              }}
+              className="lowercase"
+            >
+              sign up
+            </Button>
+          )}
         </div>
       </header>
 
@@ -2512,6 +2462,11 @@ const Index = () => {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      {/* Bottom Navigation */}
+      {!isPlaying && (
+        <BottomNavigation onOpenLibrary={() => setShowHistory(true)} />
+      )}
     </div>
   );
 };

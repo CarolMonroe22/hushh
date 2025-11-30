@@ -14,6 +14,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { z } from 'zod';
+import { BottomNavigation } from '@/components/BottomNavigation';
 
 const profileSchema = z.object({
   full_name: z.string().trim().min(2, { message: "Name must be at least 2 characters" }).max(100),
@@ -256,18 +257,9 @@ const Account = () => {
     <div className="min-h-screen bg-background p-6">
       <div className="max-w-4xl mx-auto space-y-6">
         {/* Header */}
-        <div className="flex items-center justify-between">
-          <div>
-            <h1 className="text-3xl font-light lowercase tracking-wider">my account</h1>
-            <p className="text-sm text-muted-foreground lowercase mt-1">manage your profile and settings</p>
-          </div>
-          <Button
-            variant="ghost"
-            onClick={() => navigate('/')}
-            className="lowercase"
-          >
-            ← back to hushh
-          </Button>
+        <div className="mb-6">
+          <h1 className="text-3xl font-light lowercase tracking-wider">my account</h1>
+          <p className="text-sm text-muted-foreground lowercase mt-1">manage your profile and settings</p>
         </div>
 
         {/* Main content */}
@@ -576,6 +568,9 @@ const Account = () => {
           </TabsContent>
         </Tabs>
       </div>
+
+      {/* Bottom Navigation */}
+      <BottomNavigation />
     </div>
   );
 };

@@ -2,11 +2,9 @@ import { useState } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useUserSessions, type UserSession } from '@/hooks/useUserSessions';
-import { useCommunityAudios } from '@/hooks/useCommunityAudios';
 import { formatDistanceToNow } from 'date-fns';
-import { Heart, Play, Trash2, Clock, Users } from 'lucide-react';
+import { Heart, Play, Trash2 } from 'lucide-react';
 
 type SessionHistoryProps = {
   open: boolean;
@@ -16,13 +14,9 @@ type SessionHistoryProps = {
 
 export const SessionHistory = ({ open, onOpenChange, onPlaySession }: SessionHistoryProps) => {
   const { sessions, isLoading, toggleFavorite, deleteSession } = useUserSessions();
-  const { communityAudios, isLoading: isLoadingCommunity } = useCommunityAudios();
-  const [filter, setFilter] = useState<'all' | 'preset' | 'creator' | 'binaural' | 'voice' | 'community'>('all');
+  const [filter, setFilter] = useState<'all' | 'preset' | 'creator' | 'binaural' | 'voice'>('all');
 
-  const filteredSessions = filter === 'community' 
-    ? communityAudios 
-    : sessions.filter((s) => filter === 'all' || s.session_type === filter);
-
+  const filteredSessions = sessions.filter((s) => filter === 'all' || s.session_type === filter);
   const favorites = sessions.filter((s) => s.is_favorite);
 
   const getSessionTitle = (session: UserSession) => {
@@ -56,58 +50,45 @@ export const SessionHistory = ({ open, onOpenChange, onPlaySession }: SessionHis
   };
 
   const SessionCard = ({ session }: { session: UserSession }) => (
-    <div className="group relative p-4 rounded-lg border border-border/50 bg-card/30 hover:bg-card/50 transition-all">
-      <div className="flex items-start justify-between gap-3">
+    <div 
+      className="group relative p-5 rounded-xl hover:bg-card/50 transition-all cursor-pointer"
+      onClick={() => {
+        onPlaySession(session);
+        onOpenChange(false);
+      }}
+    >
+      <div className="flex items-center gap-4">
+        <span className="text-3xl">{getSessionEmoji(session)}</span>
+        
         <div className="flex-1 min-w-0">
-          <div className="flex items-center gap-2 mb-1">
-            <span className="text-xl">{getSessionEmoji(session)}</span>
-            <h3 className="font-medium text-sm lowercase truncate">
-              {getSessionTitle(session)}
-            </h3>
-          </div>
-          
-          <div className="flex items-center gap-3 text-xs text-muted-foreground lowercase">
-            <span className="flex items-center gap-1">
-              <Clock className="h-3 w-3" />
-              {formatDistanceToNow(new Date(session.created_at), { addSuffix: true })}
-            </span>
-            {session.times_played > 0 && (
-              <span>played {session.times_played}x</span>
-            )}
-          </div>
+          <h3 className="font-medium lowercase truncate">
+            {getSessionTitle(session)}
+          </h3>
+          <p className="text-sm text-muted-foreground lowercase">
+            {formatDistanceToNow(new Date(session.created_at), { addSuffix: true })}
+          </p>
         </div>
-
-        <div className="flex items-center gap-1">
-          <Button
-            variant="ghost"
-            size="icon"
-            className="h-8 w-8"
-            onClick={() => toggleFavorite(session.id, session.is_favorite)}
-          >
-            <Heart
-              className={`h-4 w-4 ${
-                session.is_favorite ? 'fill-primary text-primary' : ''
-              }`}
-            />
-          </Button>
-          
-          <Button
-            variant="ghost"
-            size="icon"
-            className="h-8 w-8"
-            onClick={() => {
-              onPlaySession(session);
-              onOpenChange(false);
+        
+        <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+          <Button 
+            variant="ghost" 
+            size="icon" 
+            className="h-9 w-9"
+            onClick={(e) => {
+              e.stopPropagation();
+              toggleFavorite(session.id, session.is_favorite);
             }}
           >
-            <Play className="h-4 w-4" />
+            <Heart className={session.is_favorite ? 'fill-primary text-primary h-4 w-4' : 'h-4 w-4'} />
           </Button>
-          
-          <Button
-            variant="ghost"
-            size="icon"
-            className="h-8 w-8 opacity-0 group-hover:opacity-100 transition-opacity"
-            onClick={() => deleteSession(session.id)}
+          <Button 
+            variant="ghost" 
+            size="icon" 
+            className="h-9 w-9"
+            onClick={(e) => {
+              e.stopPropagation();
+              deleteSession(session.id);
+            }}
           >
             <Trash2 className="h-4 w-4" />
           </Button>
@@ -119,86 +100,64 @@ export const SessionHistory = ({ open, onOpenChange, onPlaySession }: SessionHis
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-2xl max-h-[80vh] p-0">
-        <DialogHeader className="p-6 pb-4">
+        <DialogHeader className="p-6 pb-3">
           <DialogTitle className="lowercase text-2xl">your library</DialogTitle>
         </DialogHeader>
 
-        <Tabs value={filter} onValueChange={(v) => setFilter(v as any)} className="w-full">
-          <TabsList className="w-full justify-start rounded-none border-b px-6">
-            <TabsTrigger value="all" className="lowercase">all</TabsTrigger>
-            <TabsTrigger value="preset" className="lowercase">preset</TabsTrigger>
-            <TabsTrigger value="creator" className="lowercase">creator</TabsTrigger>
-            <TabsTrigger value="binaural" className="lowercase">binaural</TabsTrigger>
-            <TabsTrigger value="voice" className="lowercase">voice</TabsTrigger>
-            <TabsTrigger value="community" className="lowercase">
-              <Users className="h-4 w-4 mr-1" />
-              community
-            </TabsTrigger>
-          </TabsList>
+        <div className="flex gap-2 flex-wrap px-6 pb-4">
+          {(['all', 'preset', 'creator', 'binaural', 'voice'] as const).map((f) => (
+            <Button 
+              key={f}
+              variant={filter === f ? "default" : "ghost"}
+              size="sm"
+              className="lowercase rounded-full"
+              onClick={() => setFilter(f)}
+            >
+              {f}
+            </Button>
+          ))}
+        </div>
 
-          <TabsContent value={filter} className="mt-0">
-            <ScrollArea className="h-[50vh] px-6 py-4">
-              {(filter === 'community' ? isLoadingCommunity : isLoading) ? (
-                <div className="text-center py-12 text-muted-foreground lowercase">
-                  loading sessions...
-                </div>
-              ) : filteredSessions.length === 0 ? (
-                <div className="text-center py-12">
-                  <p className="text-muted-foreground lowercase mb-2">
-                    {filter === 'community' ? 'no public sessions yet' : 'no sessions yet'}
+        <ScrollArea className="h-[50vh] px-6 pb-6">
+          {isLoading ? (
+            <div className="flex flex-col items-center justify-center py-16 text-center">
+              <p className="text-muted-foreground lowercase">loading sessions...</p>
+            </div>
+          ) : filteredSessions.length === 0 ? (
+            <div className="flex flex-col items-center justify-center py-16 text-center">
+              <span className="text-5xl mb-4">🌙</span>
+              <p className="text-muted-foreground lowercase">no sessions yet</p>
+              <p className="text-sm text-muted-foreground/70 lowercase mt-1">
+                generate your first session to start
+              </p>
+            </div>
+          ) : (
+            <div className="space-y-1">
+              {filter === 'all' && favorites.length > 0 && (
+                <div className="mb-6">
+                  <p className="text-xs uppercase tracking-wider text-muted-foreground mb-3 px-1">
+                    ⭐ favorites
                   </p>
-                  <p className="text-sm text-muted-foreground lowercase">
-                    {filter === 'community' 
-                      ? 'public sessions from other users will appear here' 
-                      : 'generate your first session to start your library'}
+                  <div className="space-y-1">
+                    {favorites.map((session) => (
+                      <SessionCard key={session.id} session={session} />
+                    ))}
+                  </div>
+                  <div className="h-6" />
+                  <p className="text-xs uppercase tracking-wider text-muted-foreground mb-3 px-1">
+                    all sessions
                   </p>
-                </div>
-              ) : (
-                <div className="space-y-3">
-                  {filter === 'all' && favorites.length > 0 && (
-                    <>
-                      <h4 className="text-sm font-medium lowercase text-muted-foreground mb-2">
-                        ⭐ favorites
-                      </h4>
-                      {favorites.map((session) => (
-                        <SessionCard key={session.id} session={session} />
-                      ))}
-                      <div className="h-4" />
-                      <h4 className="text-sm font-medium lowercase text-muted-foreground mb-2">
-                        all sessions
-                      </h4>
-                    </>
-                  )}
-                  
-                  {filteredSessions
-                    .filter((s) => filter === 'community' || filter !== 'all' || !s.is_favorite)
-                    .map((session) => {
-                      const communitySession = 'profiles' in session ? session as any : null;
-                      return (
-                        <div key={session.id}>
-                          {filter === 'community' && communitySession?.profiles && (
-                            <div className="text-xs text-muted-foreground mb-1 lowercase">
-                              by {communitySession.profiles.full_name || 'anonymous'}
-                            </div>
-                          )}
-                          <SessionCard session={session} />
-                        </div>
-                      );
-                    })}
                 </div>
               )}
-            </ScrollArea>
-          </TabsContent>
-        </Tabs>
-
-        {!isLoading && sessions.length > 0 && (
-          <div className="border-t p-4 bg-muted/30">
-            <div className="flex items-center justify-between text-xs text-muted-foreground lowercase">
-              <span>{sessions.length} total sessions</span>
-              <span>{favorites.length} favorites</span>
+              
+              {filteredSessions
+                .filter((s) => filter !== 'all' || !s.is_favorite)
+                .map((session) => (
+                  <SessionCard key={session.id} session={session} />
+                ))}
             </div>
-          </div>
-        )}
+          )}
+        </ScrollArea>
       </DialogContent>
     </Dialog>
   );

@@ -90,7 +90,7 @@ const AmbientBackground = ({ isPlaying, videoKey = 'home' }: AmbientBackgroundPr
       )}
       
       {/* Gradient overlay for blend - más visible en móviles sin video */}
-      <div className={`absolute inset-0 ${isMobile ? 'bg-gradient-to-br from-primary/20 via-background/80 to-accent/20' : 'bg-gradient-to-br from-primary/10 via-transparent to-accent/10'}`} />
+      <div className={`absolute inset-0 ${isMobile ? 'bg-gradient-to-br from-primary/20 via-background/40 to-accent/20' : 'bg-gradient-to-br from-primary/10 via-transparent to-accent/10'}`} />
       
       {/* Floating particles - solo cuando está playing */}
       {isPlaying && (

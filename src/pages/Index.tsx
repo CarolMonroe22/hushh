@@ -1978,11 +1978,8 @@ const Index = () => {
           </section>
 
           {/* Example Audio Buttons */}
-          <section className="max-w-2xl mx-auto mb-12 space-y-4" aria-labelledby="examples-heading">
+          <section className="max-w-2xl mx-auto mb-16" aria-labelledby="examples-heading">
             <h2 id="examples-heading" className="sr-only">Audio Examples</h2>
-            <p className="text-xs text-muted-foreground uppercase tracking-wider text-center">
-              ✨ listen to examples
-            </p>
             <div className="flex flex-wrap justify-center gap-3">
               {isLoadingExamples ? (
                 <div className="text-muted-foreground text-sm">Loading examples...</div>
@@ -2019,14 +2016,6 @@ const Index = () => {
             <h2 id="create-vibe-heading" className="sr-only">Create Your Custom Soundscape</h2>
           {/* Large Textarea - Main Focus */}
           <div className="space-y-3">
-            {/* Formula hint */}
-            <div className="mb-2 px-1">
-              <p className="text-xs text-muted-foreground/60 font-mono">
-                formula: <span className="text-foreground/80">[goal/feeling]</span> + 
-                <span className="text-muted-foreground/40"> with [sound]</span> + 
-                <span className="text-muted-foreground/40"> [voice type]</span>
-              </p>
-            </div>
             <Textarea
               placeholder="describe how you want to feel... (e.g., 'I need deep focus for studying with calming rain')"
               value={vibeDescription}
@@ -2034,37 +2023,17 @@ const Index = () => {
               className="min-h-[140px] resize-none text-base py-4 bg-card/70 border-border/90 hover:bg-card/75 focus:bg-card/80 focus:border-border transition-all"
               maxLength={300}
             />
-            <div className="flex justify-between items-center px-1">
-              <p className="text-xs text-muted-foreground/60">
-                ✨ we'll interpret your vibe into the perfect audio
-              </p>
-              <p className="text-xs text-muted-foreground/60">
-                {vibeDescription.length}/300
-              </p>
-            </div>
+            {vibeDescription.length > 250 && (
+              <div className="flex justify-end px-1">
+                <p className="text-xs text-muted-foreground/40">
+                  {vibeDescription.length}/300
+                </p>
+              </div>
+            )}
           </div>
 
-          {/* Prompt Examples con Rotación */}
-          <div className="space-y-2.5">
-            <div className="flex items-center gap-2 px-1">
-              <p className="text-xs text-muted-foreground/80 font-medium">
-                💡 try examples like:
-              </p>
-              <div className="flex gap-1">
-                {[0, 1, 2].map((dot) => (
-                  <div 
-                    key={dot}
-                    className={`h-1 w-1 rounded-full transition-all duration-1000 ease-out ${
-                      Math.floor(exampleIndex / 5) === dot
-                        ? 'bg-primary/40 w-2.5' 
-                        : 'bg-muted-foreground/20'
-                    }`}
-                  />
-                ))}
-              </div>
-            </div>
-            
-            <div className="flex flex-wrap gap-2 animate-fade-in">
+          {/* Prompt Examples */}
+          <div className="flex flex-wrap justify-center gap-2">
               {allExamples
                 .slice(exampleIndex, exampleIndex + 5)
                 .concat(
@@ -2094,7 +2063,6 @@ const Index = () => {
                     </span>
                   </button>
                 ))}
-            </div>
           </div>
 
           {/* Generate Button - Prominent */}

@@ -2126,7 +2126,7 @@ const Index = () => {
               </TabsList>
 
               {/* Presets Content */}
-              <TabsContent value="presets" className="space-y-6 mt-0">
+              <TabsContent value="presets" className="space-y-8 mt-0">
                 {/* Mood Selection */}
                 <div className="space-y-3">
                   <Label className="text-sm font-semibold uppercase tracking-wider text-muted-foreground/80">

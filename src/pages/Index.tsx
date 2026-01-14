@@ -1960,13 +1960,13 @@ const Index = () => {
           <section className="text-center space-y-8 mb-20" aria-labelledby="hero-title">
             <h1 id="hero-title" className="text-5xl md:text-7xl font-light tracking-wider text-foreground">
               <span>1-Minute </span>
-              <span 
-                className={`inline-block transition-all duration-600 ease-in-out ${
-                  titleFade 
-                    ? 'opacity-100 translate-y-0' 
-                    : 'opacity-0 -translate-y-2'
+              <span
+                className={`inline-block transition-all duration-1000 ${
+                  titleFade
+                    ? 'opacity-100 translate-y-0 blur-0'
+                    : 'opacity-0 translate-y-1 blur-[2px]'
                 }`}
-                style={{ transitionTimingFunction: 'cubic-bezier(0.4, 0.0, 0.2, 1)' }}
+                style={{ transitionTimingFunction: 'cubic-bezier(0.22, 1, 0.36, 1)' }}
                 aria-live="polite"
               >
                 {TITLE_ROTATIONS[currentTitleIndex]}
@@ -1993,16 +1993,16 @@ const Index = () => {
                       key={example.id}
                       onClick={() => handleLoadExample(example)}
                       disabled={isGenerating || isLoadingExample !== null}
-                      className={`group flex items-center gap-2 px-5 py-2.5 rounded-full border transition-all disabled:opacity-50 disabled:cursor-not-allowed ${
+                      className={`group flex items-center gap-2 px-5 py-2.5 rounded-full border transition-all duration-500 ease-out disabled:opacity-50 disabled:cursor-not-allowed ${
                         currentPlayingExample === example.example_key
                           ? 'bg-primary/20 border-primary shadow-lg shadow-primary/20'
-                          : 'border-border/70 bg-card/50 hover:bg-accent hover:border-border'
+                          : 'border-border/50 bg-card/40 hover:bg-card/60 hover:border-border/80'
                       }`}
                     >
                       {isLoadingExample === example.example_key ? (
                         <Loader2 className="h-3.5 w-3.5 animate-spin" />
                       ) : (
-                        <Play className="h-3.5 w-3.5 group-hover:scale-110 transition-transform" />
+                        <Play className="h-3.5 w-3.5 group-hover:scale-110 transition-transform duration-300" />
                       )}
                   <span className="text-sm lowercase font-medium">{example.title}</span>
                 </button>
@@ -2069,7 +2069,7 @@ const Index = () => {
           <Button
             onClick={() => requireAuth(startCreatorSession)}
             disabled={isGenerating || !vibeDescription.trim() || vibeDescription.trim().length < 20}
-            className="w-full py-6 text-lg lowercase tracking-wide bg-primary hover:bg-primary/90 transition-all"
+            className="w-full py-6 text-lg lowercase tracking-wide bg-primary hover:bg-primary/90 hover:shadow-lg hover:shadow-primary/20 transition-all duration-500 ease-out"
             size="lg"
           >
             {isGenerating ? "creating your vibe..." : "✨ create my vibe"}
@@ -2091,28 +2091,28 @@ const Index = () => {
             
             <Tabs defaultValue="presets" className="w-full">
               {/* Tab Navigation */}
-              <TabsList className="grid w-full grid-cols-3 mb-8 bg-card/30 backdrop-blur-md p-1.5 rounded-xl border border-border/30">
-                <TabsTrigger 
-                  value="presets" 
-                  className="text-sm lowercase tracking-wide data-[state=active]:bg-primary/20 data-[state=active]:text-primary data-[state=active]:shadow-sm transition-all"
+              <TabsList className="grid w-full grid-cols-3 mb-10 bg-card/20 backdrop-blur-md p-1.5 rounded-xl border border-border/20">
+                <TabsTrigger
+                  value="presets"
+                  className="text-sm lowercase tracking-wide data-[state=active]:bg-primary/15 data-[state=active]:text-primary data-[state=active]:shadow-sm transition-all duration-500 ease-out"
                 >
                   <span className="flex items-center gap-2">
                     <span>🌙</span>
                     <span>presets</span>
                   </span>
                 </TabsTrigger>
-                <TabsTrigger 
-                  value="binaural" 
-                  className="text-sm lowercase tracking-wide data-[state=active]:bg-primary/20 data-[state=active]:text-primary data-[state=active]:shadow-sm transition-all"
+                <TabsTrigger
+                  value="binaural"
+                  className="text-sm lowercase tracking-wide data-[state=active]:bg-primary/15 data-[state=active]:text-primary data-[state=active]:shadow-sm transition-all duration-500 ease-out"
                 >
                   <span className="flex items-center gap-2">
                     <span>🎧</span>
                     <span>3D binaural</span>
                   </span>
                 </TabsTrigger>
-                <TabsTrigger 
-                  value="voice" 
-                  className="text-sm lowercase tracking-wide data-[state=active]:bg-primary/20 data-[state=active]:text-primary data-[state=active]:shadow-sm transition-all"
+                <TabsTrigger
+                  value="voice"
+                  className="text-sm lowercase tracking-wide data-[state=active]:bg-primary/15 data-[state=active]:text-primary data-[state=active]:shadow-sm transition-all duration-500 ease-out"
                 >
                   <span className="flex items-center gap-2">
                     <span>🎙️</span>
@@ -2133,10 +2133,10 @@ const Index = () => {
                       <button
                         key={mood.value}
                         onClick={() => setSelectedMood(mood.value)}
-                        className={`p-4 rounded-lg border transition-all text-left ${
+                        className={`p-4 rounded-lg border transition-all duration-300 ease-out text-left ${
                           selectedMood === mood.value
-                            ? "border-primary bg-primary/10"
-                            : "border-border bg-card hover:bg-accent"
+                            ? "border-primary bg-primary/10 shadow-sm shadow-primary/10"
+                            : "border-border/50 bg-card/50 hover:bg-card/80 hover:border-border"
                         }`}
                       >
                         <div className="text-2xl mb-1">{mood.emoji}</div>
@@ -2156,10 +2156,10 @@ const Index = () => {
                       <button
                         key={ambient.value}
                         onClick={() => setSelectedAmbient(ambient.value)}
-                        className={`p-4 rounded-lg border transition-all text-left ${
+                        className={`p-4 rounded-lg border transition-all duration-300 ease-out text-left ${
                           selectedAmbient === ambient.value
-                            ? "border-primary bg-primary/10"
-                            : "border-border bg-card hover:bg-accent"
+                            ? "border-primary bg-primary/10 shadow-sm shadow-primary/10"
+                            : "border-border/50 bg-card/50 hover:bg-card/80 hover:border-border"
                         }`}
                       >
                         <div className="text-2xl mb-1">{ambient.emoji}</div>

@@ -20,7 +20,11 @@ import { AuthModal } from "@/components/AuthModal";
 
 import { type UserSession } from "@/hooks/useUserSessions";
 import { useExampleSessions, type ExampleSession } from "@/hooks/useExampleSessions";
-import { LogOut, Play, Loader2, Shield, Moon, Headphones, Mic } from "lucide-react";
+import {
+  LogOut, Play, Loader2, Shield, Moon, Headphones, Mic,
+  CloudMoon, Target, Heart, Zap, Mountain,
+  CloudRain, Waves, Trees, Flame, Radio, Building2
+} from "lucide-react";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
@@ -31,22 +35,22 @@ type Ambient = "rain" | "ocean" | "forest" | "fireplace" | "whitenoise" | "city"
 type BinauralExperience = "barbershop" | "spa" | "ear-cleaning" | "bedtime" | "art-studio" | "yoga";
 type VoiceJourney = "story" | "prayer" | "stoic" | "manifestation" | "motivational" | "brainwash" | "fullattention";
 
-const MOODS: { value: Mood; label: string; emoji: string }[] = [
-  { value: "relax", label: "relax", emoji: "🌙" },
-  { value: "sleep", label: "sleep", emoji: "😴" },
-  { value: "focus", label: "focus", emoji: "🎯" },
-  { value: "gratitude", label: "gratitude", emoji: "🙏" },
-  { value: "boost", label: "boost", emoji: "⚡" },
-  { value: "stoic", label: "stoic", emoji: "🗿" },
+const MOODS: { value: Mood; label: string; icon: React.ReactNode }[] = [
+  { value: "relax", label: "relax", icon: <Moon className="h-6 w-6" /> },
+  { value: "sleep", label: "sleep", icon: <CloudMoon className="h-6 w-6" /> },
+  { value: "focus", label: "focus", icon: <Target className="h-6 w-6" /> },
+  { value: "gratitude", label: "gratitude", icon: <Heart className="h-6 w-6" /> },
+  { value: "boost", label: "boost", icon: <Zap className="h-6 w-6" /> },
+  { value: "stoic", label: "stoic", icon: <Mountain className="h-6 w-6" /> },
 ];
 
-const AMBIENTS: { value: Ambient; label: string; emoji: string }[] = [
-  { value: "rain", label: "rain", emoji: "🌧️" },
-  { value: "ocean", label: "ocean", emoji: "🌊" },
-  { value: "forest", label: "forest", emoji: "🌲" },
-  { value: "fireplace", label: "fireplace", emoji: "🔥" },
-  { value: "whitenoise", label: "white noise", emoji: "📻" },
-  { value: "city", label: "city", emoji: "🏙️" },
+const AMBIENTS: { value: Ambient; label: string; icon: React.ReactNode }[] = [
+  { value: "rain", label: "rain", icon: <CloudRain className="h-6 w-6" /> },
+  { value: "ocean", label: "ocean", icon: <Waves className="h-6 w-6" /> },
+  { value: "forest", label: "forest", icon: <Trees className="h-6 w-6" /> },
+  { value: "fireplace", label: "fireplace", icon: <Flame className="h-6 w-6" /> },
+  { value: "whitenoise", label: "white noise", icon: <Radio className="h-6 w-6" /> },
+  { value: "city", label: "city", icon: <Building2 className="h-6 w-6" /> },
 ];
 
 const BINAURAL_EXPERIENCES: { 
@@ -2139,7 +2143,7 @@ const Index = () => {
                             : "border-border/50 bg-card/50 hover:bg-card/80 hover:border-border"
                         }`}
                       >
-                        <div className="text-2xl mb-1">{mood.emoji}</div>
+                        <div className="mb-1.5 text-muted-foreground">{mood.icon}</div>
                         <div className="text-sm lowercase">{mood.label}</div>
                       </button>
                     ))}
@@ -2162,7 +2166,7 @@ const Index = () => {
                             : "border-border/50 bg-card/50 hover:bg-card/80 hover:border-border"
                         }`}
                       >
-                        <div className="text-2xl mb-1">{ambient.emoji}</div>
+                        <div className="mb-1.5 text-muted-foreground">{ambient.icon}</div>
                         <div className="text-sm lowercase">{ambient.label}</div>
                       </button>
                     ))}
@@ -2328,7 +2332,7 @@ const Index = () => {
                                 : "border-border bg-card hover:bg-accent"
                             }`}
                           >
-                            <div className="text-xl mb-1">{ambient.emoji}</div>
+                            <div className="mb-1 text-muted-foreground">{ambient.icon}</div>
                             <div className="text-xs lowercase">{ambient.label}</div>
                           </button>
                         ))}

@@ -1947,18 +1947,18 @@ const Index = () => {
         }}
       />
 
-      <div className="container mx-auto px-4 pt-32 pb-12 md:pt-36 md:pb-20 max-w-4xl min-h-[var(--real-vh)]">
+      <div className="container mx-auto px-4 pt-28 pb-24 md:pt-36 md:pb-20 max-w-4xl min-h-[var(--real-vh)]">
         {/* Logo Header */}
-        <header className="flex items-center justify-center mb-16">
-          <div className="text-4xl md:text-5xl font-light lowercase tracking-wide" role="banner">
+        <header className="flex items-center justify-center mb-12 md:mb-16">
+          <div className="text-3xl sm:text-4xl md:text-5xl font-light lowercase tracking-wide" role="banner">
             🌙 hushh
           </div>
         </header>
 
         {/* Hero Section */}
         <main>
-          <section className="text-center space-y-8 mb-20" aria-labelledby="hero-title">
-            <h1 id="hero-title" className="text-5xl md:text-7xl font-light tracking-wider text-foreground">
+          <section className="text-center space-y-6 sm:space-y-8 mb-16 sm:mb-20" aria-labelledby="hero-title">
+            <h1 id="hero-title" className="text-4xl sm:text-5xl md:text-7xl font-light tracking-wider text-foreground">
               <span>1-Minute </span>
               <span
                 className={`inline-block transition-all duration-1000 ${
@@ -1978,7 +1978,7 @@ const Index = () => {
           </section>
 
           {/* Example Audio Buttons */}
-          <section className="max-w-2xl mx-auto mb-20" aria-labelledby="examples-heading">
+          <section className="max-w-2xl mx-auto mb-16 sm:mb-20" aria-labelledby="examples-heading">
             <h2 id="examples-heading" className="sr-only">Audio Examples</h2>
             <div className="flex flex-wrap justify-center gap-3">
               {isLoadingExamples ? (
@@ -1993,7 +1993,7 @@ const Index = () => {
                       key={example.id}
                       onClick={() => handleLoadExample(example)}
                       disabled={isGenerating || isLoadingExample !== null}
-                      className={`group flex items-center gap-2 px-5 py-2.5 rounded-full border transition-all duration-500 ease-out disabled:opacity-50 disabled:cursor-not-allowed ${
+                      className={`group flex items-center gap-2 px-4 py-3 sm:px-5 sm:py-2.5 rounded-full border transition-all duration-500 ease-out disabled:opacity-50 disabled:cursor-not-allowed ${
                         currentPlayingExample === example.example_key
                           ? 'bg-primary/20 border-primary shadow-lg shadow-primary/20'
                           : 'border-border/50 bg-card/40 hover:bg-card/60 hover:border-border/80'
@@ -2079,7 +2079,7 @@ const Index = () => {
 
 
           {/* Tabs System - Three Experiences */}
-          <section className="max-w-2xl mx-auto mt-24" aria-labelledby="experiences-heading">
+          <section className="max-w-2xl mx-auto mt-16 sm:mt-24" aria-labelledby="experiences-heading">
             <h2 id="experiences-heading" className="sr-only">Audio Experiences</h2>
 
             {/* Intro para tabs */}

@@ -1957,7 +1957,7 @@ const Index = () => {
 
         {/* Hero Section */}
         <main>
-          <section className="text-center space-y-6 mb-16" aria-labelledby="hero-title">
+          <section className="text-center space-y-8 mb-20" aria-labelledby="hero-title">
             <h1 id="hero-title" className="text-5xl md:text-7xl font-light tracking-wider text-foreground">
               <span>1-Minute </span>
               <span 
@@ -1978,7 +1978,7 @@ const Index = () => {
           </section>
 
           {/* Example Audio Buttons */}
-          <section className="max-w-2xl mx-auto mb-16" aria-labelledby="examples-heading">
+          <section className="max-w-2xl mx-auto mb-20" aria-labelledby="examples-heading">
             <h2 id="examples-heading" className="sr-only">Audio Examples</h2>
             <div className="flex flex-wrap justify-center gap-3">
               {isLoadingExamples ? (
@@ -2012,7 +2012,7 @@ const Index = () => {
           </section>
 
           {/* Main Input Area - Creator Mode */}
-          <section className="max-w-2xl mx-auto space-y-6 mb-12" aria-labelledby="create-vibe-heading">
+          <section className="max-w-2xl mx-auto space-y-8 mb-16" aria-labelledby="create-vibe-heading">
             <h2 id="create-vibe-heading" className="sr-only">Create Your Custom Soundscape</h2>
           {/* Large Textarea - Main Focus */}
           <div className="space-y-3">
@@ -2033,7 +2033,7 @@ const Index = () => {
           </div>
 
           {/* Prompt Examples */}
-          <div className="flex flex-wrap justify-center gap-2">
+          <div className="flex flex-wrap justify-center gap-2.5">
               {allExamples
                 .slice(exampleIndex, exampleIndex + 5)
                 .concat(
@@ -2079,16 +2079,13 @@ const Index = () => {
 
 
           {/* Tabs System - Three Experiences */}
-          <section className="max-w-2xl mx-auto mt-8" aria-labelledby="experiences-heading">
+          <section className="max-w-2xl mx-auto mt-24" aria-labelledby="experiences-heading">
             <h2 id="experiences-heading" className="sr-only">Audio Experiences</h2>
-            
-            {/* Intro para tabs - suaviza la transición */}
-            <div className="text-center space-y-2 mb-8 mt-12">
-              <h3 className="text-lg font-medium text-foreground/90 lowercase tracking-wide">
+
+            {/* Intro para tabs */}
+            <div className="text-center mb-10">
+              <p className="text-sm text-muted-foreground/60 lowercase tracking-wider">
                 or explore curated experiences
-              </h3>
-              <p className="text-sm text-muted-foreground max-w-md mx-auto">
-                choose from pre-designed mood combinations, immersive 3D scenarios, or guided voice journeys
               </p>
             </div>
             

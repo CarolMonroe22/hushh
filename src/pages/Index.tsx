@@ -20,7 +20,7 @@ import { AuthModal } from "@/components/AuthModal";
 
 import { type UserSession } from "@/hooks/useUserSessions";
 import { useExampleSessions, type ExampleSession } from "@/hooks/useExampleSessions";
-import { LogOut, Play, Loader2, Shield } from "lucide-react";
+import { LogOut, Play, Loader2, Shield, Moon, Headphones, Mic } from "lucide-react";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
@@ -2097,7 +2097,7 @@ const Index = () => {
                   className="text-sm lowercase tracking-wide data-[state=active]:bg-primary/15 data-[state=active]:text-primary data-[state=active]:shadow-sm transition-all duration-500 ease-out"
                 >
                   <span className="flex items-center gap-2">
-                    <span>🌙</span>
+                    <Moon className="h-4 w-4" />
                     <span>presets</span>
                   </span>
                 </TabsTrigger>
@@ -2106,7 +2106,7 @@ const Index = () => {
                   className="text-sm lowercase tracking-wide data-[state=active]:bg-primary/15 data-[state=active]:text-primary data-[state=active]:shadow-sm transition-all duration-500 ease-out"
                 >
                   <span className="flex items-center gap-2">
-                    <span>🎧</span>
+                    <Headphones className="h-4 w-4" />
                     <span>3D binaural</span>
                   </span>
                 </TabsTrigger>
@@ -2115,7 +2115,7 @@ const Index = () => {
                   className="text-sm lowercase tracking-wide data-[state=active]:bg-primary/15 data-[state=active]:text-primary data-[state=active]:shadow-sm transition-all duration-500 ease-out"
                 >
                   <span className="flex items-center gap-2">
-                    <span>🎙️</span>
+                    <Mic className="h-4 w-4" />
                     <span>voice journeys</span>
                   </span>
                 </TabsTrigger>

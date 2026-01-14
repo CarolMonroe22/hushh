@@ -2322,21 +2322,23 @@ const Index = () => {
 
                   {/* Ambient Selection (conditional) */}
                   {withAmbient && (
-                    <div className="space-y-2">
-                      <label className="text-sm font-medium lowercase tracking-wide">ambient sound</label>
-                      <div className="grid grid-cols-3 gap-2">
+                    <div className="space-y-3">
+                      <Label className="text-sm font-semibold uppercase tracking-wider text-muted-foreground/80">
+                        ambient sound
+                      </Label>
+                      <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
                         {AMBIENTS.map((ambient) => (
                           <button
                             key={ambient.value}
                             onClick={() => setAmbientForJourney(ambient.value)}
-                            className={`p-3 rounded-lg border transition-all text-left focus:ring-2 focus:ring-primary focus:ring-offset-2 focus:outline-none transform hover:scale-[1.02] hover:shadow-lg hover:-translate-y-0.5 active:scale-[0.98] ${
+                            className={`p-5 rounded-xl border-2 transition-all duration-300 ease-out text-left focus:ring-2 focus:ring-primary focus:ring-offset-2 focus:outline-none transform hover:scale-[1.02] hover:shadow-lg hover:-translate-y-0.5 active:scale-[0.98] ${
                               ambientForJourney === ambient.value
-                                ? "border-primary bg-primary/10"
-                                : "border-border bg-card hover:bg-accent"
+                                ? "border-primary bg-gradient-to-br from-primary/10 to-primary/20 shadow-lg shadow-primary/30"
+                                : "border-border/30 bg-card/60 hover:bg-card/80 hover:border-border/60"
                             }`}
                           >
-                            <div className={`mb-1 ${ambientForJourney === ambient.value ? "text-primary" : "text-muted-foreground"}`}>{ambient.icon}</div>
-                            <div className="text-xs lowercase">{ambient.label}</div>
+                            <div className={`mb-2 transition-colors duration-300 ${ambientForJourney === ambient.value ? "text-primary" : "text-muted-foreground"}`}>{ambient.icon}</div>
+                            <div className="text-sm font-medium lowercase">{ambient.label}</div>
                           </button>
                         ))}
                       </div>

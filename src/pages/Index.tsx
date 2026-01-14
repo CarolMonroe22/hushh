@@ -2205,7 +2205,7 @@ const Index = () => {
                       <button
                         key={experience.value}
                         onClick={() => setSelectedExperience(experience.value)}
-                        className={`p-4 rounded-lg border transition-all text-left ${
+                        className={`p-4 rounded-lg border transition-all text-left min-h-[44px] ${
                           selectedExperience === experience.value
                             ? "border-primary bg-primary/10"
                             : "border-border bg-card hover:bg-accent"
@@ -2261,7 +2261,7 @@ const Index = () => {
                     <div className="grid grid-cols-2 gap-2">
                       <button
                         onClick={() => setVoiceGender("female")}
-                        className={`p-3 rounded-lg border transition-all ${
+                        className={`p-4 rounded-lg border transition-all min-h-[44px] ${
                           voiceGender === "female"
                             ? "border-primary bg-primary/10"
                             : "border-border bg-card hover:bg-accent"
@@ -2271,7 +2271,7 @@ const Index = () => {
                       </button>
                       <button
                         onClick={() => setVoiceGender("male")}
-                        className={`p-3 rounded-lg border transition-all ${
+                        className={`p-4 rounded-lg border transition-all min-h-[44px] ${
                           voiceGender === "male"
                             ? "border-primary bg-primary/10"
                             : "border-border bg-card hover:bg-accent"
@@ -2290,7 +2290,7 @@ const Index = () => {
                         <button
                           key={journey.value}
                           onClick={() => setSelectedJourney(journey.value)}
-                          className={`p-3 rounded-lg border transition-all text-left ${
+                          className={`p-4 rounded-lg border transition-all text-left min-h-[44px] ${
                             selectedJourney === journey.value
                               ? "border-primary bg-primary/10"
                               : "border-border bg-card hover:bg-accent"

@@ -2129,7 +2129,7 @@ const Index = () => {
               <TabsContent value="presets" className="space-y-6 mt-0">
                 {/* Mood Selection */}
                 <div className="space-y-3">
-                  <Label className="text-xs text-muted-foreground uppercase tracking-wider">
+                  <Label className="text-sm font-semibold uppercase tracking-wider text-muted-foreground/80">
                     mood
                   </Label>
                   <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
@@ -2152,7 +2152,7 @@ const Index = () => {
 
                 {/* Ambient Selection */}
                 <div className="space-y-3">
-                  <Label className="text-xs text-muted-foreground uppercase tracking-wider">
+                  <Label className="text-sm font-semibold uppercase tracking-wider text-muted-foreground/80">
                     ambient
                   </Label>
                   <div className="grid grid-cols-2 md:grid-cols-3 gap-3">

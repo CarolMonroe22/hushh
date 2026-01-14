@@ -2143,7 +2143,7 @@ const Index = () => {
                             : "border-border/30 bg-card/60 hover:bg-card/80 hover:border-border/60"
                         }`}
                       >
-                        <div className="mb-2 text-muted-foreground">{mood.icon}</div>
+                        <div className={`mb-2 ${selectedMood === mood.value ? "text-primary" : "text-muted-foreground"}`}>{mood.icon}</div>
                         <div className="text-sm font-medium lowercase">{mood.label}</div>
                       </button>
                     ))}
@@ -2166,7 +2166,7 @@ const Index = () => {
                             : "border-border/30 bg-card/60 hover:bg-card/80 hover:border-border/60"
                         }`}
                       >
-                        <div className="mb-2 text-muted-foreground">{ambient.icon}</div>
+                        <div className={`mb-2 ${selectedAmbient === ambient.value ? "text-primary" : "text-muted-foreground"}`}>{ambient.icon}</div>
                         <div className="text-sm font-medium lowercase">{ambient.label}</div>
                       </button>
                     ))}
@@ -2332,7 +2332,7 @@ const Index = () => {
                                 : "border-border bg-card hover:bg-accent"
                             }`}
                           >
-                            <div className="mb-1 text-muted-foreground">{ambient.icon}</div>
+                            <div className={`mb-1 ${ambientForJourney === ambient.value ? "text-primary" : "text-muted-foreground"}`}>{ambient.icon}</div>
                             <div className="text-xs lowercase">{ambient.label}</div>
                           </button>
                         ))}

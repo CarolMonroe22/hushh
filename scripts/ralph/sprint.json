@@ -1,0 +1,110 @@
+{
+  "project": "hushh",
+  "target_file": "src/pages/Index.tsx",
+  "sprints": [
+    {
+      "id": 2,
+      "name": "Active States & Selection",
+      "tasks": [
+        {
+          "id": "2.1",
+          "description": "Icon changes to primary color when card is selected",
+          "details": "When a mood or ambient card is selected, change the icon color from text-muted-foreground to text-primary. Add this to the className of the icon div based on selection state."
+        },
+        {
+          "id": "2.2",
+          "description": "More pronounced glow/shadow on selection",
+          "details": "Increase the shadow on selected cards from shadow-md to shadow-lg and make the primary color glow more visible with shadow-primary/30 instead of /20."
+        },
+        {
+          "id": "2.3",
+          "description": "Subtle gradient background when active",
+          "details": "Add a subtle gradient to selected cards using bg-gradient-to-br from-primary/10 to-primary/20 instead of flat bg-primary/15."
+        },
+        {
+          "id": "2.4",
+          "description": "Visible focus ring for accessibility",
+          "details": "Add focus:ring-2 focus:ring-primary focus:ring-offset-2 focus:outline-none to all mood and ambient card buttons for keyboard navigation."
+        }
+      ]
+    },
+    {
+      "id": 3,
+      "name": "Micro-interactions",
+      "tasks": [
+        {
+          "id": "3.1",
+          "description": "Scale up on hover",
+          "details": "Add hover:scale-[1.02] to mood and ambient cards. Ensure transform is in the className for the transition to work smoothly."
+        },
+        {
+          "id": "3.2",
+          "description": "Smooth icon transition on selection",
+          "details": "Add transition-colors duration-300 to the icon div so the color change from muted to primary is animated."
+        },
+        {
+          "id": "3.3",
+          "description": "Lift effect with shadow on hover",
+          "details": "Add hover:shadow-lg hover:-translate-y-0.5 to cards for a subtle lift effect when hovering. Combine with existing hover states."
+        },
+        {
+          "id": "3.4",
+          "description": "Active state with subtle scale down",
+          "details": "Add active:scale-[0.98] to cards for tactile feedback when clicking/tapping."
+        }
+      ]
+    },
+    {
+      "id": 4,
+      "name": "Visual Hierarchy",
+      "tasks": [
+        {
+          "id": "4.1",
+          "description": "More distinctive section labels",
+          "details": "Find the 'choose a mood' and 'choose an ambient' labels and make them more distinctive with text-sm font-semibold uppercase tracking-wider text-muted-foreground/80."
+        },
+        {
+          "id": "4.2",
+          "description": "Better spacing between mood and ambient sections",
+          "details": "Increase the gap between the mood section and ambient section. Look for the space-y or gap classes and increase from current value to space-y-8 or similar."
+        },
+        {
+          "id": "4.3",
+          "description": "Subtle visual separator between sections",
+          "details": "Add a subtle divider between mood and ambient sections using a div with className 'h-px bg-border/30 my-6' or similar."
+        },
+        {
+          "id": "4.4",
+          "description": "Consistency across all tabs",
+          "details": "Ensure the card styles for moods and ambients are consistent. Check that both use the same padding, border radius, transitions, and hover states."
+        }
+      ]
+    },
+    {
+      "id": 5,
+      "name": "Testing & Polish",
+      "tasks": [
+        {
+          "id": "5.1",
+          "description": "Verify mobile touch targets",
+          "details": "Ensure all cards have minimum 44x44px touch targets. Check padding and sizing work well on mobile viewports (sm: breakpoint)."
+        },
+        {
+          "id": "5.2",
+          "description": "Verify desktop experience",
+          "details": "Test that hover states, transitions, and layouts work well on larger screens (md: and lg: breakpoints)."
+        },
+        {
+          "id": "5.3",
+          "description": "Performance check on animations",
+          "details": "Ensure all transitions use GPU-accelerated properties (transform, opacity). Avoid animating layout properties like width/height."
+        },
+        {
+          "id": "5.4",
+          "description": "Final polish pass",
+          "details": "Review all changes, ensure consistency, remove any redundant classes, and verify the overall visual experience matches the plan goals."
+        }
+      ]
+    }
+  ]
+}

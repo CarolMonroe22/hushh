@@ -2139,7 +2139,7 @@ const Index = () => {
                         onClick={() => setSelectedMood(mood.value)}
                         className={`p-5 rounded-xl border-2 transition-all duration-300 ease-out text-left ${
                           selectedMood === mood.value
-                            ? "border-primary bg-primary/15 shadow-md shadow-primary/20"
+                            ? "border-primary bg-primary/15 shadow-lg shadow-primary/30"
                             : "border-border/30 bg-card/60 hover:bg-card/80 hover:border-border/60"
                         }`}
                       >
@@ -2162,7 +2162,7 @@ const Index = () => {
                         onClick={() => setSelectedAmbient(ambient.value)}
                         className={`p-5 rounded-xl border-2 transition-all duration-300 ease-out text-left ${
                           selectedAmbient === ambient.value
-                            ? "border-primary bg-primary/15 shadow-md shadow-primary/20"
+                            ? "border-primary bg-primary/15 shadow-lg shadow-primary/30"
                             : "border-border/30 bg-card/60 hover:bg-card/80 hover:border-border/60"
                         }`}
                       >

@@ -36,21 +36,21 @@ type BinauralExperience = "barbershop" | "spa" | "ear-cleaning" | "bedtime" | "a
 type VoiceJourney = "story" | "prayer" | "stoic" | "manifestation" | "motivational" | "brainwash" | "fullattention";
 
 const MOODS: { value: Mood; label: string; icon: React.ReactNode }[] = [
-  { value: "relax", label: "relax", icon: <Moon className="h-6 w-6" /> },
-  { value: "sleep", label: "sleep", icon: <CloudMoon className="h-6 w-6" /> },
-  { value: "focus", label: "focus", icon: <Target className="h-6 w-6" /> },
-  { value: "gratitude", label: "gratitude", icon: <Heart className="h-6 w-6" /> },
-  { value: "boost", label: "boost", icon: <Zap className="h-6 w-6" /> },
-  { value: "stoic", label: "stoic", icon: <Mountain className="h-6 w-6" /> },
+  { value: "relax", label: "relax", icon: <Moon className="h-7 w-7" /> },
+  { value: "sleep", label: "sleep", icon: <CloudMoon className="h-7 w-7" /> },
+  { value: "focus", label: "focus", icon: <Target className="h-7 w-7" /> },
+  { value: "gratitude", label: "gratitude", icon: <Heart className="h-7 w-7" /> },
+  { value: "boost", label: "boost", icon: <Zap className="h-7 w-7" /> },
+  { value: "stoic", label: "stoic", icon: <Mountain className="h-7 w-7" /> },
 ];
 
 const AMBIENTS: { value: Ambient; label: string; icon: React.ReactNode }[] = [
-  { value: "rain", label: "rain", icon: <CloudRain className="h-6 w-6" /> },
-  { value: "ocean", label: "ocean", icon: <Waves className="h-6 w-6" /> },
-  { value: "forest", label: "forest", icon: <Trees className="h-6 w-6" /> },
-  { value: "fireplace", label: "fireplace", icon: <Flame className="h-6 w-6" /> },
-  { value: "whitenoise", label: "white noise", icon: <Radio className="h-6 w-6" /> },
-  { value: "city", label: "city", icon: <Building2 className="h-6 w-6" /> },
+  { value: "rain", label: "rain", icon: <CloudRain className="h-7 w-7" /> },
+  { value: "ocean", label: "ocean", icon: <Waves className="h-7 w-7" /> },
+  { value: "forest", label: "forest", icon: <Trees className="h-7 w-7" /> },
+  { value: "fireplace", label: "fireplace", icon: <Flame className="h-7 w-7" /> },
+  { value: "whitenoise", label: "white noise", icon: <Radio className="h-7 w-7" /> },
+  { value: "city", label: "city", icon: <Building2 className="h-7 w-7" /> },
 ];
 
 const BINAURAL_EXPERIENCES: { 
@@ -2132,19 +2132,19 @@ const Index = () => {
                   <Label className="text-xs text-muted-foreground uppercase tracking-wider">
                     mood
                   </Label>
-                  <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
+                  <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
                     {MOODS.map((mood) => (
                       <button
                         key={mood.value}
                         onClick={() => setSelectedMood(mood.value)}
-                        className={`p-4 rounded-lg border transition-all duration-300 ease-out text-left ${
+                        className={`p-5 rounded-xl border-2 transition-all duration-300 ease-out text-left ${
                           selectedMood === mood.value
-                            ? "border-primary bg-primary/10 shadow-sm shadow-primary/10"
-                            : "border-border/50 bg-card/50 hover:bg-card/80 hover:border-border"
+                            ? "border-primary bg-primary/15 shadow-md shadow-primary/20"
+                            : "border-border/30 bg-card/60 hover:bg-card/80 hover:border-border/60"
                         }`}
                       >
-                        <div className="mb-1.5 text-muted-foreground">{mood.icon}</div>
-                        <div className="text-sm lowercase">{mood.label}</div>
+                        <div className="mb-2 text-muted-foreground">{mood.icon}</div>
+                        <div className="text-sm font-medium lowercase">{mood.label}</div>
                       </button>
                     ))}
                   </div>
@@ -2155,19 +2155,19 @@ const Index = () => {
                   <Label className="text-xs text-muted-foreground uppercase tracking-wider">
                     ambient
                   </Label>
-                  <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
+                  <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
                     {AMBIENTS.map((ambient) => (
                       <button
                         key={ambient.value}
                         onClick={() => setSelectedAmbient(ambient.value)}
-                        className={`p-4 rounded-lg border transition-all duration-300 ease-out text-left ${
+                        className={`p-5 rounded-xl border-2 transition-all duration-300 ease-out text-left ${
                           selectedAmbient === ambient.value
-                            ? "border-primary bg-primary/10 shadow-sm shadow-primary/10"
-                            : "border-border/50 bg-card/50 hover:bg-card/80 hover:border-border"
+                            ? "border-primary bg-primary/15 shadow-md shadow-primary/20"
+                            : "border-border/30 bg-card/60 hover:bg-card/80 hover:border-border/60"
                         }`}
                       >
-                        <div className="mb-1.5 text-muted-foreground">{ambient.icon}</div>
-                        <div className="text-sm lowercase">{ambient.label}</div>
+                        <div className="mb-2 text-muted-foreground">{ambient.icon}</div>
+                        <div className="text-sm font-medium lowercase">{ambient.label}</div>
                       </button>
                     ))}
                   </div>

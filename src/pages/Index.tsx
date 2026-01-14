@@ -2137,7 +2137,7 @@ const Index = () => {
                       <button
                         key={mood.value}
                         onClick={() => setSelectedMood(mood.value)}
-                        className={`p-5 rounded-xl border-2 transition-all duration-300 ease-out text-left focus:ring-2 focus:ring-primary focus:ring-offset-2 focus:outline-none transform hover:scale-[1.02] hover:shadow-lg hover:-translate-y-0.5 active:scale-[0.98] ${
+                        className={`p-5 rounded-xl border-2 transition-[transform,box-shadow,border-color,background-color] duration-300 ease-out text-left focus:ring-2 focus:ring-primary focus:ring-offset-2 focus:outline-none will-change-transform hover:scale-[1.02] hover:shadow-lg hover:-translate-y-0.5 active:scale-[0.98] ${
                           selectedMood === mood.value
                             ? "border-primary bg-gradient-to-br from-primary/10 to-primary/20 shadow-lg shadow-primary/30"
                             : "border-border/30 bg-card/60 hover:bg-card/80 hover:border-border/60"
@@ -2163,7 +2163,7 @@ const Index = () => {
                       <button
                         key={ambient.value}
                         onClick={() => setSelectedAmbient(ambient.value)}
-                        className={`p-5 rounded-xl border-2 transition-all duration-300 ease-out text-left focus:ring-2 focus:ring-primary focus:ring-offset-2 focus:outline-none transform hover:scale-[1.02] hover:shadow-lg hover:-translate-y-0.5 active:scale-[0.98] ${
+                        className={`p-5 rounded-xl border-2 transition-[transform,box-shadow,border-color,background-color] duration-300 ease-out text-left focus:ring-2 focus:ring-primary focus:ring-offset-2 focus:outline-none will-change-transform hover:scale-[1.02] hover:shadow-lg hover:-translate-y-0.5 active:scale-[0.98] ${
                           selectedAmbient === ambient.value
                             ? "border-primary bg-gradient-to-br from-primary/10 to-primary/20 shadow-lg shadow-primary/30"
                             : "border-border/30 bg-card/60 hover:bg-card/80 hover:border-border/60"
@@ -2331,7 +2331,7 @@ const Index = () => {
                           <button
                             key={ambient.value}
                             onClick={() => setAmbientForJourney(ambient.value)}
-                            className={`p-5 rounded-xl border-2 transition-all duration-300 ease-out text-left focus:ring-2 focus:ring-primary focus:ring-offset-2 focus:outline-none transform hover:scale-[1.02] hover:shadow-lg hover:-translate-y-0.5 active:scale-[0.98] ${
+                            className={`p-5 rounded-xl border-2 transition-[transform,box-shadow,border-color,background-color] duration-300 ease-out text-left focus:ring-2 focus:ring-primary focus:ring-offset-2 focus:outline-none will-change-transform hover:scale-[1.02] hover:shadow-lg hover:-translate-y-0.5 active:scale-[0.98] ${
                               ambientForJourney === ambient.value
                                 ? "border-primary bg-gradient-to-br from-primary/10 to-primary/20 shadow-lg shadow-primary/30"
                                 : "border-border/30 bg-card/60 hover:bg-card/80 hover:border-border/60"

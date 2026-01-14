@@ -2150,6 +2150,9 @@ const Index = () => {
                   </div>
                 </div>
 
+                {/* Section Divider */}
+                <div className="h-px bg-border/30 my-6" />
+
                 {/* Ambient Selection */}
                 <div className="space-y-3">
                   <Label className="text-sm font-semibold uppercase tracking-wider text-muted-foreground/80">

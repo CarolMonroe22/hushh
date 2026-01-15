@@ -2052,22 +2052,9 @@ const Index = () => {
                   <button
                     key={`${example.title}-${exampleIndex}`}
                     onClick={() => setVibeDescription(example.description)}
-                    className="group px-3.5 py-2 rounded-lg text-xs font-medium
-                             bg-card/60 border border-border/40
-                             hover:bg-card/80 hover:border-primary/30
-                             text-foreground/70 hover:text-foreground/90
-                             transition-all duration-1000 ease-out
-                             shadow-sm hover:shadow-md hover:shadow-primary/3
-                             transform hover:scale-[1.02] active:scale-[0.98]
-                             animate-fade-in"
+                    className="px-4 py-2 rounded-full text-xs font-medium tracking-wide bg-card/30 border border-border/20 hover:bg-card/50 hover:border-primary/30 text-foreground/60 hover:text-foreground/80 transition-all duration-300 ease-out"
                   >
-                    <span className="relative">
                       {example.title}
-                      <span className="absolute inset-0 opacity-0 group-hover:opacity-30 
-                                   bg-gradient-to-r from-primary/5 to-transparent 
-                                   blur-2xl transition-opacity duration-1000 ease-out" 
-                      />
-                    </span>
                   </button>
                 ))}
           </div>

@@ -2077,15 +2077,19 @@ const Index = () => {
             <h2 id="experiences-heading" className="sr-only">Audio Experiences</h2>
 
             {/* Intro para tabs */}
-            <div className="text-center mb-10">
-              <p className="text-sm text-muted-foreground/60 lowercase tracking-wider">
-                or explore curated experiences
-              </p>
+            <div className="text-center py-16 mb-8">
+              <div className="flex items-center gap-4">
+                <div className="flex-1 h-px bg-border/20"></div>
+                <p className="text-micro text-muted-foreground/40">
+                  or explore curated experiences
+                </p>
+                <div className="flex-1 h-px bg-border/20"></div>
+              </div>
             </div>
             
             <Tabs defaultValue="presets" className="w-full">
               {/* Tab Navigation */}
-              <TabsList className="grid w-full grid-cols-3 mb-10 bg-card/20 backdrop-blur-md p-1.5 rounded-xl border border-border/20">
+              <TabsList className="grid w-full grid-cols-3 mb-10 bg-card/30 backdrop-blur-lg p-2 rounded-2xl border border-border/10 shadow-lg shadow-black/5">
                 <TabsTrigger
                   value="presets"
                   className="text-sm lowercase tracking-wide data-[state=active]:bg-primary/15 data-[state=active]:text-primary data-[state=active]:shadow-sm transition-all duration-500 ease-out"
@@ -2170,10 +2174,10 @@ const Index = () => {
                 <Button
                   onClick={() => requireAuth(startSession)}
                   disabled={isGenerating || !selectedMood || !selectedAmbient || (user && !canGenerate)}
-                  className="w-full py-6 text-base lowercase tracking-wide bg-primary/90 hover:bg-primary transition-all"
+                  className="w-full py-6 text-base font-medium lowercase tracking-wide bg-primary hover:bg-primary/90 hover:shadow-lg hover:shadow-primary/20 transition-all duration-300"
                   size="lg"
                 >
-                  {!canGenerate && user && !isPremium ? 'limit reached' : isGenerating ? "generating your session..." : "✨ generate session"}
+                  {!canGenerate && user && !isPremium ? 'limit reached' : isGenerating ? "generating your session..." : "generate session"}
                 </Button>
               </TabsContent>
 
@@ -2213,10 +2217,10 @@ const Index = () => {
                 <Button
                   onClick={() => requireAuth(() => setShowHeadphoneModal(true))}
                   disabled={isGenerating || !selectedExperience}
-                  className="w-full py-6 text-base lowercase tracking-wide bg-primary/90 hover:bg-primary transition-all"
+                  className="w-full py-6 text-base font-medium lowercase tracking-wide bg-primary hover:bg-primary/90 hover:shadow-lg hover:shadow-primary/20 transition-all duration-300"
                   size="lg"
                 >
-                  {isGenerating ? "🎧 creating 3D experience... put on your headphones!" : "🎧 start 3D experience"}
+                  {isGenerating ? "creating 3D experience... put on your headphones" : "start 3D experience"}
                 </Button>
 
                 {/* Tip sobre auriculares - más prominente durante carga */}
@@ -2228,8 +2232,8 @@ const Index = () => {
                       </p>
                     </div>
                   ) : (
-                    <p className="text-xs text-muted-foreground/70 italic">
-                      💡 tip: use quality headphones for best spatial effect
+                    <p className="text-micro text-muted-foreground/40">
+                      tip: use quality headphones for best spatial effect
                     </p>
                   )}
                 </div>
@@ -2340,16 +2344,16 @@ const Index = () => {
                 <Button
                   onClick={() => requireAuth(startVoiceJourney)}
                   disabled={isGenerating || !selectedJourney || (withAmbient && !ambientForJourney)}
-                  className="w-full py-6 text-base lowercase tracking-wide bg-primary hover:bg-primary/90 transition-all"
+                  className="w-full py-6 text-base font-medium lowercase tracking-wide bg-primary hover:bg-primary/90 hover:shadow-lg hover:shadow-primary/20 transition-all duration-300"
                   size="lg"
                 >
-                  {isGenerating ? "creating voice journey..." : "🎙️ start journey"}
+                  {isGenerating ? "creating voice journey..." : "start journey"}
                 </Button>
 
                 {/* Note */}
                 <div className="text-center">
-                  <p className="text-xs text-muted-foreground/70 italic">
-                    💡 voice journeys are 1-2 minutes of guided spoken content
+                  <p className="text-micro text-muted-foreground/40">
+                    voice journeys are 1-2 minutes of guided spoken content
                   </p>
                 </div>
               </TabsContent>
@@ -2403,7 +2407,7 @@ const Index = () => {
                   </ul>
                 </div>
 
-                <p className="text-muted-foreground italic text-xs">
+                <p className="text-micro text-muted-foreground/40">
                   Without headphones, you'll hear a flat stereo mix that loses the 3D spatial magic.
                 </p>
               </div>

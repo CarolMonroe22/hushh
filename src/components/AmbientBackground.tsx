@@ -57,7 +57,7 @@ const AmbientBackground = ({ isPlaying, videoKey = 'home' }: AmbientBackgroundPr
   const videoSrc = videoMap[videoKey] || videoMap['home'];
   
   // Opacidad más baja para home, normal para sesiones
-  const opacity = videoKey === 'home' ? 'opacity-[0.15]' : 'opacity-30';
+  const opacity = videoKey === 'home' ? 'opacity-[0.20]' : 'opacity-30';
 
   // Mostrar fondo simple mientras se inicializa
   if (!isReady) {
@@ -75,7 +75,7 @@ const AmbientBackground = ({ isPlaying, videoKey = 'home' }: AmbientBackgroundPr
         playsInline
         className={`absolute inset-0 w-full h-full object-cover ${opacity} transition-opacity duration-1000`}
         style={{
-          filter: 'hue-rotate(260deg) saturate(0.8) brightness(0.6)'
+          filter: 'hue-rotate(260deg) saturate(0.8) brightness(0.7)'
         }}
         onError={(e) => {
           console.error('Error loading video:', e);
@@ -86,7 +86,7 @@ const AmbientBackground = ({ isPlaying, videoKey = 'home' }: AmbientBackgroundPr
       </video>
       
       {/* Gradient overlay for blend */}
-      <div className="absolute inset-0 bg-gradient-to-br from-primary/10 via-transparent to-accent/10" />
+      <div className="absolute inset-0 bg-gradient-to-b from-background/80 via-transparent to-background/60" />
       
       {/* Floating particles - solo cuando está playing */}
       {isPlaying && (

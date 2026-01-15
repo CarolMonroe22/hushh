@@ -1965,7 +1965,7 @@ const Index = () => {
             <h1 id="hero-title" className="text-display text-foreground/95">
               <span>1-Minute </span>
               <span
-                className={`inline-block transition-all duration-1000 ${
+                className={`inline-block text-primary/90 transition-all duration-1000 ${
                   titleFade
                     ? 'opacity-100 translate-y-0 blur-0'
                     : 'opacity-0 translate-y-1 blur-[2px]'

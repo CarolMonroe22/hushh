@@ -2022,7 +2022,7 @@ const Index = () => {
           {/* Large Textarea - Main Focus */}
           <div className="space-y-3">
             <Textarea
-              placeholder="describe how you want to feel... (e.g., 'I need deep focus for studying with calming rain')"
+              placeholder="describe how you want to feel..."
               value={vibeDescription}
               onChange={(e) => setVibeDescription(e.target.value)}
               className="min-h-[140px] resize-none text-base py-4 bg-card/70 border-border/90 hover:bg-card/75 focus:bg-card/80 focus:border-border transition-all"

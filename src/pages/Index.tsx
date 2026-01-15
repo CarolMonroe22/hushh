@@ -2000,7 +2000,7 @@ const Index = () => {
                       className={`group flex items-center gap-2 px-4 py-3 sm:px-5 sm:py-2.5 rounded-full border transition-all duration-500 ease-out disabled:opacity-50 disabled:cursor-not-allowed ${
                         currentPlayingExample === example.example_key
                           ? 'bg-primary/20 border-primary shadow-lg shadow-primary/20'
-                          : 'border-border/50 bg-card/40 hover:bg-card/60 hover:border-border/80'
+                          : 'border-border/30 bg-card/30 backdrop-blur-sm hover:bg-card/50 hover:border-border/50'
                       }`}
                     >
                       {isLoadingExample === example.example_key ? (

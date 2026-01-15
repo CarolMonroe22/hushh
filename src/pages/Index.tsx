@@ -2205,10 +2205,10 @@ const Index = () => {
                       <button
                         key={experience.value}
                         onClick={() => setSelectedExperience(experience.value)}
-                        className={`p-4 rounded-lg border transition-all text-left min-h-[44px] ${
+                        className={`p-5 rounded-xl border-2 transition-[transform,box-shadow,border-color,background-color] duration-300 ease-out text-left focus:ring-2 focus:ring-primary focus:ring-offset-2 focus:outline-none will-change-transform hover:scale-[1.02] hover:shadow-lg hover:-translate-y-0.5 active:scale-[0.98] ${
                           selectedExperience === experience.value
-                            ? "border-primary bg-primary/10"
-                            : "border-border bg-card hover:bg-accent"
+                            ? "border-primary bg-gradient-to-br from-primary/10 to-primary/20 shadow-lg shadow-primary/30"
+                            : "border-border/30 bg-card/60 hover:bg-card/80 hover:border-border/60"
                         }`}
                       >
                         <div className="text-2xl mb-2">{experience.emoji}</div>
@@ -2258,26 +2258,26 @@ const Index = () => {
                   {/* Gender Selection */}
                   <div className="space-y-2">
                     <label className="text-sm font-medium lowercase tracking-wide">voice gender</label>
-                    <div className="grid grid-cols-2 gap-2">
+                    <div className="grid grid-cols-2 gap-3">
                       <button
                         onClick={() => setVoiceGender("female")}
-                        className={`p-4 rounded-lg border transition-all min-h-[44px] ${
+                        className={`p-5 rounded-xl border-2 transition-[transform,box-shadow,border-color,background-color] duration-300 ease-out focus:ring-2 focus:ring-primary focus:ring-offset-2 focus:outline-none will-change-transform hover:scale-[1.02] hover:shadow-lg hover:-translate-y-0.5 active:scale-[0.98] ${
                           voiceGender === "female"
-                            ? "border-primary bg-primary/10"
-                            : "border-border bg-card hover:bg-accent"
+                            ? "border-primary bg-gradient-to-br from-primary/10 to-primary/20 shadow-lg shadow-primary/30"
+                            : "border-border/30 bg-card/60 hover:bg-card/80 hover:border-border/60"
                         }`}
                       >
-                        <div className="text-sm lowercase">female</div>
+                        <div className="text-sm font-medium lowercase">female</div>
                       </button>
                       <button
                         onClick={() => setVoiceGender("male")}
-                        className={`p-4 rounded-lg border transition-all min-h-[44px] ${
+                        className={`p-5 rounded-xl border-2 transition-[transform,box-shadow,border-color,background-color] duration-300 ease-out focus:ring-2 focus:ring-primary focus:ring-offset-2 focus:outline-none will-change-transform hover:scale-[1.02] hover:shadow-lg hover:-translate-y-0.5 active:scale-[0.98] ${
                           voiceGender === "male"
-                            ? "border-primary bg-primary/10"
-                            : "border-border bg-card hover:bg-accent"
+                            ? "border-primary bg-gradient-to-br from-primary/10 to-primary/20 shadow-lg shadow-primary/30"
+                            : "border-border/30 bg-card/60 hover:bg-card/80 hover:border-border/60"
                         }`}
                       >
-                        <div className="text-sm lowercase">male</div>
+                        <div className="text-sm font-medium lowercase">male</div>
                       </button>
                     </div>
                   </div>
@@ -2285,15 +2285,15 @@ const Index = () => {
                   {/* Journey Type Selection */}
                   <div className="space-y-2">
                     <label className="text-sm font-medium lowercase tracking-wide">journey type</label>
-                    <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
+                    <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
                       {VOICE_JOURNEYS.map((journey) => (
                         <button
                           key={journey.value}
                           onClick={() => setSelectedJourney(journey.value)}
-                          className={`p-4 rounded-lg border transition-all text-left min-h-[44px] ${
+                          className={`p-5 rounded-xl border-2 transition-[transform,box-shadow,border-color,background-color] duration-300 ease-out text-left focus:ring-2 focus:ring-primary focus:ring-offset-2 focus:outline-none will-change-transform hover:scale-[1.02] hover:shadow-lg hover:-translate-y-0.5 active:scale-[0.98] ${
                             selectedJourney === journey.value
-                              ? "border-primary bg-primary/10"
-                              : "border-border bg-card hover:bg-accent"
+                              ? "border-primary bg-gradient-to-br from-primary/10 to-primary/20 shadow-lg shadow-primary/30"
+                              : "border-border/30 bg-card/60 hover:bg-card/80 hover:border-border/60"
                           }`}
                         >
                           <div className="flex items-center gap-2 mb-1">

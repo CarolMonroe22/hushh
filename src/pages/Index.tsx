@@ -1976,8 +1976,8 @@ const Index = () => {
                 {TITLE_ROTATIONS[currentTitleIndex]}
               </span>
             </h1>
-              <p className="text-lg md:text-xl text-muted-foreground tracking-wide">
-                personalized audio experiences for rest, focus & relaxation
+              <p className="text-base md:text-lg text-muted-foreground/70 font-light tracking-wide max-w-md mx-auto">
+                personalized audio for rest, focus & relaxation
               </p>
           </section>
 

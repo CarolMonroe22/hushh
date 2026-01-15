@@ -1961,7 +1961,7 @@ const Index = () => {
 
         {/* Hero Section */}
         <main>
-          <section className="text-center space-y-6 sm:space-y-8 mb-16 sm:mb-20" aria-labelledby="hero-title">
+          <section className="text-center space-y-8 sm:space-y-10 mb-20 sm:mb-24" aria-labelledby="hero-title">
             <h1 id="hero-title" className="text-display text-foreground/95">
               <span>1-Minute </span>
               <span

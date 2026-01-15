@@ -2020,6 +2020,7 @@ const Index = () => {
           <section className="max-w-2xl mx-auto space-y-8 mb-16" aria-labelledby="create-vibe-heading">
             <h2 id="create-vibe-heading" className="sr-only">Create Your Custom Soundscape</h2>
           {/* Large Textarea - Main Focus */}
+          <p className="text-micro text-muted-foreground/50 mb-3">create your vibe</p>
           <div className="space-y-3">
             <Textarea
               placeholder="describe how you want to feel..."

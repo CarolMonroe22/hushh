@@ -23,7 +23,9 @@ import { useExampleSessions, type ExampleSession } from "@/hooks/useExampleSessi
 import {
   LogOut, Play, Loader2, Shield, Moon, Headphones, Mic,
   CloudMoon, Target, Heart, Zap, Mountain,
-  CloudRain, Waves, Trees, Flame, Radio, Building2
+  CloudRain, Waves, Trees, Flame, Radio, Building2,
+  Scissors, Sparkles, Ear, BedDouble, Palette, PersonStanding,
+  BookOpen, HandHeart, Columns, Star, Flame as FireIcon, Brain, Focus
 } from "lucide-react";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
@@ -53,54 +55,54 @@ const AMBIENTS: { value: Ambient; label: string; icon: React.ReactNode }[] = [
   { value: "city", label: "city", icon: <Building2 className="h-7 w-7" /> },
 ];
 
-const BINAURAL_EXPERIENCES: { 
-  value: BinauralExperience; 
-  label: string; 
-  emoji: string;
+const BINAURAL_EXPERIENCES: {
+  value: BinauralExperience;
+  label: string;
+  icon: React.ReactNode;
   shortDesc: string;
 }[] = [
-  { 
-    value: "barbershop", 
-    label: "Barbershop Visit", 
-    emoji: "💈",
+  {
+    value: "barbershop",
+    label: "Barbershop",
+    icon: <Scissors className="h-6 w-6" />,
     shortDesc: "scissors, clippers, personal attention"
   },
-  { 
-    value: "spa", 
-    label: "Spa & Massage", 
-    emoji: "🧖",
-    shortDesc: "soft whispers, gentle touches, oils"
+  {
+    value: "spa",
+    label: "Spa & Massage",
+    icon: <Sparkles className="h-6 w-6" />,
+    shortDesc: "soft whispers, gentle touches"
   },
-  { 
-    value: "ear-cleaning", 
-    label: "Ear Cleaning", 
-    emoji: "👂",
+  {
+    value: "ear-cleaning",
+    label: "Ear Cleaning",
+    icon: <Ear className="h-6 w-6" />,
     shortDesc: "close proximity, gentle sounds"
   },
-  { 
-    value: "bedtime", 
-    label: "Bedtime Attention", 
-    emoji: "🌙",
-    shortDesc: "tucking in, soft whispers, goodnight"
+  {
+    value: "bedtime",
+    label: "Bedtime",
+    icon: <BedDouble className="h-6 w-6" />,
+    shortDesc: "tucking in, soft whispers"
   },
-  { 
-    value: "art-studio", 
-    label: "Art Studio", 
-    emoji: "🎨",
+  {
+    value: "art-studio",
+    label: "Art Studio",
+    icon: <Palette className="h-6 w-6" />,
     shortDesc: "sketching, painting, creative energy"
   },
-  { 
-    value: "yoga", 
-    label: "Yoga Session", 
-    emoji: "🧘",
-    shortDesc: "guided breathing, gentle movement"
+  {
+    value: "yoga",
+    label: "Yoga Session",
+    icon: <PersonStanding className="h-6 w-6" />,
+    shortDesc: "guided breathing, movement"
   },
 ];
 
 const VOICE_JOURNEYS: {
   value: VoiceJourney;
   label: string;
-  emoji: string;
+  icon: React.ReactNode;
   voices: {
     female: string;
     male: string;
@@ -110,70 +112,70 @@ const VOICE_JOURNEYS: {
   {
     value: "story",
     label: "Story",
-    emoji: "📖",
+    icon: <BookOpen className="h-5 w-5" />,
     voices: {
-      female: "pjcYQlDFKMbcOUp6F5GD", // Brittney - Meditation
-      male: "Mu5jxyqZOLIGltFpfalg"    // Jameson - Meditation
+      female: "pjcYQlDFKMbcOUp6F5GD",
+      male: "Mu5jxyqZOLIGltFpfalg"
     },
     shortDesc: "immersive bedtime tale"
   },
   {
     value: "prayer",
     label: "Prayer",
-    emoji: "🙏",
+    icon: <HandHeart className="h-5 w-5" />,
     voices: {
-      female: "pjcYQlDFKMbcOUp6F5GD", // Brittney - Meditation
-      male: "Mu5jxyqZOLIGltFpfalg"    // Jameson - Meditation
+      female: "pjcYQlDFKMbcOUp6F5GD",
+      male: "Mu5jxyqZOLIGltFpfalg"
     },
     shortDesc: "guided peaceful prayer"
   },
   {
     value: "stoic",
     label: "Stoic",
-    emoji: "🏛️",
+    icon: <Columns className="h-5 w-5" />,
     voices: {
-      female: "pjcYQlDFKMbcOUp6F5GD", // Brittney - Meditation
-      male: "Mu5jxyqZOLIGltFpfalg"    // Jameson - Meditation
+      female: "pjcYQlDFKMbcOUp6F5GD",
+      male: "Mu5jxyqZOLIGltFpfalg"
     },
     shortDesc: "wisdom & inner strength"
   },
   {
     value: "manifestation",
     label: "Manifest",
-    emoji: "✨",
+    icon: <Star className="h-5 w-5" />,
     voices: {
-      female: "pjcYQlDFKMbcOUp6F5GD", // Brittney - Meditation
-      male: "Mu5jxyqZOLIGltFpfalg"    // Jameson - Meditation
+      female: "pjcYQlDFKMbcOUp6F5GD",
+      male: "Mu5jxyqZOLIGltFpfalg"
     },
     shortDesc: "abundance affirmations"
   },
   {
     value: "motivational",
     label: "Motivate",
-    emoji: "🔥",
+    icon: <Zap className="h-5 w-5" />,
     voices: {
-      female: "pjcYQlDFKMbcOUp6F5GD", // Brittney - Meditation
-      male: "Mu5jxyqZOLIGltFpfalg"    // Jameson - Meditation
+      female: "pjcYQlDFKMbcOUp6F5GD",
+      male: "Mu5jxyqZOLIGltFpfalg"
     },
     shortDesc: "powerful encouragement"
   },
   {
     value: "brainwash",
     label: "Brain Wash",
-    emoji: "🧠",
+    icon: <Brain className="h-5 w-5" />,
     voices: {
-      female: "pjcYQlDFKMbcOUp6F5GD", // Brittney - Meditation
-      male: "Mu5jxyqZOLIGltFpfalg"    // Jameson - Meditation
+      female: "pjcYQlDFKMbcOUp6F5GD",
+      male: "Mu5jxyqZOLIGltFpfalg"
     },
     shortDesc: "mental cleanse & reset"
   },
   {
     value: "fullattention",
     label: "Full Attention",
-    emoji: "🎯",
+    icon: <Target className="h-5 w-5" />,
     voices: {
-      female: "pjcYQlDFKMbcOUp6F5GD", // Brittney - Meditation
-      male: "Mu5jxyqZOLIGltFpfalg"    // Jameson - Meditation
+      female: "pjcYQlDFKMbcOUp6F5GD",
+      male: "Mu5jxyqZOLIGltFpfalg"
     },
     shortDesc: "deep focus activation"
   },
@@ -1914,15 +1916,27 @@ const Index = () => {
               </DropdownMenu>
             </div>
           ) : (
-            <Button
-              onClick={() => {
-                setAuthModalMode('signup');
-                setShowAuthModal(true);
-              }}
-              className="lowercase"
-            >
-              sign up
-            </Button>
+            <div className="flex items-center gap-3">
+              <Button
+                variant="ghost"
+                onClick={() => {
+                  setAuthModalMode('login');
+                  setShowAuthModal(true);
+                }}
+                className="lowercase text-muted-foreground hover:text-foreground"
+              >
+                login
+              </Button>
+              <Button
+                onClick={() => {
+                  setAuthModalMode('signup');
+                  setShowAuthModal(true);
+                }}
+                className="lowercase bg-primary/90 hover:bg-primary"
+              >
+                sign up
+              </Button>
+            </div>
           )}
         </div>
       </header>
@@ -2205,9 +2219,9 @@ const Index = () => {
                             : "border-border/30 bg-card/60 hover:bg-card/80 hover:border-border/60"
                         }`}
                       >
-                        <div className="text-2xl mb-2">{experience.emoji}</div>
+                        <div className={`mb-2 transition-colors duration-300 ${selectedExperience === experience.value ? "text-primary" : "text-muted-foreground"}`}>{experience.icon}</div>
                         <div className="text-sm font-medium lowercase mb-1">{experience.label}</div>
-                        <div className="text-xs text-muted-foreground">{experience.shortDesc}</div>
+                        <div className="text-xs text-muted-foreground/70">{experience.shortDesc}</div>
                       </button>
                     ))}
                   </div>
@@ -2290,11 +2304,11 @@ const Index = () => {
                               : "border-border/30 bg-card/60 hover:bg-card/80 hover:border-border/60"
                           }`}
                         >
-                          <div className="flex items-center gap-2 mb-1">
-                            <div className="text-lg">{journey.emoji}</div>
-                            <div className="text-sm lowercase font-medium">{journey.label}</div>
+                          <div className={`mb-2 transition-colors duration-300 ${selectedJourney === journey.value ? "text-primary" : "text-muted-foreground"}`}>
+                            {journey.icon}
                           </div>
-                          <div className="text-xs text-muted-foreground leading-tight">
+                          <div className="text-sm lowercase font-medium mb-1">{journey.label}</div>
+                          <div className="text-xs text-muted-foreground/70 leading-tight">
                             {journey.shortDesc}
                           </div>
                         </button>

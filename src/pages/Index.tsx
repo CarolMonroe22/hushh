@@ -1954,8 +1954,8 @@ const Index = () => {
       <div className="container mx-auto px-4 pt-28 pb-24 md:pt-36 md:pb-20 max-w-4xl min-h-[var(--real-vh)]">
         {/* Logo Header */}
         <header className="flex items-center justify-center mb-12 md:mb-16">
-          <div className="text-3xl sm:text-4xl md:text-5xl font-light lowercase tracking-wide" role="banner">
-            🌙 hushh
+          <div className="text-2xl sm:text-3xl md:text-4xl font-extralight lowercase tracking-[0.2em] text-foreground/90" role="banner">
+            <span className="animate-float" style={{ animationDuration: '6s' }}>🌙</span> hushh
           </div>
         </header>
 

@@ -1,108 +1,146 @@
 {
   "project": "hushh",
   "target_file": "src/pages/Index.tsx",
+  "secondary_files": ["src/components/AmbientBackground.tsx", "src/index.css"],
   "sprints": [
     {
-      "id": 2,
-      "name": "Active States & Selection",
+      "id": "A",
+      "name": "Logo & Hero",
       "tasks": [
         {
-          "id": "2.1",
-          "description": "Icon changes to primary color when card is selected",
-          "details": "When a mood or ambient card is selected, change the icon color from text-muted-foreground to text-primary. Add this to the className of the icon div based on selection state."
+          "id": "A.1",
+          "description": "Refine logo styling",
+          "details": "Find the Logo Header section. Change the logo div from 'text-3xl sm:text-4xl md:text-5xl font-light lowercase tracking-wide' to 'text-2xl sm:text-3xl md:text-4xl font-extralight lowercase tracking-[0.2em] text-foreground/90'. Add animate-float to the moon emoji span with style animationDuration 6s."
         },
         {
-          "id": "2.2",
-          "description": "More pronounced glow/shadow on selection",
-          "details": "Increase the shadow on selected cards from shadow-md to shadow-lg and make the primary color glow more visible with shadow-primary/30 instead of /20."
+          "id": "A.2",
+          "description": "Apply text-display class to hero title",
+          "details": "Find the h1 with id='hero-title'. Replace the className 'text-4xl sm:text-5xl md:text-7xl font-light tracking-wider text-foreground' with 'text-display text-foreground/95'."
         },
         {
-          "id": "2.3",
-          "description": "Subtle gradient background when active",
-          "details": "Add a subtle gradient to selected cards using bg-gradient-to-br from-primary/10 to-primary/20 instead of flat bg-primary/15."
+          "id": "A.3",
+          "description": "Add primary color to rotating word",
+          "details": "Find the span that contains TITLE_ROTATIONS[currentTitleIndex]. Add 'text-primary/90' to its className so the rotating word stands out with the accent color."
         },
         {
-          "id": "2.4",
-          "description": "Visible focus ring for accessibility",
-          "details": "Add focus:ring-2 focus:ring-primary focus:ring-offset-2 focus:outline-none to all mood and ambient card buttons for keyboard navigation."
+          "id": "A.4",
+          "description": "Refine hero subtitle",
+          "details": "Find the p tag with 'personalized audio experiences for rest, focus & relaxation'. Change text to 'personalized audio for rest, focus & relaxation' (shorter). Change className to 'text-base md:text-lg text-muted-foreground/70 font-light tracking-wide max-w-md mx-auto'."
+        },
+        {
+          "id": "A.5",
+          "description": "Increase hero spacing",
+          "details": "Find the Hero Section's parent section element. Change 'mb-16 sm:mb-20' to 'mb-20 sm:mb-24' for more breathing room. Also change 'space-y-6 sm:space-y-8' to 'space-y-8 sm:space-y-10'."
         }
       ]
     },
     {
-      "id": 3,
-      "name": "Micro-interactions",
+      "id": "B",
+      "name": "Example Audio Buttons",
       "tasks": [
         {
-          "id": "3.1",
-          "description": "Scale up on hover",
-          "details": "Add hover:scale-[1.02] to mood and ambient cards. Ensure transform is in the className for the transition to work smoothly."
+          "id": "B.1",
+          "description": "Enhance example button styling",
+          "details": "Find the Example Audio Buttons section. Update the button className to add 'backdrop-blur-sm' and change border from 'border-border/50' to 'border-border/30'. The full unselected state should be: 'border-border/30 bg-card/30 backdrop-blur-sm hover:bg-card/50 hover:border-border/50'."
         },
         {
-          "id": "3.2",
-          "description": "Smooth icon transition on selection",
-          "details": "Add transition-colors duration-300 to the icon div so the color change from muted to primary is animated."
+          "id": "B.2",
+          "description": "Add section micro-label for examples",
+          "details": "Above the flex container with example buttons, add a paragraph: <p className='text-micro text-muted-foreground/50 mb-4'>listen</p>. This adds context for what the buttons do."
         },
         {
-          "id": "3.3",
-          "description": "Lift effect with shadow on hover",
-          "details": "Add hover:shadow-lg hover:-translate-y-0.5 to cards for a subtle lift effect when hovering. Combine with existing hover states."
-        },
-        {
-          "id": "3.4",
-          "description": "Active state with subtle scale down",
-          "details": "Add active:scale-[0.98] to cards for tactile feedback when clicking/tapping."
+          "id": "B.3",
+          "description": "Add hover scale to example buttons",
+          "details": "Add 'transform hover:scale-[1.02] active:scale-[0.98]' to the example button className for micro-interaction feedback."
         }
       ]
     },
     {
-      "id": 4,
-      "name": "Visual Hierarchy",
+      "id": "C",
+      "name": "Creator Textarea",
       "tasks": [
         {
-          "id": "4.1",
-          "description": "More distinctive section labels",
-          "details": "Find the 'choose a mood' and 'choose an ambient' labels and make them more distinctive with text-sm font-semibold uppercase tracking-wider text-muted-foreground/80."
+          "id": "C.1",
+          "description": "Shorten textarea placeholder",
+          "details": "Find the Textarea component. Change placeholder from the long text to simply: 'describe how you want to feel...'"
         },
         {
-          "id": "4.2",
-          "description": "Better spacing between mood and ambient sections",
-          "details": "Increase the gap between the mood section and ambient section. Look for the space-y or gap classes and increase from current value to space-y-8 or similar."
+          "id": "C.2",
+          "description": "Refine textarea border and focus states",
+          "details": "Update Textarea className from 'bg-card/70 border-border/90 hover:bg-card/75 focus:bg-card/80 focus:border-border' to 'bg-card/40 border-border/30 hover:bg-card/50 focus:bg-card/60 focus:border-primary/50 focus:ring-1 focus:ring-primary/20'."
         },
         {
-          "id": "4.3",
-          "description": "Subtle visual separator between sections",
-          "details": "Add a subtle divider between mood and ambient sections using a div with className 'h-px bg-border/30 my-6' or similar."
+          "id": "C.3",
+          "description": "Add micro-label above textarea",
+          "details": "Before the Textarea div, add: <p className='text-micro text-muted-foreground/50 mb-3'>create your vibe</p>"
         },
         {
-          "id": "4.4",
-          "description": "Consistency across all tabs",
-          "details": "Ensure the card styles for moods and ambients are consistent. Check that both use the same padding, border radius, transitions, and hover states."
+          "id": "C.4",
+          "description": "Refine prompt example chips",
+          "details": "Find the prompt example buttons. Update className to: 'px-4 py-2 rounded-full text-xs font-medium tracking-wide bg-card/30 border border-border/20 hover:bg-card/50 hover:border-primary/30 text-foreground/60 hover:text-foreground/80 transition-all duration-300 ease-out'. Remove the inner span with blur effect."
         }
       ]
     },
     {
-      "id": 5,
-      "name": "Testing & Polish",
+      "id": "D",
+      "name": "Section Divider",
       "tasks": [
         {
-          "id": "5.1",
-          "description": "Verify mobile touch targets",
-          "details": "Ensure all cards have minimum 44x44px touch targets. Check padding and sizing work well on mobile viewports (sm: breakpoint)."
+          "id": "D.1",
+          "description": "Add decorative lines to divider",
+          "details": "Find the 'or explore curated experiences' div. Wrap the p tag in a flex container with lines: <div className='flex items-center gap-4'><div className='flex-1 h-px bg-border/20'></div><p>...</p><div className='flex-1 h-px bg-border/20'></div></div>"
         },
         {
-          "id": "5.2",
-          "description": "Verify desktop experience",
-          "details": "Test that hover states, transitions, and layouts work well on larger screens (md: and lg: breakpoints)."
+          "id": "D.2",
+          "description": "Apply text-micro class to divider text",
+          "details": "Change the p className from 'text-sm text-muted-foreground/60 lowercase tracking-wider' to 'text-micro text-muted-foreground/40'."
         },
         {
-          "id": "5.3",
-          "description": "Performance check on animations",
-          "details": "Ensure all transitions use GPU-accelerated properties (transform, opacity). Avoid animating layout properties like width/height."
+          "id": "D.3",
+          "description": "Increase divider vertical spacing",
+          "details": "Change the parent div className from 'text-center mb-10' to 'text-center py-16 mb-8' for more breathing room around the divider."
+        }
+      ]
+    },
+    {
+      "id": "E",
+      "name": "Tabs Section Polish",
+      "tasks": [
+        {
+          "id": "E.1",
+          "description": "Enhance TabsList styling",
+          "details": "Find the TabsList component. Update className from 'bg-card/20 backdrop-blur-md p-1.5 rounded-xl border border-border/20' to 'bg-card/30 backdrop-blur-lg p-2 rounded-2xl border border-border/10 shadow-lg shadow-black/5'."
         },
         {
-          "id": "5.4",
-          "description": "Final polish pass",
-          "details": "Review all changes, ensure consistency, remove any redundant classes, and verify the overall visual experience matches the plan goals."
+          "id": "E.2",
+          "description": "Unify generate button styles across tabs",
+          "details": "Find all three generate buttons (presets, binaural, voice). Ensure they all have: 'w-full py-6 text-base font-medium lowercase tracking-wide bg-primary hover:bg-primary/90 hover:shadow-lg hover:shadow-primary/20 transition-all duration-300'. Remove any emoji from button text, use clean text only."
+        },
+        {
+          "id": "E.3",
+          "description": "Refine tip text styling",
+          "details": "Find all tip/note paragraphs at the bottom of tabs (the ones with italic). Remove 'italic' class and change to 'text-micro text-muted-foreground/40' for consistency. Remove emoji from tips."
+        }
+      ]
+    },
+    {
+      "id": "F",
+      "name": "Video Background",
+      "tasks": [
+        {
+          "id": "F.1",
+          "description": "Increase home video opacity",
+          "details": "In src/components/AmbientBackground.tsx, find the opacity variable. Change 'opacity-[0.15]' to 'opacity-[0.20]' for home state."
+        },
+        {
+          "id": "F.2",
+          "description": "Adjust video brightness",
+          "details": "In AmbientBackground.tsx, find the filter style on the video element. Change 'brightness(0.6)' to 'brightness(0.7)' for slightly more visible video."
+        },
+        {
+          "id": "F.3",
+          "description": "Enhance gradient overlay",
+          "details": "In AmbientBackground.tsx, find the gradient overlay div. Change from 'bg-gradient-to-br from-primary/10 via-transparent to-accent/10' to 'bg-gradient-to-b from-background/80 via-transparent to-background/60' for better text readability."
         }
       ]
     }

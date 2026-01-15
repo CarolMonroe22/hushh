@@ -1,34 +1,28 @@
-# Ralph Base Prompt - Hushh Visual Improvements
+# Ralph Base Prompt - Hushh Landing Redesign v2
 
 ## Context
-You are working on the Hushh app, an ASMR/ambient audio generator built with React + TypeScript + Tailwind CSS.
+You are improving the visual design of the Hushh app landing page. The app is an ASMR/ambient audio generator built with React + TypeScript + Tailwind CSS.
 
-## Target File
-`src/pages/Index.tsx` - This is the main landing page containing mood and ambient card components.
+The design goal is **premium, minimal, and refined** - think high-end wellness app aesthetic.
 
-## Code Patterns
+## Target Files
+- Primary: `src/pages/Index.tsx` - Main landing page
+- Secondary: `src/components/AmbientBackground.tsx` - Video background component
+- CSS: `src/index.css` - Custom utility classes
 
-### Mood Cards Location
-Look for `MOODS.map` - the cards are rendered in a grid with buttons.
+## Typography Classes Available
+These classes are defined in index.css:
+- `text-display` - Large headlines (text-5xl md:text-7xl font-extralight tracking-tight)
+- `text-headline` - Section headers (text-2xl md:text-3xl font-light tracking-tight)
+- `text-body` - Body text (text-base font-normal leading-relaxed)
+- `text-caption` - Captions (text-sm font-medium tracking-wide)
+- `text-micro` - Micro labels (text-xs font-medium uppercase tracking-widest)
 
-### Ambient Cards Location
-Look for `AMBIENTS.map` - similar structure to mood cards.
-
-### Current Card Structure
-```tsx
-<button
-  key={item.value}
-  onClick={() => setSelected(item.value)}
-  className={`p-5 rounded-xl border-2 transition-all duration-300 ease-out text-left ${
-    selected === item.value
-      ? "border-primary bg-primary/15 shadow-md shadow-primary/20"
-      : "border-border/30 bg-card/60 hover:bg-card/80 hover:border-border/60"
-  }`}
->
-  <div className="mb-2 text-muted-foreground">{item.icon}</div>
-  <div className="text-sm font-medium lowercase">{item.label}</div>
-</button>
-```
+## Design Principles
+1. **Minimal** - Remove unnecessary elements, keep it clean
+2. **Refined** - Subtle borders, soft shadows, careful spacing
+3. **Consistent** - Same patterns across all sections
+4. **Premium** - High-end feel, no cluttered UI
 
 ## Rules
 1. Read the file first before making any changes
@@ -36,7 +30,7 @@ Look for `AMBIENTS.map` - similar structure to mood cards.
 3. Do not refactor or improve other code
 4. Preserve existing functionality
 5. Use Tailwind CSS classes only
-6. Test that the build passes after changes
+6. Verify build passes after changes
 
 ## Verification
 After making changes, run:

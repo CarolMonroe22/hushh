@@ -1962,7 +1962,7 @@ const Index = () => {
         {/* Hero Section */}
         <main>
           <section className="text-center space-y-6 sm:space-y-8 mb-16 sm:mb-20" aria-labelledby="hero-title">
-            <h1 id="hero-title" className="text-4xl sm:text-5xl md:text-7xl font-light tracking-wider text-foreground">
+            <h1 id="hero-title" className="text-display text-foreground/95">
               <span>1-Minute </span>
               <span
                 className={`inline-block transition-all duration-1000 ${

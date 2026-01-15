@@ -1984,6 +1984,7 @@ const Index = () => {
           {/* Example Audio Buttons */}
           <section className="max-w-2xl mx-auto mb-16 sm:mb-20" aria-labelledby="examples-heading">
             <h2 id="examples-heading" className="sr-only">Audio Examples</h2>
+            <p className="text-micro text-muted-foreground/50 mb-4">listen</p>
             <div className="flex flex-wrap justify-center gap-3">
               {isLoadingExamples ? (
                 <div className="text-muted-foreground text-sm">Loading examples...</div>

@@ -2057,6 +2057,7 @@ const Index = () => {
                              text-foreground/70 hover:text-foreground/90
                              transition-all duration-1000 ease-out
                              shadow-sm hover:shadow-md hover:shadow-primary/3
+                             transform hover:scale-[1.02] active:scale-[0.98]
                              animate-fade-in"
                   >
                     <span className="relative">

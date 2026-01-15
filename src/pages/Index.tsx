@@ -2025,7 +2025,7 @@ const Index = () => {
               placeholder="describe how you want to feel..."
               value={vibeDescription}
               onChange={(e) => setVibeDescription(e.target.value)}
-              className="min-h-[140px] resize-none text-base py-4 bg-card/70 border-border/90 hover:bg-card/75 focus:bg-card/80 focus:border-border transition-all"
+              className="min-h-[140px] resize-none text-base py-4 bg-card/40 border-border/30 hover:bg-card/50 focus:bg-card/60 focus:border-primary/50 focus:ring-1 focus:ring-primary/20 transition-all"
               maxLength={300}
             />
             {vibeDescription.length > 250 && (

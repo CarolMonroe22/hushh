@@ -2063,10 +2063,10 @@ const Index = () => {
           <Button
             onClick={() => requireAuth(startCreatorSession)}
             disabled={isGenerating || !vibeDescription.trim() || vibeDescription.trim().length < 20}
-            className="w-full py-6 text-lg lowercase tracking-wide bg-primary hover:bg-primary/90 hover:shadow-lg hover:shadow-primary/20 transition-all duration-500 ease-out"
+            className="w-full py-6 text-base font-medium lowercase tracking-wide bg-primary hover:bg-primary/90 hover:shadow-lg hover:shadow-primary/20 transition-all duration-300"
             size="lg"
           >
-            {isGenerating ? "creating your vibe..." : "✨ create my vibe"}
+            {isGenerating ? "creating your vibe..." : "create my vibe"}
           </Button>
           </section>
 
